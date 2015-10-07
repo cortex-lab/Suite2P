@@ -130,6 +130,9 @@ ops.CorrFrame   = [];
 ops.mimg1       = zeros(Ly, Lx);
 nbytes = fs{1}(1).bytes;
 nFr = img.nFrames(fs{1}(1).name);
+if ops.useImRead
+   Info = imfinfo(fs{1}(1).name); 
+end
 
 tic
 for k = 1:length(fs)
@@ -141,11 +144,12 @@ for k = 1:length(fs)
             if abs(nbytes - fs{k}(j).bytes)>1e3
                 nbytes = fs{k}(j).bytes;
                 nFr = img.nFrames(fs{k}(j).name);
+                Info = imfinfo(fs{k}(j).name);
             end
             if red_align
-                ichanrange = (nchannels*(iplane0-1)+rchannel):nplanes*nchannels:length(Info);
+                ichanrange = (nchannels*(iplane0-1)+rchannel):nplanes*nchannels:nFr;
             else
-                ichanrange = (nchannels*(iplane0-1)+ichannel):nplanes*nchannels:length(Info);
+                ichanrange = (nchannels*(iplane0-1)+ichannel):nplanes*nchannels:nFr;
             end
             data = zeros(Ly, Lx, numel(ichanrange), ops.RawPrecision);
             for ix = 1:length(ichanrange)
