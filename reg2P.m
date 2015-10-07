@@ -242,7 +242,7 @@ for k = 1:length(fs)
      if ops.CopyDataLocally && ~isempty(strfind(ops.TempStorage, 'zserver'))
         % check again if this location is on zserver
         if strcmp(ops.TempStorage(1), '\') || strcmp(ops.TempStorage(1), '/')
-            waning('you are trying to remove a file from a network location, skipping...')
+            warning('you are trying to remove a file from a network location, skipping...')
         else
             rmdir(fullfile(ops.TempStorage, ops.mouse_name), 's');
         end
