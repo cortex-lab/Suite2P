@@ -1,0 +1,130 @@
+i = 0;
+
+i = i+1;
+db(i).mouse_name    = 'M150329_MP009';
+db(i).date          = '2015-04-29';
+db(i).expts         = [4 5 6];
+db(i).expred        = 3;
+db(i).nchannels_red = 2;
+db(i).nchannels = 1;
+db(i).gchannel = 1; 
+db(i).nplanes = 1; 
+db(i).planesToProcess = [1];
+%
+i = i+1;
+db(i).mouse_name    = 'M150329_MP009';
+db(i).date          = '2015-04-10';
+db(i).expred        = 3;
+db(i).expts         = [5 6 7 8 9 10 11];
+db(i).nchannels_red = 2;
+db(i).nchannels = 1;
+db(i).gchannel = 1; 
+db(i).nplanes = 1; 
+
+i = i+1;
+db(i).mouse_name    = 'M150326_MP008';
+db(i).date          = '2015-04-09';
+db(i).expred        = 2;
+db(i).expts         = [3 4 6 8];
+db(i).nchannels_red = 2;
+db(i).nchannels = 1;
+db(i).gchannel = 1; 
+db(i).nplanes = 1; 
+
+i = i+1;
+db(i).mouse_name    = 'M150423_MP014';
+db(i).date          = '2015-06-16';
+db(i).expts         = [8];
+db(i).expred        = 4;
+db(i).nchannels_red = 2;
+db(i).nchannels = 1;
+db(i).gchannel = 1; 
+db(i).nplanes = 1; 
+
+i = i+1;
+db(i).mouse_name    =  'M150303_MP007';
+db(i).date          = '2015-04-05';
+db(i).expts         = [1 7 9 10 11 12 13 14];
+db(i).expred        = 6;
+db(i).nchannels_red = 2;
+db(i).comments      = 'singleORIsat different pause lengths';
+db(i).nchannels = 1;
+db(i).gchannel = 1; 
+db(i).nplanes = 1; 
+
+i = i+1;
+db(i).mouse_name    =  'M150303_MP007';
+db(i).date          = '2015-04-04';
+db(i).expts         = [3 5 6 10];
+db(i).expred        = 4;
+db(i).comments      = 'multiGRAT slow, fast and textures';
+db(i).nchannels_red = 2;
+db(i).nchannels = 1;
+db(i).gchannel = 1; 
+db(i).nplanes = 1; 
+
+i = i+1;
+db(i).mouse_name    =  'M150326_MP008';
+db(i).date          = '2015-04-11';
+db(i).expts         = [4 6 7 9 10 11 12 14];
+db(i).expred        = 5;
+db(i).comments      = 'all sorts of crazy stims with SAT';
+db(i).nchannels_red = 2;
+db(i).nchannels = 1;
+db(i).gchannel = 1; 
+db(i).nplanes = 1; 
+
+i = i+1;
+db(i).mouse_name    = 'M150326_MP008';
+db(i).date          = '2015-04-16';
+db(i).expts         = [1 3 5];
+db(i).expred        = 2;
+db(i).comments      = 'stimGRATfast not biased / biased';
+db(i).nchannels_red = 2;
+db(i).nchannels = 1;
+db(i).gchannel = 1; 
+db(i).nplanes = 1; 
+
+i = i+1;
+db(i).mouse_name    = 'M150329_MP009';
+db(i).date          = '2015-04-09';
+db(i).expts         = [1 3];
+db(i).expred        = 2;
+db(i).comments      = 'multiGRAT, have not validated the channels';
+db(i).nchannels_red = 2;
+db(i).nchannels = 1;
+db(i).gchannel = 1; 
+db(i).nplanes = 1; 
+
+i = i+1;
+db(i).mouse_name    = 'M150329_MP009';
+db(i).date          = '2015-04-25';
+db(i).expts         = [1 3 4];
+db(i).expred        = 2;
+db(i).comments      = 'fastgratings2';
+db(i).nchannels_red = 2;
+db(i).nchannels = 1;
+db(i).gchannel = 1; 
+db(i).nplanes = 1; 
+
+i = i+1;
+db(i).mouse_name    = 'M150329_MP009';
+db(i).date          = '2015-04-27';
+db(i).expts         = [3 5 6];
+db(i).expred        = 4;
+db(i).comments      = 'fast gratings unbiased / biased';
+db(i).nchannels_red = 2;
+db(i).nchannels = 1;
+db(i).gchannel = 1; 
+db(i).nplanes = 1; 
+
+i = i+1;
+db(i).mouse_name    = 'M150422_MP012';
+db(i).date          = '2015-05-20';
+db(i).expts         = [4];
+db(i).expred        = 4;
+db(i).comments      = 'test registration types';
+db(i).nchannels_red = 2;
+db(i).nchannels = 1;
+db(i).gchannel = 1; 
+db(i).nplanes = 1; 
