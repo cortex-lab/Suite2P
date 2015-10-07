@@ -239,7 +239,7 @@ for k = 1:length(fs)
     end
     ops.mimg1 = ops.mimg1/ops.Nframes(k);
     % delete registered folder
-     if ops.CopyDataLocally && ~strfind(ops.TempStorage, 'zserver')
+     if ops.CopyDataLocally && ~isempty(strfind(ops.TempStorage, 'zserver'))
         % check again if this location is on zserver
         if strcmp(ops.TempStorage(1), '\') || strcmp(ops.TempStorage(1), '/')
             waning('you are trying to remove a file from a network location, skipping...')
