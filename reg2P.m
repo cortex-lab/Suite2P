@@ -245,7 +245,7 @@ for k = 1:length(fs)
                     strcmp(ops.TempStorage(1), '/')
                 warning('You are trying to remove a file from a network location, skipping...')
             else
-                rmdir(fs{k}(j).name, 's');
+                delete(fs{k}(j).name);
             end
         end
     end
