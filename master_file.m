@@ -60,14 +60,14 @@ clustrules.parent.MaxRegions                = 10;
 % (encourages colocalized clusters) OBSOLETE
 
 %%
-for iexp = [2] %2:length(db)          
+for iexp = 1:length(db)          
     % copy files from zserver
     ops = build_ops(db(iexp), ops0);
     if ops.CopyDataLocally
         copy_from_zserver(ops);
     end
     
-    for iplane = 5 %ops.planesToProcess
+    for iplane = ops.planesToProcess
         ops         = build_ops(db(iexp), ops0); % reset ops for each plane
         if ops.useGPU
             gpuDevice(1);   % reset GPU at each dataset
@@ -97,12 +97,15 @@ for iexp = [2] %2:length(db)
     end
     
     % remove raw tiff directories
-    if ops.CopyDataLocally && ~strfind(ops.TempStorage, 'zserver')
-        % check again if this location is on zserver
-        if strcmp(ops.TempStorage(1), '\') || strcmp(ops.TempStorage(1), '/')
-            error('you are trying to remove a file from a network location')
+    % delete temporarily copied tiffs
+    if ops.CopyDataLocally && ops.DeleteRawOnline
+        % check if the location is NOT on zserver
+        if ~isempty(strfind(ops.TempStorage, 'zserver')) || ...
+                strcmp(ops.TempStorage(1), '\') || ...
+                strcmp(ops.TempStorage(1), '/')
+            warning('You are trying to remove a file from a network location, skipping...')
         else
-            rmdir(fullfile(ops.TempStorage, ops.mouse_name), 's');
+            rmdir(fullfile(ops.TempDir), 's');
         end
     end
     % clean up
