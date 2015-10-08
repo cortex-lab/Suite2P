@@ -236,19 +236,21 @@ for k = 1:length(fs)
         if rem(j,5)==1
             fprintf('Set %d, tiff %d done in time %2.2f \n', k, j, toc)            
         end
-    end
-    ops.mimg1 = ops.mimg1/ops.Nframes(k);
-    % delete temporarily copied tiffs
-    if ops.CopyDataLocally && ops.DeleteRawOnline
-        % check if the location is NOT on zserver
-        if ~isempty(strfind(ops.TempStorage, 'zserver')) || ...
-                strcmp(ops.TempStorage(1), '\') || ...
-                strcmp(ops.TempStorage(1), '/')
-            warning('You are trying to remove a file from a network location, skipping...')
-        else
-            rmdir(fullfile(ops.TempDir), 's');
+        
+        % delete temporarily copied tiffs
+        if ops.CopyDataLocally && ops.DeleteRawOnline
+            % check if the location is NOT on zserver
+            if ~isempty(strfind(ops.TempStorage, 'zserver')) || ...
+                    strcmp(ops.TempStorage(1), '\') || ...
+                    strcmp(ops.TempStorage(1), '/')
+                warning('You are trying to remove a file from a network location, skipping...')
+            else
+                rmdir(fs{k}(j).name, 's');
+            end
         end
     end
+    ops.mimg1 = ops.mimg1/ops.Nframes(k);
+    
 end
 % close bin file
 fclose(fid);

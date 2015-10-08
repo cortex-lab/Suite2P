@@ -51,14 +51,14 @@ for j = 1:length(ops.SubDirs)
 end
 
 % build file list
-if ops.CopyDataLocally
-    ops.fs = [];
-    for j = 1:length(ops.SubDirs)
-        ops.fs{j} = dir(fullfile(ops.TempDir, ops.SubDirs{j}, '*.tif'));
-        for k = 1:length(ops.fs{j})
+ops.fs = [];
+for j = 1:length(ops.SubDirs)
+    ops.fs{j} = dir(fullfile(ops.RootDir, ops.SubDirs{j}, '*.tif'));
+    for k = 1:length(ops.fs{j})
+        if ops.CopyDataLocally
             ops.fs{j}(k).name = fullfile(ops.TempDir, ops.SubDirs{j}, ops.fs{j}(k).name);
+        else
+            ops.fs{j}(k).name =  ops.fsroot{j}(k).name;
         end
     end
-else
-    ops.fs = ops.fsroot;
 end
