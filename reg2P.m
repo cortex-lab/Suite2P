@@ -259,6 +259,7 @@ fclose(fid);
 if ops.doRegistration
     minDs = min(ops.DS(2:end, [1 2]), [], 1);
     maxDs = max(ops.DS(2:end, [1 2]), [], 1);
+    disp([minDs(1) maxDs(1) minDs(2) maxDs(2)])
     if BiDiPhase>0
         maxDs(2) = max(1+BiDiPhase, maxDs(2));
     elseif BiDiPhase<0

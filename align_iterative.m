@@ -20,7 +20,7 @@ for i = 1:ops.NiterPrealign
     if i<floor(ops.NiterPrealign/2)        
         igood = igood(1:100);  
     else
-        igood = igood(1:size(data,3)/2);  
+        igood = igood(1:round(size(data,3)/2));  
     end
     ops.mimg = mean(dreg(:,:,igood),3);
     
