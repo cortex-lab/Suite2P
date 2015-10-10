@@ -211,6 +211,9 @@ for k = 1:length(fs)
                 ix0 = ix0 + Nbatch;
             end
             % collect ds
+            if j==1
+                ds(1,:) = 0;
+            end
             ops.DS          = cat(1, ops.DS, ds);
             ops.CorrFrame   = cat(1, ops.CorrFrame, Corr);
         else

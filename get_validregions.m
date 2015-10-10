@@ -8,7 +8,7 @@ for k = 1:length(stat0)
     if ~isempty(stat0(k).region)
         vs = [stat0(k).region.V];
         criterion = sum(vs > mean(vs(:)) * clustrules.parent.PixelFractionThreshold);
-        if criterion<clustrules.parent.MaxRegions
+        if 1 %criterion<clustrules.parent.MaxRegions
             
             igood = [stat0(k).region.mrs]./[stat0(k).region.mrs0] <clustrules.Compact;
             igood = igood & [stat0(k).region.npix]>clustrules.MinNpix & ...
@@ -19,6 +19,8 @@ for k = 1:length(stat0)
             for j = 1:length(igood)
                 ix = ix+1;
                 stat(ix) = stat0(k).region(igood(j));
+                stat(ix).region.V = stat0(ix).region.V;
+                
                 iclust(stat(ix).ipix) = ix + numel(stat0);
                 
                 ismmb = ismember(stat0(k).ipix, stat(ix).ipix);
