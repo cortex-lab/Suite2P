@@ -8,12 +8,7 @@ ntotframes          = ceil(sum(ops.Nframes));
 ops.NavgFramesSVD   = min(ops.NavgFramesSVD, ntotframes);
 nt0 = ceil(ntotframes / ops.NavgFramesSVD);
 
-if isfield(ops, 'chunk_align') && ~isempty(ops.chunk_align); chunk_align   = ops.chunk_align(iplane);
-else chunk_align = 1; end
 
-if chunk_align>9
-   nt0 =  ops.chunk_align;
-end
 ops.NavgFramesSVD = floor(ntotframes/nt0);
 nimgbatch = nt0 * floor(2000/nt0);
 

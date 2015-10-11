@@ -1,4 +1,4 @@
-function ops = build_ops(db, ops)
+function ops = build_ops2(db, ops)
 
 % ops = db;
 fieldNames = fieldnames(db);
@@ -30,7 +30,7 @@ end
 % build file list
 ops.fs = [];
 for j = 1:length(ops.SubDirs)
-    ops.fs{j} = dir(fullfile(ops.RootDir, ops.SubDirs{j}, '*.tif'));
+    ops.fs{j} = dir(fullfile(ops.TempDir, ops.SubDirs{j}, '*.tif'));
     for k = 1:length(ops.fs{j})
         if ops.CopyDataLocally
             ops.fs{j}(k).name = fullfile(ops.TempDir, ops.SubDirs{j}, ops.fs{j}(k).name);

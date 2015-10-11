@@ -54,7 +54,8 @@ for k = 1:Nk
         region(whclust).med     = [mean(y0) mean(x0)];
         region(whclust).ipix    = pixi;
         region(whclust).lambda  = res.lambda(pixi);
-        region(whclust).V = sum(res.M(pixi));
+        region(whclust).V       = sum(res.M(pixi));
+        region(whclust).parent      = k;  
     end
     stat(k).region = region;
     

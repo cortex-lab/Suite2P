@@ -30,7 +30,7 @@ if ops.useGPU
 %     cc = gpuArray.zeros(size(data), 'single');
 end
 cc = zeros(size(data), 'single');
-eps0 = single(1e-20);
+eps0 = single(1e-10);
 
 cfft2mimg = conj(fft2(mimg));
 cfft2mimgNorm = cfft2mimg./(eps0+abs(cfft2mimg));
@@ -55,23 +55,35 @@ xrange = [(Lx-lx+1):Lx 1:(lx+1)];
 yrange = [(Ly-ly+1):Ly 1:(ly+1)];
 cc =cc(yrange,xrange,:);
 
+sig= 1;
+
+ccs = my_conv(cc(:,:)', sig)';
+ccs = reshape(ccs, size(cc));
+ccs = permute(ccs, [2 1 3]);
+ccs = my_conv(ccs(:,:)', sig)';
+ccs = reshape(ccs, size(cc));
+ccs = permute(ccs, [2 1 3]);
+
 Corr = zeros(NT,1);
 ds  = zeros(NT,2);
 for i = 1:NT
      cc0 = cc(:,:,i);
-    [dmax, iy] = max(cc0, [], 1);
-    [~, ix]    = max(dmax, [], 2);
+     
+    [dmax, iy] = max(ccs(:,:,i), [], 1);
+    [mdmax, ix]    = max(dmax, [], 2);
     iy = iy(ix);
     
     if ops.SubPixel>1
         iy = min(max(iy, 3), 2*ly-1);
         ix = min(max(ix, 3), 2*lx-1);
         
-        cczoom  = cc0(iy-2:iy+2, ix-2:ix+2);
+        cczoom  = abs(cc0(iy-2:iy+2, ix-2:ix+2));
         mcczoom = mean(mean(cczoom));
         ix = ix + mean(mean(xref .* cczoom))/mcczoom;
         iy = iy + mean(mean(yref .* cczoom))/mcczoom;
-        Corr(i) = sum(sum(cczoom(:)));        
+        Corr(i) = sum(sum(cczoom(:)));    
+    else
+        Corr(i) = mdmax;
     end
     ix = ix - lx;
     iy = iy - ly;
