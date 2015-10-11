@@ -61,7 +61,7 @@ if ops.doRegistration
             end
             iplane0 = iplane0 - nFr/nchannels;
             data = img.loadFrames(fs{k}(j).name, ichanset(1),ichanset(2), ichanset(3));
-            data = squeeze(mean(reshape(data, Ly, Lx, nplanes, chunk_align, []), 4));
+            data = reshape(data, Ly, Lx, nplanes, []);
             
             if BiDiPhase
                 yrange = 2:2:Ly;
