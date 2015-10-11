@@ -1,7 +1,7 @@
 function [ops, U, Sv] = get_svdcomps(ops)
 
-load(sprintf('%s/%s/%s/regops_%s_%s_plane%d.mat', ops.ResultsSavePath, ops.mouse_name, ops.date, ...
-    ops.mouse_name, ops.date, ops.iplane))
+% load(sprintf('%s/%s/%s/regops_%s_%s_plane%d.mat', ops.ResultsSavePath, ops.mouse_name, ops.date, ...
+%     ops.mouse_name, ops.date, ops.iplane))
 
 iplane = ops.iplane;
 
