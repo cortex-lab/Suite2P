@@ -32,6 +32,6 @@ ops.SubPixel = tempSubPixel;
 
 ops.AlignNanThresh = median(Corr) - 4*std(Corr);
 ops.ErrorInitialAlign = err;
-
+ops.dsprealign = dsnew;
 
 end 

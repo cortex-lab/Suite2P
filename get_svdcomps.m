@@ -34,7 +34,7 @@ while 1
     data = reshape(data, Ly, Lx, []);
     
     % subtract off the mean of this batch
-    data = data - repmat(ops.mimg1, 1, 1, size(data,3));
+%     data = data - repmat(ops.mimg1, 1, 1, size(data,3));
     
     irange = 1:nt0*floor(size(data,3)/nt0);
     data = data(:,:, irange);
@@ -84,7 +84,7 @@ while 1
     
     % subtract off the mean of this batch
     %         data = data - repmat(mean(data,3), 1, 1, size(data,3));
-    data = data - repmat(ops.mimg1, 1, 1, size(data,3));
+%     data = data - repmat(ops.mimg1, 1, 1, size(data,3));
     data = data(ops.yrange, ops.xrange, :);
     Fs(:, ix + (1:size(data,3))) = U' * reshape(data, [], size(data,3));
     

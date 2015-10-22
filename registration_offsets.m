@@ -77,8 +77,8 @@ for i = 1:NT
         iy = min(max(iy, 3), 2*ly-1);
         ix = min(max(ix, 3), 2*lx-1);
         
-        cczoom  = abs(cc0(iy-2:iy+2, ix-2:ix+2));
-        mcczoom = mean(mean(cczoom));
+        cczoom  = cc0(iy-2:iy+2, ix-2:ix+2);
+        mcczoom = mean(mean(abs(cczoom)));
         ix = ix + mean(mean(xref .* cczoom))/mcczoom;
         iy = iy + mean(mean(yref .* cczoom))/mcczoom;
         Corr(i) = sum(sum(cczoom(:)));    
