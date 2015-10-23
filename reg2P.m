@@ -112,7 +112,8 @@ if ops.doRegistration
     %
     clear IMG
 end
-ops.RegFile = [ops.RegFileRoot, sprintf('_plane%d.bin', iplane)];
+ops.RegFile = fullfile(ops.RegFileRoot, sprintf('tempreg_plane%d.bin', iplane));
+
 regdir = fileparts(ops.RegFile);
 if ~exist(regdir, 'dir')
    mkdir(regdir); 

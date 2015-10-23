@@ -1,94 +1,90 @@
 %%
-% addpath('\\zserver\Lab\Share\Marius\TwoPhotonSuiteDev')
+cd('D:\CODE\MariusBox\runSuite2P')
+addpath('D:\CODE\GitHub\Suite2P')
 
 % make database to run in batch
-% make_db_MK
-make_db_5plane_red
-% make_db_axons
-% make_db_ss
-% make_db_1plane_red
-% make_db_20plane_1x;
-% make_db_badreg;
-% make_db_1x;
+make_db_adaptation;
 
 ops0.useGPU                 = 0; % if you can use a GPU in matlab this accelerate registration approx 3 times
 ops0.doRegistration         = 1;
+
 % root paths for files and temporary storage (ideally an SSD drive. my SSD is C)
-ops0.RegFileTiffLocation    = []; %'D:/DATA/'; % leave empty to NOT save registered tiffs
-ops0.RegFileRoot            = 'C:/DATA/tempreg';
-ops0.LoadRegMean   			= 0; % this can be overriden with a regopspath field in the db structure
-
-ops0.getROIs                = 0;
-ops0.getSVDcomps            = 1;
-ops0.nSVD                   = 2000; % how many SVD components to keep
-
-ops0.CopyDataLocally        = 0;
-ops0.useImRead              = 0; % imread works faster from a local drive
+ops0.RootStorage            = '//zserver4/Data/2P';
+ops0.CopyDataLocally        = 1;
 ops0.TempStorage            = 'C:/DATA/'; % copy data locally first
+ops0.RegFileRoot            = 'C:/DATA/'; 
 ops0.ResultsSavePath        = 'D:/DATA/F';
+ops0.RegFileTiffLocation    = []; %'D:/DATA/'; % leave empty to NOT save registered tiffs
+ops0.DeleteBin              = 1; % set to 1 for batch processing on a limited hard drive
+ops0.DeleteRawOnline        = 1; % set to 1 for deleting local tiff files right after registration
+
+ops0.useImRead              = 1; % imread works faster from a local drive
 ops0.PhaseCorrelation       = 1; % set to 0 for non-whitened cross-correlation
 ops0.SubPixel               = Inf; % 2 is alignment by 0.5 pixel, Inf is the exact number from phase correlation
-
-ops0.showTargetRegistration = 1;
-ops0.RootStorage            = '//zserver4/Data/2P';
-ops0.ShowCellMap            = 1;
-ops0.DeleteBin              = 1; % set to 1 for batch processing on a limited hard drive
-ops0.DeleteRawOnline        = 0; % set to 1 for batch processing on an (even more) limited hard drive
-
-% the following settings shouldn't need to be adjusted
-ops0.NavgFramesSVD          = 3000; % how many (pooled) frames to do the SVD based on
-ops0.Nk0                    = 1000;  % how many clusters to start with
-ops0.Nk                     = 500;  % how many clusters to end with
-ops.nSVDforROI              = 1000;
-ops0.niterclustering        = 30;   % how many iterations of clustering
-
 ops0.showTargetRegistration = 1;
 ops0.NimgFirstRegistration  = 1000; 
+ops0.NiterPrealign          = 10;
 ops0.RegPrecision           = 'int16';
 ops0.RawPrecision           = 'int16';
-ops0.NiterPrealign          = 10;
 
-% these are modifiable settings for classifying ROIs post-clustering
-clustrules.MaxNpix                          = 200; % important
-clustrules.MinNpix                          = 20; % important
-clustrules.Compact                          = 1.3; % important
+ops0.getROIs                = 1;
+ops0.ShowCellMap            = 1;
+ops0.Nk0                    = 1300;  % how many clusters to start with
+ops0.Nk                     = 650;  % how many clusters to end with
+ops0.nSVDforROI             = 1000;
+ops0.niterclustering        = 30;   % how many iterations of clustering
+ops0.sig                    = 0.5;  % spatial smoothing length for clustering; encourages localized clusters
+
+ops0.getSVDcomps            = 0;
+ops0.NavgFramesSVD          = 5000; % how many (binned) timepoints to do the SVD based on
+ops0.nSVD                   = 1000; % how many SVD components to keep
+
+% these are modifiable settings for classifying ROIs post-clustering, these settings can be over-ridden in the GUI after running the pipeline
+clustrules.MaxNpix                          = 500; 
+clustrules.MinNpix                          = 30; 
+clustrules.Compact                          = 2; 
 clustrules.parent.minPixRelVar              = 1/10;
-clustrules.parent.PixelFractionThreshold    = 0.5; % 1/20;
+clustrules.parent.PixelFractionThreshold    = 0.5; 
 clustrules.parent.MaxRegions                = 10;
 
-% ops0.sig                    = 0.25;  % spatial smoothing constant
-% (encourages colocalized clusters) OBSOLETE
+% the following settings shouldn't need to be adjusted
+ops0.LoadRegMean   			= 0; % 
+
+
 
 %%
-for iexp = 1:length(db)          
+for iexp = 1 % 1:length(db)        %3:length(db)          
     % copy files from zserver
-    ops = build_ops(db(iexp), ops0);
-    if ops.CopyDataLocally
-        copy_from_zserver(ops);
+    if ops0.CopyDataLocally
+        db0 = copy_from_zserver(db(iexp), ops0);
+        ops = build_ops2(db0, ops0);
+    else
+        ops = build_ops(db(iexp), ops0);
     end
     
-    for iplane = ops.planesToProcess
-        ops         = build_ops(db(iexp), ops0); % reset ops for each plane
-        if ops.useGPU
-            gpuDevice(1);   % reset GPU at each dataset
-        end
-        ops.iplane  = iplane;       
-        ops         = reg2P(ops);  % do registration
-
-%         fname = sprintf('%s/%s/%s/SVDmaskForROI_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
-%             ops.mouse_name,ops.date, ops.mouse_name, ops.date, iplane);
-%         load(fname);
-%         ops.Nk0 = 5000;
-%         ops.Nk  = 2500;        
-        if ops.getSVDcomps
-            ops    = get_svdcomps(ops);
-        end
-
-        if ops.getROIs 
-            [ops, U, Sv]        = get_svdForROI(ops);
-            [ops, stat0, res0]  = fast_clustering(ops, reshape(U, [], size(U,3)), Sv);        
-            [stat, res]         = apply_ROIrules(ops, stat0, res0, clustrules);
-            Fcell               = get_signals(ops, iplane);
+    if ops.useGPU
+        gpuDevice(1);   % reset GPU at each dataset
+    end
+    %
+    ops1         = reg2Pnew(ops);  % do registration
+    
+    for i = 1:length(ops.planesToProcess)
+        iplane  = ops.planesToProcess(i);
+        ops     = ops1{i};
+        ops.iplane  = iplane;
+        
+        if numel(ops.yrange)>300 && numel(ops.xrange)>300
+            if ops.getSVDcomps
+                ops    = get_svdcomps(ops);
+            end
+            
+            if ops.getROIs
+                %%
+                [ops, U, Sv]        = get_svdForROI(ops);
+                [ops, stat0, res0]  = fast_clustering(ops, reshape(U, [], size(U,3)), Sv);
+                [stat, res]         = apply_ROIrules(ops, stat0, res0, clustrules);
+                Fcell               = get_signals(ops, iplane);
+            end
         end
         
         if ops.DeleteBin
@@ -96,18 +92,19 @@ for iexp = 1:length(db)
         end
     end
     
-    % remove raw tiff directories
     % delete temporarily copied tiffs
-    if ops.CopyDataLocally && ops.DeleteRawOnline
+    if ops.CopyDataLocally
         % check if the location is NOT on zserver
         if ~isempty(strfind(ops.TempStorage, 'zserver')) || ...
                 strcmp(ops.TempStorage(1), '\') || ...
                 strcmp(ops.TempStorage(1), '/')
             warning('You are trying to remove a file from a network location, skipping...')
         else
-            rmdir(fullfile(ops.TempDir), 's');
+            rmdir(fullfile(ops.TempStorage, ops.mouse_name), 's');
+%             rmdir(fullfile(ops.TempDir), 's');
         end
     end
+    
     % clean up
     fclose all;        
 end

@@ -100,7 +100,7 @@ clear IMG
 
 %%
 for i = 1:numPlanes
-    ops1{i}.RegFile = [ops.RegFileRoot, sprintf('_plane%d.bin', ops.planesToProcess(i))];
+    ops1{i}.RegFile = fullfile(ops.RegFileRoot, sprintf('tempreg_plane%d.bin', ops.planesToProcess(i)));
     regdir = fileparts(ops1{i}.RegFile);
     if ~exist(regdir, 'dir')
         mkdir(regdir);
