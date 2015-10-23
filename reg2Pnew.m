@@ -21,7 +21,6 @@ else BiDiPhase = 0; end
 if isfield(ops, 'LoadRegMean') && ~isempty(ops.LoadRegMean); LoadRegMean = ops.LoadRegMean;
 else LoadRegMean = 0; end
 
-addpath(genpath('\\zserver\Code\Register\'))
 fs = ops.fs;
 
 %% find the mean frame after aligning a random subset
@@ -31,7 +30,7 @@ if nfmax>=2000
     nfmax = 1999;
 end
 nbytes = fs{1}(1).bytes;
-nFr = img.nFrames(fs{1}(1).name);
+nFr = nFrames(fs{1}(1).name);
 Info0 = imfinfo(fs{1}(1).name);
 Ly = Info0(1).Height;
 Lx = Info0(1).Width;
@@ -45,7 +44,7 @@ if ops.doRegistration
         for j = 1:length(fs{k})
             if abs(nbytes - fs{k}(j).bytes)>1e3
                 nbytes = fs{k}(j).bytes;
-                nFr = img.nFrames(fs{k}(j).name);
+                nFr = nFrames(fs{k}(j).name);
             end
             if nFr<(nchannels*nplanes*nfmax + nchannels*nplanes)
                 continue;
@@ -60,7 +59,7 @@ if ops.doRegistration
                     nchannels*nplanes*nfmax]; nchannels];
             end
             iplane0 = iplane0 - nFr/nchannels;
-            data = img.loadFrames(fs{k}(j).name, ichanset(1),ichanset(2), ichanset(3));
+            data = loadFrames(fs{k}(j).name, ichanset(1),ichanset(2), ichanset(3));
             data = reshape(data, Ly, Lx, nplanes, []);
             
             if BiDiPhase
@@ -98,8 +97,6 @@ if ops.showTargetRegistration
 end
 %
 clear IMG
-
-
 
 %%
 for i = 1:numPlanes

@@ -48,11 +48,11 @@ mov = mov(ops.yrange, ops.xrange, :);
 
 ops.nSVDforROI = min(ops.nSVDforROI, size(mov,3));
 
-% for i = 1:size(mov,3)
-%    I = mov(:,:,i);
-%    I = my_conv(my_conv(I',ops.sig)', ops.sig);
-%    mov(:,:,i) = I;
-% end
+for i = 1:size(mov,3)
+   I = mov(:,:,i);
+   I = my_conv(my_conv(I',ops.sig)', ops.sig);
+   mov(:,:,i) = I;
+end
 
 mov             = reshape(mov, [], size(mov,3));
 mov             = mov./repmat(mean(mov.^2,2).^.5, 1, size(mov,2));
