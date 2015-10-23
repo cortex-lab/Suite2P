@@ -26,7 +26,7 @@ ResultsSavePath --- where to save the final results.
 DeleteBin --- deletes the binary file created to store the registered movies
 DeleteRawOnline --- deletes local tiff files as soon as they are registered
 
-Most of these filepaths are complemented with separate subfolders per animal and experiment, specified in the make_db file. 
+Most of these filepaths are complemented with separate subfolders per animal and experiment, specified in the make_db file. The output is a struct called dat which is saved into a mat file in ResultsSavePath under a name formatted like F_M150329_MP009_2015-04-29_plane1_Nk650. It contains all the information collected throughout the processing, and contains the fluorescence traces in dat.F.Fcell and whether a given ROI is a cell or not in dat.F.iscell. dat.stat contains information about each ROI and can be used to recover the corresponding pixels for each ROI in dat.stat.ipix. The centroid of the ROI is specified in data.stat as well. 
 
 IV. Options for registration
 
