@@ -1,4 +1,4 @@
-This code was written by Marius Pachitariu and is provided here with no warranty. 
+This code was written by Marius Pachitariu and is provided here with no warranty. Please direct all questions and requests to marius10patgmaildotcom. 
 
 I. Introduction 
 
@@ -66,6 +66,17 @@ parent --- these are criteria imposed on the parent cluster (before separating c
 parent.minPixRelVar --- significant regions need to have at least >1/10 the mean variance of all regions
 parent.MaxRegions --- if there are more non-significant regions than this number, this parent ROI is probably very spread out over many small components and its connected regions are not good cells: it will be discarded. 
 
-VIII. About this software
+VIII. The following is a typical example of an entry in your local make_db file, which you can model after make_db_adaptation. The folder structure assumed is RootStorage/mouse_name/date/expts(k) for all entries in expts(k). 
+
+i = i+1;
+db(i).mouse_name    = 'M150329_MP009'; 
+db(i).date          = '2015-04-27';
+db(i).expts         = [5 6]; % which experiments to process together
+db(i).nchannels     = 1; % number of channels recorded
+db(i).gchannel      = 1;  % which of these channels do you want analyzed
+db(i).nplanes       = 1;  % number of planes recorded
+db(i).comments      = 'multi p file: block 0,5,6';
+
+IX. About this software
 
 Following six years of theoretical and computational neuroscience, a year ago I have started doing my own recordings and found the existing pipelines for Calcium processing to be lacking. This included a first disappointment with my own software that I had developed a few years ago for detecting donut-like ROIs from mean images. That method found donuts reliably and indeed found five times more cells than my colleagues in the lab were detecting, but most of the detected cells were very silent throughout the recordings, and several cells with large transients were not detected because... they did not show up at all in the mean images! An activity-based method was needed and I turned to ICA methods for several months until I realized the method was biasing my tuning curves and very often giving me negative responses. This was because ICA-like methods return continuous-valued masks that attempt to disentangle and orthogonalize potentially overlapping ROIs (cells, neuropil, dendrites). The model's assumptions thus biased the end result. While it is possible that other advanced methods might solve all problems, I thought there was a need and opportunity for simpler algorithms, like pixel-clustering methods. Combining such algorithms with a dimensionality-reduction pre-processing step, resulted in the very fast method implemented here. 
