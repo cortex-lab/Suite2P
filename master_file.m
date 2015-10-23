@@ -1,9 +1,13 @@
 %%
-cd('D:\CODE\MariusBox\runSuite2P')
-addpath('D:\CODE\GitHub\Suite2P')
-
-% make database to run in batch
+cd('D:\CODE\MariusBox\runSuite2P') % start this code in the directory with make_db
 make_db_adaptation;
+
+toolbox_path = 'D:\CODE\GitHub\Suite2P';
+if exist(toolbox_path, 'dir')
+	addpath(toolbox_path) % add local path to the toolbox
+else
+	error('toolbox_path does not exist, please change toolbox_path');
+end
 
 ops0.useGPU                 = 0; % if you can use a GPU in matlab this accelerate registration approx 3 times
 ops0.doRegistration         = 1;
@@ -53,7 +57,7 @@ ops0.LoadRegMean   			= 0; %
 
 
 %%
-for iexp = 1 % 1:length(db)        %3:length(db)          
+for iexp = 1:length(db)        %3:length(db)          
     % copy files from zserver
     if ops0.CopyDataLocally
         db0 = copy_from_zserver(db(iexp), ops0);
