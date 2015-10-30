@@ -51,7 +51,6 @@ clustrules.parent.minPixRelVar              = 1/10;
 clustrules.parent.PixelFractionThreshold    = 0.5; 
 clustrules.parent.MaxRegions                = 10;
 
-% the following settings shouldn't need to be adjusted
 ops0.LoadRegMean   			= 0; % 
 
 
@@ -83,7 +82,7 @@ for iexp = 1:length(db)        %3:length(db)
             end
             
             if ops.getROIs
-                %%
+                %
                 [ops, U, Sv]        = get_svdForROI(ops);
                 [ops, stat0, res0]  = fast_clustering(ops, reshape(U, [], size(U,3)), Sv);
                 [stat, res]         = apply_ROIrules(ops, stat0, res0, clustrules);
