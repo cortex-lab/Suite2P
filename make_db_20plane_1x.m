@@ -22,5 +22,5 @@ db(i).nchannels     = 1;
 db(i).gchannel      = 1; 
 db(i).nplanes       = 12; 
 db(i).BiDiPhase     = 1;
-db(i).Nk0           = 1300;
-db(i).Nk            = 650;
+db(i).Nk0           = 2500;
+db(i).Nk            = 1250;
