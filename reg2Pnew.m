@@ -153,7 +153,6 @@ for k = 1:length(fs)
             end
             data = img.loadFrames(fs{k}(j).name, ichanset(1), ichanset(2), ichanset(3));
         end
-        iplane0 = iplane0 - nFr/nchannels;
         
         if BiDiPhase
             yrange = 2:2:Ly;
@@ -233,6 +232,8 @@ for k = 1:length(fs)
                 delete(fs{k}(j).name);
             end
         end
+        
+        iplane0 = iplane0 - nFr/nchannels;
     end
     for i = 1:numPlanes
         ops1{i}.mimg1 = ops1{i}.mimg1/ops1{i}.Nframes(k);
