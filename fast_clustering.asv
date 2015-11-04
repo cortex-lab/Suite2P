@@ -2,8 +2,8 @@ function [ops, stat, res] = fast_clustering(ops, U, Sv)
 
 iplane = ops.iplane;
 
-for i = 1:ops.nSVDforROI
-  U(:,i) = U(:,i)  * Sv(i).^.5;
+for i = 1:ops.nSVD
+   1U(:,i) = U(:,i)  * Sv(i).^.5;
 end
 U = U';
 [nSVD, Npix] = size(U);

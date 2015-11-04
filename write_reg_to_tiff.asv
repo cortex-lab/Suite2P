@@ -1,0 +1,35 @@
+function write_reg_to_tiff(fid, ops, iplane)
+
+Ly = ops.Ly;
+Lx = ops.Ly;
+bitspersamp = 16;
+
+frewind(fid);
+for k = 1:length(ops.SubDirs)
+    ix = 0;    
+    nframesleft = ops.Nframes(k);
+    while nframesleft>0
+         ix = ix + 1;
+        nfrtoread = min(nframesleft, 2000);
+        data = fread(fid,  Ly*Lx*nfrtoread, '*int16');                
+        nframesleft = nframesleft - nfrtoread;
+        
+        if ix==1
+            navg = min(size(data,3), 250);
+            ops.mimg0 = data(:,:,1:navg);
+        end
+        
+        data = reshape(data, Ly, Lx, []);        
+       
+        foldr = fullfile(ops.RegFileTiffLocation, ops.mouse_name, sprintf('Plane%d', iplane), ...
+            ops.SubDirs{k});
+        if ~exist(foldr, 'dir')
+            mkdir(foldr)
+        end
+        partname = sprintf('%s_%s_%s_2P_plane%d_%d.tif', ops.date, ops.SubDirs{k}, ...
+            ops.mouse_name, iplane, ix);
+        fname = fullfile(foldr, partname);
+        
+        TiffWriter(uint16(data),fname,bitspersamp);
+    end
+end
