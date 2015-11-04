@@ -243,7 +243,6 @@ for k = 1:length(fs)
     
 end
 % close bin file
-keyboard;
 %%
 for i = 1:numPlanes    
     fclose(fid{i});
