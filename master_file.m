@@ -18,7 +18,10 @@ ops0.CopyDataLocally        = 1;
 ops0.TempStorage            = 'C:/DATA/'; % copy data locally first
 ops0.RegFileRoot            = 'C:/DATA/'; 
 ops0.ResultsSavePath        = 'D:/DATA/F';
-ops0.RegFileTiffLocation    = []; %'D:/DATA/'; % leave empty to NOT save registered tiffs
+
+ops0.RegFileTiffLocation    = 'D:/DATA/'; % leave empty to NOT save registered tiffs
+ops0.nimgbegend             = 250; % how many frames to average at the beginning and end of each experiment
+
 ops0.DeleteBin              = 1; % set to 1 for batch processing on a limited hard drive
 ops0.DeleteRawOnline        = 1; % set to 1 for deleting local tiff files right after registration
 
