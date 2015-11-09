@@ -22,8 +22,8 @@ db(i).nchannels     = 1;
 db(i).gchannel      = 1; 
 db(i).nplanes       = 12; 
 db(i).BiDiPhase     = 1;
-db(i).Nk0           = 2500;
-db(i).Nk            = 1250;
+db(i).Nk0           = 3000;
+db(i).Nk            = 1500;
 
 i = i+1;
 db(i).mouse_name    = 'M150824_MP019';
@@ -35,4 +35,4 @@ db(i).gchannel      = 1;
 db(i).nplanes       = 12; 
 db(i).BiDiPhase     = 0;
 db(i).Nk0           = 3000;
-db(i).Nk            = 1500;
+db(i).Nk            = 3000;

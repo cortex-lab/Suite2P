@@ -128,9 +128,9 @@ for k = 1:length(fs)
          ops1{i}.Nframes(k)  = 0;
     end
     
-    iplane0 = 1;
+    iplane0 = 1:1:numPlanes;
     for j = 1:length(fs{k})
-        iplane0 = mod(iplane0-1, nplanes) + 1;
+        iplane0 = mod(iplane0-1, numPlanes) + 1;
         if ops.useImRead
             if abs(nbytes - fs{k}(j).bytes)>1e3
                 nbytes = fs{k}(j).bytes;
@@ -138,9 +138,11 @@ for k = 1:length(fs)
                 Info = imfinfo(fs{k}(j).name);
             end
             if red_align
-                ichanrange = (nchannels*(iplane0-1)+rchannel):nchannels:nFr;
+%                 ichanrange = (nchannels*(iplane0-1)+rchannel):nchannels:nFr;
+                ichanrange = rchannel:nchannels:nFr;
             else
-                ichanrange = (nchannels*(iplane0-1)+ichannel):nchannels:nFr;
+                ichanrange = ichannel:nchannels:nFr;
+%                 ichanrange = (nchannels*(iplane0-1)+ichannel):nchannels:nFr;
             end
             data = zeros(Ly, Lx, numel(ichanrange), ops.RawPrecision);
             for ix = 1:length(ichanrange)
@@ -149,9 +151,10 @@ for k = 1:length(fs)
         else
             nFr = img.nFrames(fs{k}(j).name);
             if red_align
-                ichanset = [nchannels*(iplane0-1)+rchannel; nFr; nchannels];
+%                 ichanset = [nchannels*(iplane0-1)+rchannel; nFr; nchannels];
+                ichanset = [rchannel; nFr; nchannels];
             else
-                ichanset = [nchannels*(iplane0-1)+ichannel; nFr; nchannels];
+                ichanset = [ichannel; nFr; nchannels];
             end
             data = img.loadFrames(fs{k}(j).name, ichanset(1), ichanset(2), ichanset(3));
         end
@@ -169,7 +172,8 @@ for k = 1:length(fs)
             % get the registration offsets
             dsall = zeros(size(data,3), 2);
             for i = 1:numPlanes
-                indframes = ops.planesToProcess(i):nplanes:size(data,3);
+                ifr0 = iplane0(ops.planesToProcess(i));
+                indframes = ifr0:nplanes:size(data,3);
                 [ds, Corr]  = registration_offsets(data(:,:,indframes), ops1{i}, 0);
                 dsall(indframes,:)  = ds;
                 % collect ds
@@ -184,13 +188,14 @@ for k = 1:length(fs)
             % green channel
             if red_align
                 if ops.useImRead
-                    ichanrange = (nchannels*(iplane0-1)+ichannel):nchannels:length(Info);
+%                     ichanrange = (nchannels*(iplane0-1)+ichannel):nchannels:length(Info);
+                    ichanrange = ichannel:nchannels:length(Info);
                     data = zeros(Ly, Lx, numel(ichanrange), ops.RawPrecision);
                     for ix = 1:length(ichanrange)
                         data(:,:,ix) = imread(fs{k}(j).name, 'Index', ichanrange(ix),'Info', Info);
                     end
                 else
-                    ichanset = [nchannels*(iplane0-1)+ichannel; nFr; nchannels];
+                    ichanset = [ichannel; nFr; nchannels];
                     data = img.loadFrames(fs{k}(j).name, ichanset(1), ichanset(2), ichanset(3));
                 end
             end
@@ -211,7 +216,8 @@ for k = 1:length(fs)
         end
         % write dreg to bin file
         for i = 1:numPlanes
-            indframes = ops.planesToProcess(i):nplanes:size(data,3);
+            ifr0 = iplane0(ops.planesToProcess(i));
+            indframes = ifr0:nplanes:size(data,3);
             dwrite = dreg(:,:,indframes);
             fwrite(fid{i}, dwrite, ops.RegPrecision);
             
@@ -282,6 +288,20 @@ for i = 1:numPlanes
     save(sprintf('%s/%s/%s/regops_%s_%s_plane%d.mat', ops.ResultsSavePath, ops.mouse_name, ops.date, ...
         ops.mouse_name, ops.date,  ops.planesToProcess(i)),  'ops')
 end
+
+% delete temporarily copied tiffs
+if ops.CopyDataLocally
+    % check if the location is NOT on zserver
+    if ~isempty(strfind(ops.TempStorage, 'zserver')) || ...
+            strcmp(ops.TempStorage(1), '\') || ...
+            strcmp(ops.TempStorage(1), '/')
+        warning('You are trying to remove a file from a network location, skipping...')
+    else
+        rmdir(fullfile(ops.TempStorage, ops.mouse_name), 's');
+        %             rmdir(fullfile(ops.TempDir), 's');
+    end
+end
+
 %save(sprintf('%s/F_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
  %   ops.mouse_name, ops.date, iplane), 'ops')
 
