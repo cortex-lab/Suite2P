@@ -35,4 +35,43 @@ db(i).gchannel      = 1;
 db(i).nplanes       = 12; 
 db(i).BiDiPhase     = 0;
 db(i).Nk0           = 3000;
-db(i).Nk            = 3000;
+db(i).Nk            = 1500;
+
+
+i = i+1;
+db(i).mouse_name    = 'M150610_MP020';
+db(i).date          = '2015-11-10';
+db(i).expred        = [];
+db(i).expts         = [5];
+db(i).nchannels     = 1;
+db(i).gchannel      = 1; 
+db(i).nplanes       = 14; 
+db(i).BiDiPhase     = 0;
+db(i).Nk0           = 3000;
+db(i).Nk            = 1500;
+
+
+i = i+1;
+db(i).mouse_name    = 'M150610_MP021';
+db(i).date          = '2015-11-11';
+db(i).expred        = [];
+db(i).expts         = [5];
+db(i).nchannels     = 1;
+db(i).gchannel      = 1; 
+db(i).nplanes       = 12; 
+db(i).BiDiPhase     = 0;
+db(i).Nk0           = 3000;
+db(i).Nk            = 1500;
+
+
+i = i+1;
+db(i).mouse_name    = 'M150610_MP020';
+db(i).date          = '2015-11-12';
+db(i).expred        = [];
+db(i).expts         = [2];
+db(i).nchannels     = 1;
+db(i).gchannel      = 1; 
+db(i).nplanes       = 12; 
+db(i).BiDiPhase     = 0;
+db(i).Nk0           = 3000;
+db(i).Nk            = 1500;
