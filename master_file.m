@@ -28,6 +28,9 @@ ops0.DeleteRawOnline        = 1; % set to 1 for deleting local tiff files right 
 ops0.useImRead              = 1; % imread works faster from a local drive
 ops0.PhaseCorrelation       = 1; % set to 0 for non-whitened cross-correlation
 ops0.SubPixel               = Inf; % 2 is alignment by 0.5 pixel, Inf is the exact number from phase correlation
+% upsampling factor during registration, 1 for no upsampling is fastest, 2 gives
+% better subpixel accuracy
+ops0.registrationUpsample   = 1;
 ops0.showTargetRegistration = 1;
 ops0.NimgFirstRegistration  = 1000; 
 ops0.NiterPrealign          = 10;
