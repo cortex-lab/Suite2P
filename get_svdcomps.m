@@ -111,6 +111,6 @@ for iexp = 1:length(ops.expts)
 end
 
 U = reshape(U, numel(ops.yrange), numel(ops.xrange), []);
-save(sprintf('%s/%s/%s/SVD_%s_%s_plane%d.mat', ops.ResultsSavePath, ops.mouse_name, ops.date, ...
+save(sprintf('%s/SVD_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
     ops.mouse_name, ops.date, iplane), 'U', 'Sv', 'Vcell', 'ops');
 % keyboard;

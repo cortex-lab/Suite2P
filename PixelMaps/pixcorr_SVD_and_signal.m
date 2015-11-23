@@ -1,7 +1,9 @@
 function pixCorr = pixcorr_SVD_and_signal(U, V, R)
 
 % Computes pixel-level correlation with secondary signal R, such as a
-% running trace or a pupil trace. Produces an array of correlation coefficients
+% running trace or a pupil trace. U and V are the spatial and temporal components
+% of the SVD respectively, such that the raw fluorescence is F = U * V. 
+% This script produces an array of correlation coefficients
 % pixCorr of size Ly by Lx. The number of SVD components used is whatever
 % size(U,3) is. 
 

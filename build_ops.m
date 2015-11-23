@@ -39,3 +39,12 @@ for j = 1:length(ops.SubDirs)
         end
     end
 end
+
+CharSubDirs = '';
+for i = 1:length(ops.SubDirs)
+    CharSubDirs = [CharSubDirs ops.SubDirs{i} '_'];
+end
+CharSubDirs = CharSubDirs(1:end-1);
+
+ops.ResultsSavePath = sprintf('%s//%s//%s//%s//', ops.ResultsSavePath, ops.mouse_name, ops.date, ...
+        CharSubDirs);

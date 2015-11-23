@@ -5,7 +5,7 @@ addpath('D:\CODE\GitHub\Suite2P')
 % make database to run in batch
 make_db_adaptation;
 
-ops0.useGPU                 = 0; % if you can use a GPU in matlab this accelerate registration approx 3 times
+ops0.useGPU                 = 1; % if you can use a GPU in matlab this accelerate registration approx 3 times
 ops0.doRegistration         = 1;
 
 % root paths for files and temporary storage (ideally an SSD drive. my SSD is C)
@@ -55,7 +55,7 @@ ops0.NiterPrealign          = 10;
 
 
 %%
-for iexp = 1 % 1:length(db)        %3:length(db)          
+for iexp = 13 % 1:length(db)        %3:length(db)          
     % copy files from zserver
     if ops0.CopyDataLocally
         db0 = copy_from_zserver(db(iexp), ops0);
@@ -80,8 +80,7 @@ for iexp = 1 % 1:length(db)        %3:length(db)
                 ops    = get_svdcomps(ops);
             end
             
-            if ops.getROIs
-                %%
+            if ops.getROIs                
                 [ops, U, Sv]        = get_svdForROI(ops);
                 [ops, stat0, res0]  = fast_clustering(ops, reshape(U, [], size(U,3)), Sv);
                 [stat, res]         = apply_ROIrules(ops, stat0, res0, clustrules);
