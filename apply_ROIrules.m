@@ -18,5 +18,7 @@ end
 iplane = ops.iplane;
 Nk = ops.Nk;
 
-save(sprintf('%s/%s/%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ...
-    ops.mouse_name, ops.date, ops.mouse_name, ops.date, iplane, Nk),  'ops', 'res', 'stat', 'stat0', 'res0')
+
+save(sprintf('%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ...
+    ops.mouse_name, ops.date, iplane, Nk),  'ops', 'res', 'stat', 'stat0', 'res0')
+

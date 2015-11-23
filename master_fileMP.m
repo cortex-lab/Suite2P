@@ -16,7 +16,7 @@ ops0.ResultsSavePath        = 'D:/DATA/F';
 ops0.RootStorage            = '//zserver4/Data/2P';
 
 ops0.getROIs                = 1;
-ops0.getSVDcomps            = 0;
+ops0.getSVDcomps            = 1;
 ops0.nSVD                   = 1000; % how many SVD components to keep
 
 ops0.CopyDataLocally        = 1;
@@ -92,19 +92,7 @@ for iexp = 13 % 1:length(db)        %3:length(db)
             delete(ops.RegFile);        % delete temporary bin file
         end
     end
-    
-    % delete temporarily copied tiffs
-    if ops.CopyDataLocally
-        % check if the location is NOT on zserver
-        if ~isempty(strfind(ops.TempStorage, 'zserver')) || ...
-                strcmp(ops.TempStorage(1), '\') || ...
-                strcmp(ops.TempStorage(1), '/')
-            warning('You are trying to remove a file from a network location, skipping...')
-        else
-            rmdir(fullfile(ops.TempStorage, ops.mouse_name), 's');
-%             rmdir(fullfile(ops.TempDir), 's');
-        end
-    end
+   
     
     % clean up
     fclose all;        

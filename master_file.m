@@ -57,61 +57,9 @@ clustrules.parent.MaxRegions                = 10;
 ops0.LoadRegMean   			= 0; % 
 
 
-
 %%
 for iexp = 1:length(db)        %3:length(db)          
     % copy files from zserver
-    if ops0.CopyDataLocally
-        db0 = copy_from_zserver(db(iexp), ops0);
-        ops = build_ops2(db0, ops0);
-    else
-        ops = build_ops(db(iexp), ops0);
-    end
-    
-    if ops.useGPU
-        gpuDevice(1);   % reset GPU at each dataset
-    end
-    %
-    ops1         = reg2Pnew(ops);  % do registration
-    
-    for i = 1:length(ops.planesToProcess)
-        iplane  = ops.planesToProcess(i);
-        ops     = ops1{i};
-        ops.iplane  = iplane;
-        
-        if numel(ops.yrange)>300 && numel(ops.xrange)>300
-            if ops.getSVDcomps
-                ops    = get_svdcomps(ops);
-            end
-            
-            if ops.getROIs
-                %
-                [ops, U, Sv]        = get_svdForROI(ops);
-                [ops, stat0, res0]  = fast_clustering(ops, reshape(U, [], size(U,3)), Sv);
-                [stat, res]         = apply_ROIrules(ops, stat0, res0, clustrules);
-                Fcell               = get_signals(ops, iplane);
-            end
-        end
-        
-        if ops.DeleteBin
-            delete(ops.RegFile);        % delete temporary bin file
-        end
-    end
-    
-    % delete temporarily copied tiffs
-    if ops.CopyDataLocally
-        % check if the location is NOT on zserver
-        if ~isempty(strfind(ops.TempStorage, 'zserver')) || ...
-                strcmp(ops.TempStorage(1), '\') || ...
-                strcmp(ops.TempStorage(1), '/')
-            warning('You are trying to remove a file from a network location, skipping...')
-        else
-            rmdir(fullfile(ops.TempStorage, ops.mouse_name), 's');
-%             rmdir(fullfile(ops.TempDir), 's');
-        end
-    end
-    
-    % clean up
-    fclose all;        
+   run_pipeline(iexp, db, ops0, clustrules);
 end
 %%
