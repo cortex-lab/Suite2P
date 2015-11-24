@@ -2,14 +2,14 @@ function [tdata, validIdx] = translate_movie(data, dv, ops)
 
 %% Parameters
 [ly, lx, nFrames] = size(data);
-if isfield(ops, 'SubPixel') && isfinite(ops.SubPixel)
-  dv = round(ops.SubPixel*dv)./ops.SubPixel;
+if nargin < 3 
+  ops = [];
 end
-if isfield(ops, 'useGPU')
-  useGPU = ops.useGPU;
-else
-  useGPU = false;
+subpixel = getOr(ops, {'subPixel' 'SubPixel'}, 1);
+if isfinite(subpixel)
+  dv = round(subpixel*dv)./subpixel;
 end
+useGPU = getOr(ops, 'useGPU', false);
 
 dv = permute(dv, [2 3 1]);
 fy = ifftshift((-fix(ly/2):ceil(ly/2) - 1)/ly)';% freq along first dimension

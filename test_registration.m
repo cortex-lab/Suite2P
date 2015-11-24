@@ -16,7 +16,7 @@ noiseSigma = std(frame(:))/3;
 dvr = [0 0; dvrSigma*randn(nTrans - 1, 2)];
 
 ops = struct('useGPU', useGPU, 'PhaseCorrelation', true, 'mimg', [],...
-  'SubPixel', inf, 'registrationUpsample', 1, 'RegPrecision', 'same');
+  'SubPixel', inf, 'registrationUpsample', 1, 'regPrecision', 'same');
 
 movie = repmat(frame, [1 1 nTrans]);
 

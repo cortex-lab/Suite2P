@@ -3,26 +3,11 @@ function [dv, corr, regdata] = registration_offsets(data, ops, removeMean)
 %% Parameters
 [ly, lx, nFrames] = size(data);
 refImg = ops.mimg;
-if isfield(ops, 'registrationUpsample') % factor to upsample
-  usFac = ops.registrationUpsample;
-else
-  usFac = 1;
-end
-if isfield(ops, 'PhaseCorrelation')
-  phaseCorrelation = ops.PhaseCorrelation;
-else
-  phaseCorrelation = false;
-end
-if isfield(ops, 'SubPixel')
-  subpixel = ops.SubPixel;
-else
-  subpixel = 1;
-end
-if isfield(ops, 'useGPU')
-  useGPU = ops.useGPU;
-else
-  useGPU = false;
-end
+
+subpixel = getOr(ops, {'subPixel' 'SubPixel'}, 1); % subpixel factor
+usFac = getOr(ops, 'registrationUpsample', 1); % factor to upsample
+phaseCorrelation = getOr(ops, {'phaseCorrelation' 'PhaseCorrelation'}, false); 
+useGPU = getOr(ops, 'useGPU', false);
 
 maskSlope   = 1.2; % slope on taper mask preapplied to image. was 2, then 1.2
 % SD pixels of gaussian smoothing applied to correlation map (MOM likes .6)
