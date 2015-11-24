@@ -24,7 +24,7 @@ else
   useGPU = false;
 end
 
-maskSlope   = 1; % slope on taper mask preapplied to image. was 2, then 1.2
+maskSlope   = 1.2; % slope on taper mask preapplied to image. was 2, then 1.2
 % SD pixels of gaussian smoothing applied to correlation map (MOM likes .6)
 smoothSigma = 1.15/sqrt(usFac);
 
@@ -93,7 +93,7 @@ end
 nBatches = ceil(nFrames/batchSize);
 for bi = 1:nBatches
   fi = (bi - 1)*batchSize + 1:min(bi*batchSize, nFrames);
-  if bi == nBatches && bi > 1
+  if bi == nBatches
     % the last batch will usually have less frames
     corrUps = corrUps(:,:,1:numel(fi));
   end

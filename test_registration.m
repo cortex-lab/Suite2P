@@ -14,12 +14,18 @@ frame = single(frame);
 dvrSigma =  2;
 noiseSigma = std(frame(:))/3;
 dvr = [0 0; dvrSigma*randn(nTrans - 1, 2)];
-transFrame = img.translate(repmat(frame, [1 1 nTrans]), dvr(:,2), dvr(:,1), 'clip');
+
+ops = struct('useGPU', useGPU, 'PhaseCorrelation', true, 'mimg', [],...
+  'SubPixel', inf, 'registrationUpsample', 1, 'RegPrecision', 'same');
+
+movie = repmat(frame, [1 1 nTrans]);
+
+[transFrame, validIdx] = translate_movie(movie, dvr, ops);
+transFrame = transFrame(validIdx{1},validIdx{2},:);
+
 transFrame = transFrame + noiseSigma*randn(size(transFrame), 'single');
-targetFrame = transFrame(:,:,1);
+ops.mimg = transFrame(:,:,1);
 %%
-ops = struct('useGPU', useGPU, 'PhaseCorrelation', true, 'mimg', targetFrame,...
-  'SubPixel', inf, 'registrationUpsample', 1);
 tic
 nreps = 1;
 for i = 1:nreps
