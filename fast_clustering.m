@@ -165,7 +165,7 @@ stat    = get_stat(res);
 if ~exist(ops.ResultsSavePath, 'dir')
     mkdir(ops.ResultsSavePath)
 end
-save(sprintf('%s/%s/%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ops.mouse_name, ops.date, ...
+save(sprintf('%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ...
     ops.mouse_name, ops.date, iplane, Nk),  'ops', 'res', 'stat')
 
 %%

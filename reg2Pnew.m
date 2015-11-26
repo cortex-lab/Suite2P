@@ -285,7 +285,7 @@ for i = 1:numPlanes
         mkdir(savepath)
     end
     ops = ops1{i};
-    save(sprintf('%s/%s/%s/regops_%s_%s_plane%d.mat', ops.ResultsSavePath, ops.mouse_name, ops.date, ...
+    save(sprintf('%s/regops_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
         ops.mouse_name, ops.date,  ops.planesToProcess(i)),  'ops')
 end
 

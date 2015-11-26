@@ -1,8 +1,7 @@
 function Fcell = get_signals(ops, iplane)
 
 try
-    load(sprintf('%s/%s/%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ops.mouse_name, ops.date, ...
-        ops.mouse_name, ops.date, iplane, ops.Nk))
+   load(sprintf('%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath,ops.mouse_name, ops.date, iplane, ops.Nk))
 catch
    error('Could not find cell detection file \n') 
 end
@@ -53,5 +52,6 @@ for i = 1:length(ops.Nframes)
     Fcell{i} = F(:, csumNframes(i) + (1:ops.Nframes(i)));
 end
 
-save(sprintf('%s/%s/%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ops.mouse_name, ops.date, ...
-        ops.mouse_name, ops.date, iplane, ops.Nk), 'ops', 'res', 'stat', 'stat0', 'res0', 'Fcell')
+save(sprintf('%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ...
+    ops.mouse_name, ops.date, iplane, Nk),  'ops', 'res', 'stat', 'stat0', 'res0', 'Fcell')
+

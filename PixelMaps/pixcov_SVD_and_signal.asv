@@ -1,0 +1,17 @@
+function pixC = pixcov_SVD_and_signal(U, V, R)
+
+R = (:);
+
+R = R - mean(R);
+V = V - repmat(mean(V,2), 1, size(V,2));
+
+c
+
+
+
+
+
+
+
+
+end

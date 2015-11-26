@@ -5,7 +5,7 @@ addpath('D:\CODE\GitHub\Suite2P')
 % make database to run in batch
 make_db_adaptation;
 
-ops0.useGPU                 = 0; % if you can use a GPU in matlab this accelerate registration approx 3 times
+ops0.useGPU                 = 1; % if you can use a GPU in matlab this accelerate registration approx 3 times
 ops0.doRegistration         = 1;
 
 % root paths for files and temporary storage (ideally an SSD drive. my SSD is C)
@@ -16,7 +16,7 @@ ops0.ResultsSavePath        = 'D:/DATA/F';
 ops0.RootStorage            = '//zserver4/Data/2P';
 
 ops0.getROIs                = 1;
-ops0.getSVDcomps            = 0;
+ops0.getSVDcomps            = 1;
 ops0.nSVD                   = 1000; % how many SVD components to keep
 
 ops0.CopyDataLocally        = 1;
@@ -55,7 +55,7 @@ ops0.NiterPrealign          = 10;
 
 
 %%
-for iexp = 1 % 1:length(db)        %3:length(db)          
+for iexp = 13 % 1:length(db)        %3:length(db)          
     % copy files from zserver
     if ops0.CopyDataLocally
         db0 = copy_from_zserver(db(iexp), ops0);
@@ -80,8 +80,7 @@ for iexp = 1 % 1:length(db)        %3:length(db)
                 ops    = get_svdcomps(ops);
             end
             
-            if ops.getROIs
-                %%
+            if ops.getROIs                
                 [ops, U, Sv]        = get_svdForROI(ops);
                 [ops, stat0, res0]  = fast_clustering(ops, reshape(U, [], size(U,3)), Sv);
                 [stat, res]         = apply_ROIrules(ops, stat0, res0, clustrules);
@@ -93,19 +92,7 @@ for iexp = 1 % 1:length(db)        %3:length(db)
             delete(ops.RegFile);        % delete temporary bin file
         end
     end
-    
-    % delete temporarily copied tiffs
-    if ops.CopyDataLocally
-        % check if the location is NOT on zserver
-        if ~isempty(strfind(ops.TempStorage, 'zserver')) || ...
-                strcmp(ops.TempStorage(1), '\') || ...
-                strcmp(ops.TempStorage(1), '/')
-            warning('You are trying to remove a file from a network location, skipping...')
-        else
-            rmdir(fullfile(ops.TempStorage, ops.mouse_name), 's');
-%             rmdir(fullfile(ops.TempDir), 's');
-        end
-    end
+   
     
     % clean up
     fclose all;        
