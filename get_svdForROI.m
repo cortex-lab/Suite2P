@@ -67,8 +67,8 @@ U               = single(U);
 Sv              = single(diag(Sv));
 %
 U = reshape(U, numel(ops.yrange), numel(ops.xrange), []);
-if ~exist(fullfile(ops.ResultsSavePath, ops.mouse_name, ops.date), 'dir')
-   mkdir(fullfile(ops.ResultsSavePath, ops.mouse_name, ops.date)); 
+if ~exist(ops.ResultsSavePath, 'dir')
+   mkdir(ops.ResultsSavePath); 
 end
 % save(sprintf('%s/%s/%s/SVDmaskForROI_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
 %     ops.mouse_name,ops.date,...
