@@ -1,19 +1,21 @@
 %% add in red channel information
 addpath(genpath('\\zserver\Code\Register\'))
 
-for iexp = 2:length(db)
+for iexp = 7 %2:length(db)
     if ~isempty(db(iexp).expred)
-        gpuDevice(1);
-        iplane = 1;
         ops = build_ops(db(iexp), ops0);
+           
+        for iplane = ops.planesToProcess
+            
+            keyboard;
+            load(sprintf('%s/%s/%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ops.mouse_name, ops.date, ...
+                ops.mouse_name, ops.date, iplane, ops.Nk))
+            
+            ops = getPVimage(ops);
 
-        load(sprintf('%s/%s/%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ops.mouse_name, ops.date, ...
-            ops.mouse_name, ops.date, iplane, ops.Nk))
-        
-        ops = getPVimage(ops);
-
-        save(sprintf('%s/%s/%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ops.mouse_name, ops.date, ...
-            ops.mouse_name, ops.date, iplane, ops.Nk), 'ops', 'res', 'stat', 'stat0', 'res0', 'Fcell')
+        end
+%         save(sprintf('%s/%s/%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ops.mouse_name, ops.date, ...
+%             ops.mouse_name, ops.date, iplane, ops.Nk), 'ops', 'res', 'stat', 'stat0', 'res0', 'Fcell')
     end
 end
 %% add in allinfo, pupil and running information
