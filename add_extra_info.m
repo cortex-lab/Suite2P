@@ -8,7 +8,7 @@ for iexp = 7 %2:length(db)
         for iplane = ops.planesToProcess
             
             keyboard;
-            load(sprintf('%s/%s/%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ops.mouse_name, ops.date, ...
+            load(sprintf('%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath,...
                 ops.mouse_name, ops.date, iplane, ops.Nk))
             
             ops = getPVimage(ops);
