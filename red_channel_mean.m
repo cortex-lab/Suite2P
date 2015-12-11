@@ -13,11 +13,13 @@ for j = 1:length(ops.SubDirsRed)
         ops.fsrootRED{j}(k).name = fullfile(ops.RootDir, ops.SubDirsRed{j}, ops.fsrootRED{j}(k).name);
     end
 end
-%%
+
 fs = ops.fsrootRED;
 ntifs = sum(cellfun(@(x) numel(x), fs));
 
 nfmax = ceil(2000/ntifs);
 
+%% check if the RED channel file has already been registered, find indices to shift by
 
 
+%% find plane

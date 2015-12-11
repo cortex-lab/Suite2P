@@ -3,7 +3,9 @@ function ops = build_ops(db, ops)
 % ops = db;
 fieldNames = fieldnames(db);
 for i = 1:size(fieldNames,1)
-    ops.(fieldNames{i}) = db.(fieldNames{i});
+    if ~isempty(db.(fieldNames{i}))
+        ops.(fieldNames{i}) = db.(fieldNames{i});
+    end
 end
 
 if ~(isfield(ops, 'planesToProcess') && ~isempty(ops.planesToProcess))
