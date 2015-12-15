@@ -30,7 +30,8 @@ for i = 1:length(ops.planesToProcess)
             %
             apply_ROIrules(ops, stat0, res0, clustrules);
             %
-            get_signals_and_neuropil(ops, iplane);
+            %get_signals_and_neuropil(ops, iplane);
+			get_signals_and_neuropil(ops, iplane);
         end
     end
     
