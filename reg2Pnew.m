@@ -106,9 +106,8 @@ for i = 1:numPlanes
     regdir = fileparts(ops1{i}.RegFile);
     if ~exist(regdir, 'dir')
         mkdir(regdir);
-    end
+    end    
     
-    %
     % open bin file for writing
     fid{i}             = fopen(ops1{i}.RegFile, 'w');
     ops1{i}.DS          = [];

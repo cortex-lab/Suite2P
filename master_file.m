@@ -59,7 +59,6 @@ clustrules.parent.MaxRegions                = 10;
 
 ops0.LoadRegMean   			= 0; % 
 
-
 %%
 for iexp = 1:length(db)        %3:length(db)          
     % copy files from zserver

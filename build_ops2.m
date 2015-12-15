@@ -10,6 +10,9 @@ end
 
 if ~(isfield(ops, 'planesToProcess') && ~isempty(ops.planesToProcess))
     ops.planesToProcess = 1:ops.nplanes;
+else
+    % planesToProcess is not working right now
+    ops.planesToProcess = 1:ops.nplanes; 
 end
 
 for k = 1:length(db.expts)
