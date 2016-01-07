@@ -85,7 +85,7 @@ end
 ntf0 = 0;
 lastChan=0;
 for k = 1:length(fsRED)
-    fprintf('From here\n')
+    
 
     if nimgall(indx(k))>=median(nimgall(indx))        
         
