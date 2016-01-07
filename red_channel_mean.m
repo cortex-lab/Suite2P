@@ -83,16 +83,27 @@ for j = 1:ops.nplanes
 end
 %
 ntf0 = 0;
+lastChan=0;
 for k = 1:length(fsRED)
+    fprintf('From here\n')
+
     if nimgall(indx(k))>=median(nimgall(indx))        
-        ichanset = [ops.nchannels*ops.nplanes + [ops.nchannels (ntifs*ops.nchannels*ops.nplanes)] ...
-            ops.nchannels]; 
+        
+
+        ichanset = [2*ops.nchannels*ops.nplanes - lastChan  + [ops.nchannels (ntifs*ops.nchannels*ops.nplanes)] ...
+            ops.nchannels];
+        numbFrames=nFrames(fsRED{k});
+        lastChan=lastChan+mod(numbFrames,ops.nchannels*ops.nplanes);
+
+        lastChan=mod(lastChan,ops.nchannels*ops.nplanes);
+
+         
         data = loadFrames(fsRED{k}, ichanset(1),ichanset(2), ichanset(3));        
         if ~exist('mimgR')
             [Ly, Lx, ~] = size(data);
             mimgR = zeros(Ly, Lx, ops.nplanes);
         end
-        data = reshape(data, Ly, Lx, ops.nplanes, ntifs);         
+        data = reshape(data, Ly, Lx, ops.nplanes, ntifs);  
 
         for j = 1:size(data,3)
             dsall = DS{j}(nimgFirst(indx(k), j)+1 + [1:size(data,4)], :);
