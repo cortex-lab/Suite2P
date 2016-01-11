@@ -106,9 +106,8 @@ for i = 1:numPlanes
     regdir = fileparts(ops1{i}.RegFile);
     if ~exist(regdir, 'dir')
         mkdir(regdir);
-    end
+    end    
     
-    %
     % open bin file for writing
     fid{i}             = fopen(ops1{i}.RegFile, 'w');
     ops1{i}.DS          = [];
@@ -128,7 +127,7 @@ for k = 1:length(fs)
          ops1{i}.Nframes(k)  = 0;
     end
     
-    iplane0 = 1:1:numPlanes;
+    iplane0 = 1:1:ops.nplanes;
     for j = 1:length(fs{k})
         iplane0 = mod(iplane0-1, numPlanes) + 1;
         if ops.useImRead
@@ -279,7 +278,7 @@ for i = 1:numPlanes
         ops1{i}.xrange = 1:Lx;
     end
     
-    savepath = sprintf('%s/%s/%s', ops.ResultsSavePath, ops.mouse_name, ops.date);
+    savepath = sprintf('%s/', ops.ResultsSavePath);
     
     if ~exist(savepath, 'dir')
         mkdir(savepath)

@@ -75,3 +75,15 @@ db(i).nplanes       = 12;
 db(i).BiDiPhase     = 0;
 db(i).Nk0           = 3000;
 db(i).Nk            = 1500;
+
+i = i+1;
+db(i).mouse_name    = 'M151030_MD024';
+db(i).date          = '2015-11-30';
+db(i).expred        = [3];
+db(i).expts         = [2 3];
+db(i).nchannels     = 2;
+db(i).gchannel      = 1; 
+db(i).nplanes       = 10; 
+db(i).BiDiPhase     = 0;
+db(i).Nk0           = 2000;
+db(i).Nk            = 1000;

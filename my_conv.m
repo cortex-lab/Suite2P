@@ -13,8 +13,8 @@ gaus = gaus'/sum(gaus);
 %    Smooth(n,:) = (conv(S1(n,:)', gaus, 'same')./Norms)';
 %end
 
-Smooth = filter(gaus, 1, [S1' ones(NT,1); zeros(4*sig, NN+1)]);
-Smooth = Smooth(1+4*sig:end, :);
+Smooth = filter(gaus, 1, [S1' ones(NT,1); zeros(ceil(4*sig), NN+1)]);
+Smooth = Smooth(1+ceil(4*sig):end, :);
 Smooth = Smooth(:,1:NN) ./ (Smooth(:, NN+1) * ones(1,NN));
 
 Smooth = Smooth';

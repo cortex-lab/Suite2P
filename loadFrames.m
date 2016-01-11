@@ -6,7 +6,7 @@ function [frames, headers] = loadFrames(tiff, firstIdx, lastIdx, stride, progres
 %   specify the range of frame indices to load, and PROGRESS, a handle to a
 %   MATLAB progress dialog.
 
-initChars = overfprintf(0, 'Loading TIFF frame ');
+% initChars = overfprintf(0, 'Loading TIFF frame ');
 warning('off', 'MATLAB:imagesci:tiffmexutils:libtiffWarning');
 
 warningsBackOn = onCleanup(...
@@ -48,7 +48,7 @@ nMsgChars = 0;
 setDirectory(tiff, firstIdx);
 for t = 1:nFrames
   if mod(t, 100) == 0
-    nMsgChars = overfprintf(nMsgChars, '%i/%i', t, nFrames);
+    %nMsgChars = overfprintf(nMsgChars, '%i/%i', t, nFrames);
   end
   
   if nargin > 4
@@ -67,7 +67,7 @@ for t = 1:nFrames
     end
   end
 end
-overfprintf(initChars + nMsgChars, '');
+%overfprintf(initChars + nMsgChars, '');
 
 end
 

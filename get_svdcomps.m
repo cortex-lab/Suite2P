@@ -99,8 +99,8 @@ while 1
 end
 fclose(fid);
 
-if ~exist(fullfile(ops.ResultsSavePath), 'dir')
-    mkdir(fullfile(ops.ResultsSavePath));
+if ~exist(ops.ResultsSavePath, 'dir')
+    mkdir(ops.ResultsSavePath);
 end
 
 totF = [0 cumsum(ops.Nframes)];

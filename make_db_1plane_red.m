@@ -6,9 +6,9 @@ db(i).date          = '2015-04-29';
 db(i).expts         = [4 5 6];
 db(i).expred        = 3;
 db(i).nchannels_red = 2;
-db(i).nchannels = 1;
-db(i).gchannel = 1; 
-db(i).nplanes = 1; 
+db(i).nchannels     = 1;
+db(i).gchannel      = 1; 
+db(i).nplanes       = 1; 
 db(i).planesToProcess = [1];
 %
 i = i+1;
