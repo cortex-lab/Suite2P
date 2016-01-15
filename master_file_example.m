@@ -1,6 +1,6 @@
 %%
 cd('D:\CODE\MariusBox\runSuite2P') % start this code in the directory with make_db
-make_db_adaptation;
+make_db_example;
 
 toolbox_path = 'D:\CODE\GitHub\Suite2P';
 if exist(toolbox_path, 'dir')
@@ -9,30 +9,27 @@ else
 	error('toolbox_path does not exist, please change toolbox_path');
 end
 
-ops0.useGPU                 = 0; % if you can use a GPU in matlab this accelerate registration approx 3 times
+ops0.useGPU                 = 1; % if you can use a GPU in matlab this accelerate registration approx 3 times
 ops0.doRegistration         = 1;
 
 % root paths for files and temporary storage (ideally an SSD drive. my SSD is C)
-ops0.RootStorage            = '//zserver4/Data/2P';
-ops0.CopyDataLocally        = 1;
-ops0.TempStorage            = 'C:/DATA/'; % copy data locally first
+ops0.RootStorage            = '//zserver4.ioo.ucl.ac.uk/Data/2P';
+ops0.temp_tiff              = 'C:/DATA/temp.tif'; % copy data locally first
 ops0.RegFileRoot            = 'C:/DATA/'; 
 ops0.ResultsSavePath        = 'D:/DATA/F';
 
-ops0.RegFileTiffLocation    = 'D:/DATA/'; % leave empty to NOT save registered tiffs
+ops0.RegFileTiffLocation    = []; %'D:/DATA/'; % leave empty to NOT save registered tiffs
 ops0.nimgbegend             = 250; % how many frames to average at the beginning and end of each experiment
 
-ops0.DeleteBin              = 1; % set to 1 for batch processing on a limited hard drive
-ops0.DeleteRawOnline        = 1; % set to 1 for deleting local tiff files right after registration
+ops0.DeleteBin              = 0; % set to 1 for batch processing on a limited hard drive
 
-ops0.useImRead              = 1; % imread works faster from a local drive
 ops0.PhaseCorrelation       = 1; % set to 0 for non-whitened cross-correlation
 ops0.SubPixel               = Inf; % 2 is alignment by 0.5 pixel, Inf is the exact number from phase correlation
 % upsampling factor during registration, 1 for no upsampling is fastest, 2 gives
 % better subpixel accuracy
 ops0.registrationUpsample   = 1;
 ops0.showTargetRegistration = 1;
-ops0.NimgFirstRegistration  = 1000; 
+ops0.NimgFirstRegistration  = 500; 
 ops0.NiterPrealign          = 10;
 
 ops0.getROIs                = 1;
@@ -58,8 +55,8 @@ clustrules.parent.MaxRegions                = 10;
 ops0.LoadRegMean   			= 0; % 
 
 %%
-for iexp = 1:length(db)        %3:length(db)          
+for iexp = 3 %:length(db)        %3:length(db)          
     % copy files from zserver
-   run_pipeline(iexp, db, ops0, clustrules);
+     run_pipeline(db(iexp), ops0, clustrules);
 end
 %%

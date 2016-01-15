@@ -1,17 +1,12 @@
-function run_pipeline(iexp, db, ops0, clustrules)
+function run_pipeline(db, ops0, clustrules)
 
-if ops0.CopyDataLocally
-    db0 = copy_from_zserver(db(iexp), ops0);
-    ops = build_ops2(db0, ops0);
-else
-    ops = build_ops(db(iexp), ops0);
-end
+ops = build_ops3(db, ops0);
 
 if ops.useGPU
     gpuDevice(1);   % reset GPU at each dataset
 end
 %
-ops1         = reg2Pnew(ops);  % do registration
+ops1         = reg2P(ops);  % do registration
 
 for i = 1:length(ops.planesToProcess)
     iplane  = ops.planesToProcess(i);
@@ -30,7 +25,8 @@ for i = 1:length(ops.planesToProcess)
             %
             apply_ROIrules(ops, stat0, res0, clustrules);
             %
-            get_signals_and_neuropil(ops, iplane);
+%             get_signals_and_neuropil(ops, iplane);
+            get_signals(ops, iplane);
         end
     end
     

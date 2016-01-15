@@ -1,4 +1,4 @@
-function [frames, headers] = loadFrames(tiff, firstIdx, lastIdx, stride, temp_file)
+function [frames, headers] = loadFramesBuff(tiff, firstIdx, lastIdx, stride, temp_file)
 %loadFrames Loads the frames of a Tiff file into an array (Y,X,T)
 %   MOVIE = loadFrames(TIFF, [FIRST], [LAST], [STRIDE], []) loads
 %   frames from the Tiff file specified by TIFF, which should be a filename
