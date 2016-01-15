@@ -1,4 +1,4 @@
-% function [ops, U, Sv] = get_svdForROI(ops)
+function [ops, U, Sv] = get_svdForROI(ops)
 
 % iplane = ops.iplane;
 
