@@ -25,12 +25,13 @@ for i = 1:length(ops.planesToProcess)
             %
             apply_ROIrules(ops, stat0, res0, clustrules);
             %
-
+<<<<<<< HEAD
 %             get_signals_and_neuropil(ops, iplane);
             get_signals(ops, iplane);
+=======
             %get_signals_and_neuropil(ops, iplane);
-% 			get_signals_and_neuropil(ops, iplane);
-
+			get_signals_and_neuropil(ops, iplane);
+>>>>>>> origin/master
         end
     end
     
