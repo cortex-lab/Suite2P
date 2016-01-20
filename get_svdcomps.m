@@ -67,9 +67,9 @@ if ops.nSVD<1000 || size(COV,1)>1e4
     [V, Sv]          = eigs(double(COV), ops.nSVD);
 else
     if ops.useGPU
-        [V, Sv]         = svd(gpuArray(single(COV)));
-        V = gather(V);
-        Sv = gather(Sv);
+        [V, Sv]         = svd(gpuArray(double(COV)));
+        V = gather(single(V));
+        Sv = gather(single(Sv));
     else
          [V, Sv]         = svd(COV);
     end

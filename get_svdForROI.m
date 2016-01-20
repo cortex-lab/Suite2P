@@ -63,8 +63,8 @@ COV             = mov' * mov/size(mov,1);
 ops.nSVDforROI = min(size(COV,1)-2, ops.nSVDforROI);
 
 if ops.useGPU && size(COV,1)<1.2e4
-    [V, Sv, ~]      = svd(gpuArray(single(COV)));
-    V               = V(:, 1:ops.nSVDforROI);
+    [V, Sv, ~]      = svd(gpuArray(double(COV)));
+    V               = single(V(:, 1:ops.nSVDforROI));
     Sv              = single(diag(Sv));
     Sv              = Sv(1:ops.nSVDforROI);
     %
