@@ -116,7 +116,7 @@ for i = 1:numPlanes
     
 end
 nbytes = fs{1}(1).bytes;
-nFr = img.nFrames(fs{1}(1).name);
+nFr = nFrames(fs{1}(1).name);
 if ops.useImRead
     Info = imfinfo(fs{1}(1).name);
 end
@@ -133,7 +133,7 @@ for k = 1:length(fs)
         if ops.useImRead
             if abs(nbytes - fs{k}(j).bytes)>1e3
                 nbytes = fs{k}(j).bytes;
-                nFr = img.nFrames(fs{k}(j).name);
+                nFr = nFrames(fs{k}(j).name);
                 Info = imfinfo(fs{k}(j).name);
             end
             if red_align
@@ -148,14 +148,14 @@ for k = 1:length(fs)
                 data(:,:,ix) = imread(fs{k}(j).name, 'Index', ichanrange(ix),'Info', Info);
             end
         else
-            nFr = img.nFrames(fs{k}(j).name);
+            nFr = nFrames(fs{k}(j).name);
             if red_align
 %                 ichanset = [nchannels*(iplane0-1)+rchannel; nFr; nchannels];
                 ichanset = [rchannel; nFr; nchannels];
             else
                 ichanset = [ichannel; nFr; nchannels];
             end
-            data = img.loadFrames(fs{k}(j).name, ichanset(1), ichanset(2), ichanset(3));
+            data = loadFrames(fs{k}(j).name, ichanset(1), ichanset(2), ichanset(3));
         end
         
         if BiDiPhase
@@ -195,7 +195,7 @@ for k = 1:length(fs)
                     end
                 else
                     ichanset = [ichannel; nFr; nchannels];
-                    data = img.loadFrames(fs{k}(j).name, ichanset(1), ichanset(2), ichanset(3));
+                    data = loadFrames(fs{k}(j).name, ichanset(1), ichanset(2), ichanset(3));
                 end
             end
             
