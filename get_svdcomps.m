@@ -61,10 +61,18 @@ COV             = mov' * mov/size(mov,1);
 
 ops.nSVD = min(size(COV,1)-2, ops.nSVD);
 
+
+
 if ops.nSVD<1000 || size(COV,1)>1e4
     [V, Sv]          = eigs(double(COV), ops.nSVD);
 else
-    [V, Sv]         = svd(COV);
+    if ops.useGPU
+        [V, Sv]         = svd(gpuArray(double(COV)));
+        V = gather(single(V));
+        Sv = gather(single(Sv));
+    else
+         [V, Sv]         = svd(COV);
+    end
     V               = V(:, 1:ops.nSVD);
     Sv              = Sv(1:ops.nSVD, 1:ops.nSVD);
 end

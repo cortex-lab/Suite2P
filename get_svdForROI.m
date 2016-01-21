@@ -1,6 +1,6 @@
 function [ops, U, Sv] = get_svdForROI(ops)
 
-iplane = ops.iplane;
+% iplane = ops.iplane;
 
 [Ly, Lx] = size(ops.mimg);
 
@@ -61,10 +61,23 @@ mov             = mov./repmat(mean(mov.^2,2).^.5, 1, size(mov,2));
 COV             = mov' * mov/size(mov,1);
 
 ops.nSVDforROI = min(size(COV,1)-2, ops.nSVDforROI);
-[V, Sv]          = eigs(double(COV), ops.nSVDforROI);
+
+if ops.useGPU && size(COV,1)<1.2e4
+    [V, Sv, ~]      = svd(gpuArray(double(COV)));
+    V               = single(V(:, 1:ops.nSVDforROI));
+    Sv              = single(diag(Sv));
+    Sv              = Sv(1:ops.nSVDforROI);
+    %
+     Sv = gather(Sv);
+     V = gather(V);
+else
+    [V, Sv]          = eigs(double(COV), ops.nSVDforROI);
+    Sv              = single(diag(Sv));
+end
+
 U               = normc(mov * V);
 U               = single(U);
-Sv              = single(diag(Sv));
+
 %
 U = reshape(U, numel(ops.yrange), numel(ops.xrange), []);
 if ~exist(ops.ResultsSavePath, 'dir')
@@ -73,4 +86,4 @@ end
 % save(sprintf('%s/%s/%s/SVDmaskForROI_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
 %     ops.mouse_name,ops.date,...
 %     ops.mouse_name, ops.date, iplane), 'U', 'Sv', 'ops');
-end
+

@@ -1,4 +1,7 @@
 function dreg = register_movie(data, ops, ds)
+
+orig_class = class(data);
+
 if ops.useGPU
     data = gpuArray(single(data));
 end
@@ -10,16 +13,12 @@ Nx = ifftshift([-fix(Lx/2):ceil(Lx/2)-1]);
 Nx = Nx / Lx;
 Ny = Ny / Ly;
 
-
-if strcmp(ops.RegPrecision, 'same')
-   dreg  = zeros(size(data), 'like', data);
+if ops.useGPU
+    dreg = gpuArray.zeros(size(data), orig_class);
 else
-    if ops.useGPU
-        dreg = gpuArray.zeros(size(data), ops.RegPrecision);
-    else
-        dreg = zeros(size(data), ops.RegPrecision);
-    end
+    dreg = zeros(size(data), orig_class);
 end
+
 
 if ops.useGPU
     ds = gpuArray(ds);

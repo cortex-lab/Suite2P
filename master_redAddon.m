@@ -22,6 +22,6 @@ ops0.RegFileTiffLocation    = []; %'D:/DATA/'; % leave empty to NOT save registe
 
 %%
 for iexp = 7 % 1:length(db)        %3:length(db)          
-   run_REDaddon(iexp, db, ops0);
+   run_REDaddon(iexp, db, ops0) ;
 end
 %%
