@@ -30,11 +30,11 @@ for jCell=1:nCells1
     allField=allField+jCell.*temp;
 end
 
-opt.inNeurop=3;
-opt.outNeurop=40;
-opt.zoomMicro=2;
+opt.inNeurop=3; %fixed inner diameter of the neuropil mask donut
+opt.outNeurop=45; %radius of Neuropil fixed at 45um
+opt.zoomMicro=2; %fixed zoomMicro
 opt.microID='b';
-opt.totPixels=512;
+opt.totPixels=512; %fixed number of pixel
 
 
 um2pix=infoPixUm(opt.totPixels,opt.zoomMicro,opt.microID);
