@@ -56,8 +56,8 @@ ops0.nimgbegend             = 250; % how many frames to average at the beginning
 % (encourages colocalized clusters) OBSOLETE
 
 %%
-for iexp = 1:length(db)        %3:length(db)          
+for iexp = 1:length(db)        %3:length(db)    
     % copy files from zserver
-   run_pipeline(iexp, db, ops0, clustrules);
+    run_pipeline(db(iexp), ops0, clustrules);
 end
 %%

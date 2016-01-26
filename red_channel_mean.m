@@ -22,7 +22,8 @@ fsrootRED = [];
 
 for j = 1:length(subDirsRed)
     fsrootRED{j} = dir(fullfile(ops.RootDir, subDirsRed{j}, '*.tif'));
-    for k = 1:length(ops.fsroot{j})
+    jn=find(ops.expts==str2num(subDirsRed{j}));
+    for k = 1:length(ops.fsroot{jn})
         fsrootRED{j}(k).name = fullfile(ops.RootDir, subDirsRed{j}, fsrootRED{j}(k).name);         
     end
 end
