@@ -30,11 +30,28 @@ for jCell=1:nCells1
     allField=allField+jCell.*temp;
 end
 
-opt.inNeurop=3; %fixed inner diameter of the neuropil mask donut
-opt.outNeurop=45; %radius of Neuropil fixed at 45um
-opt.zoomMicro=2; %fixed zoomMicro
-opt.microID='b';
-opt.totPixels=512; %fixed number of pixel
+if ~isfield(ops,'zoomMicro')
+    opt.zoomMicro=2; %fixed zoomMicro
+else
+    opt.zoomMicro=ops.zoomMicro;
+end
+if ~isfield(ops,'inNeurop')
+    opt.inNeurop=3; %fixed inner diameter of the neuropil mask donut
+else
+    opt.inNeurop=ops.inNeurop;
+end
+if ~isfield(ops,'outNeurop')
+    opt.outNeurop=45; %radius of Neuropil fixed at 45um
+else
+    opt.outNeurop=ops.outNeurop;
+end
+if ~isfield(ops,'microID')
+    opt.microID='b'; %microscope identity
+else
+    opt.microID=ops.microID;
+end
+opt.totPixels=LxU;
+
 
 
 um2pix=infoPixUm(opt.totPixels,opt.zoomMicro,opt.microID);
