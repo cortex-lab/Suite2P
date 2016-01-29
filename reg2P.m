@@ -168,9 +168,12 @@ for k = 1:length(fs)
             % if aligning by the red channel, data needs to be reloaded as the
             % green channel
             if red_align
+                if mod(nFr, nchannels) ~= 0
+                    fprintf('  WARNING: number of frames in tiff (%d) is NOT a multiple of number of channels!\n', j);
+                end
                 ichanset = [ichannel; nFr; nchannels];
 %                 data = img.loadFrames(fs{k}(j).name, ichanset(1), ichanset(2), ichanset(3));                
-                data = loadFramesBuff(ops.temp_tiff, ichanset(1), ichanset(2), ichanset(3));                
+                data = loadFramesBuff(ops.temp_tiff, ichanset(1), ichanset(2), ichanset(3), ops.temp_tiff);               
             end
             
             ix0 = 0;
