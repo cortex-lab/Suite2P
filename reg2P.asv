@@ -173,7 +173,7 @@ for k = 1:length(fs)
                 end
                 ichanset = [ichannel; nFr; nchannels];
 %                 data = img.loadFrames(fs{k}(j).name, ichanset(1), ichanset(2), ichanset(3));                
-                data = loadFramesBuff(ops.temp_tiff, ichanset(1), ichanset(2), ichanset(3));               
+                data = loadFramesBuff(ops.temp_tiff, ichanset(1), ichanset(2), ichanset(3), ops.temp_tiff);               
             end
             
             ix0 = 0;
