@@ -44,19 +44,19 @@ ops0.Nk                     = 650;  % how many clusters to end with
 ops0.nSVDforROI             = 1000;
 ops0.niterclustering        = 50;   % how many iterations of clustering
 
-ops0.NimgFirstRegistration  = 500; 
+ops0.NimgFirstRegistration  = 500;
 ops0.RegPrecision           = 'int16';
 ops0.RawPrecision           = 'int16';
 ops0.NiterPrealign          = 10;
 
-ops0.LoadRegMean   			= 0; % 
+ops0.LoadRegMean   			= 0; %
 ops0.nimgbegend             = 250; % how many frames to average at the beginning and end of each experiment
 
 % parameters for signal and neuropil calculation
 ops1.inNeurop   = 3; % inner diameter of neuropil mask
 ops1.outNeurop  = 30; % outer diameter of neuropil mask
 ops1.microID    = 'b2'; % ID of microscope (b: B-scope, b2: Bergamo2, m: MOM)
-ops1.useSVD     = 1; % uses all SVD components to calculate signal and 
+ops1.useSVD     = 1; % uses all SVD components to calculate signal and
                      % neuropil instead of bin-file
 ops1.getSignal  = 1; % to extract neural signal
 ops1.getNeuropil= 1; % to extract neuropil
@@ -70,11 +70,11 @@ ops1.getNeuropil= 1; % to extract neuropil
 % ops1.useSVD     = 1; % has to be SVD as bin-file is only temporary
 % set other parameters accordingly
 
-% ops0.sig                    = 0;  % spatial smoothing constant
+ops0.sig                    = 0;  % spatial smoothing constant
 % (encourages colocalized clusters) OBSOLETE
 
 %%
-for iexp = 1:length(db)        %3:length(db)    
+for iexp = 1:length(db)        %3:length(db)
     % copy files from zserver
     run_pipeline(db(iexp), ops0, clustrules);
 end
