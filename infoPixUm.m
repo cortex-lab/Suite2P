@@ -1,5 +1,6 @@
 function um2pix=infoPixUm(totPixels,zoomMicro,microID)
 
+% this is Sylvias version
 % infoPixUm computes the number of pixels per um along the horizontal
 % direction (xPU) vertical direction (yPU) approximately any direction
 % (rPU)
