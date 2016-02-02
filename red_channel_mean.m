@@ -84,8 +84,12 @@ for j = 1:ops.nplanes
 end
 %
 ntf0 = 0;
+numPlanes = ops.nplanes;
+iplane0 = 1:1:ops.nplanes;
 for k = 1:length(fsRED)
     if nimgall(indx(k))>=median(nimgall(indx))        
+        iplane0 = mod(iplane0-1, numPlanes) + 1;
+         
         ichanset = [ops.nchannels*ops.nplanes + [ops.nchannels (ntifs*ops.nchannels*ops.nplanes)] ...
             ops.nchannels]; 
         data = loadFrames(fsRED{k}, ichanset(1),ichanset(2), ichanset(3));        
@@ -100,11 +104,14 @@ for k = 1:length(fsRED)
             data(:, :, j,:)        = ...
                     register_movie(data(:, :, j, :), ops, dsall);
         end
-        mimgR = mimgR + mean(data, 4);            
+        mimgR = mimgR + mean(data(:,:,iplane0,:), 4);            
         ntf0 = ntf0 + 1;
+        
+        nFr = img.nFrames(fsRED{k});
+        iplane0 = iplane0 - nFr/ops.nchannels;
+        
+%         keyboard;
     end
 end
 
 mimgR = mimgR/ntf0;
-
-
