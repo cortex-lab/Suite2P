@@ -46,8 +46,8 @@ try
     end
     
     str = hh(strfind(hh, 'scanZoomFactor = '):end);
-    ind = strfind(str, 'scanimage');
-    ops.zoomMicro = str2double(str(18 : ind(1)-1));
+ind = strfind(str, 'scanimage');
+zoomFactor = str2double(str(18 : ind(1)-1));
 catch
 end
 
