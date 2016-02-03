@@ -29,7 +29,8 @@ for k = 1:length(ops.SubDirs)
              ops.mimg_end(:,:,k) = mean(datend, 3);
         end
         
-        foldr = fullfile(ops.RegFileTiffLocation, ops.mouse_name, ops.SubDirs{k}, sprintf('Plane%d', iplane));
+        foldr = fullfile(ops.RegFileTiffLocation, ops.mouse_name, ops.date, ...
+            ops.SubDirs{k}, sprintf('Plane%d', iplane));
         if ~exist(foldr, 'dir')
             mkdir(foldr)
         end
