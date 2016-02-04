@@ -12,16 +12,20 @@ end
 if ~isfield(opt,'microID')
     opt.microID='b'; %microscope identity
 end
-if ~isfield(opt, 'processed')
+if ~isfield(opt, 'processed') % use processed data in F_...._proc (generated in gui2P)
     opt.processed = 0;
 end
-if ~isfield(opt, 'redo')
+if ~isfield(opt, 'redo') % redo calculation of signal and neuropil based on
+                         % saved SVD components instead of temporary
+                         % bin-file
     opt.redo = 0;
 end
-if ~isfield(opt, 'neuropilOnly')
+if ~isfield(opt, 'neuropilOnly') % only calculate neuropil, not signal; 
+                                 % useful when redoing the calculation
     opt.neuropilOnly = 0;
 end
-if ~isfield(opt, 'newFile')
+if ~isfield(opt, 'newFile') % save new file '<name>_new.mat', otherwise
+                            % existing file is overwritten
     opt.newFile = 0;
 end
 
@@ -191,9 +195,9 @@ if opt.processed == 1
 else
     if opt.newFile == 1
         save(fullfile(opt.ResultsSavePath, [filenames{1}(1:end-4) ...
-            '_new.mat']), 'struct', dat);
+            '_new.mat']), '-struct', 'dat');
     else
-        save(fullfile(opt.ResultsSavePath, filenames{1}), 'struct', dat);
+        save(fullfile(opt.ResultsSavePath, filenames{1}), '-struct', 'dat');
     end
 end
 % save(filenames{1},  'ops', 'res', 'stat', 'stat0', 'res0', 'Fcell', 'FcellNeu')
