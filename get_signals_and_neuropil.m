@@ -1,58 +1,83 @@
-function Fcell = get_signals_and_neuropil(ops, iplane)
+function Fcell = get_signals_and_neuropil(opt, iplane)
 
-try
-    load(sprintf('%s/F_%s_%s_plane%d_Nk%d.mat',...
-        ops.ResultsSavePath,ops.mouse_name, ops.date, iplane, ops.Nk))
-catch
+if ~isfield(opt,'zoomMicro')
+    opt.zoomMicro=2; %fixed zoomMicro
+end
+if ~isfield(opt,'inNeurop')
+    opt.inNeurop=3; %fixed inner diameter of the neuropil mask donut
+end
+if ~isfield(opt,'outNeurop')
+    opt.outNeurop=45; %radius of Neuropil fixed at 45um
+end
+if ~isfield(opt,'microID')
+    opt.microID='b'; %microscope identity
+end
+if ~isfield(opt, 'processed')
+    opt.processed = 0;
+end
+if ~isfield(opt, 'redo')
+    opt.redo = 0;
+end
+if ~isfield(opt, 'neuropilOnly')
+    opt.neuropilOnly = 0;
+end
+if ~isfield(opt, 'newFile')
+    opt.newFile = 0;
+end
+
+filenames = dir(sprintf('%s/F_%s_%s_plane%d_Nk*.mat',...
+    opt.ResultsSavePath, opt.mouse_name, opt.date, iplane));
+filenames = {filenames.name};
+if isfield(opt, 'Nk')
+    ind = cellfun(@strfind, filenames, ...
+        repmat({['_Nk' num2str(opt.Nk)]}, size(filenames)), ...
+        'UniformOutput', false);
+    ind = ~cellfun(@isempty, ind);
+    filenames = filenames(ind);
+end
+ind = cellfun(@strfind, filenames, repmat({'_proc'}, size(filenames)), ...
+    'UniformOutput', false);
+ind = ~cellfun(@isempty, ind);
+if opt.processed == 1
+    filenames = filenames(ind);
+else
+    filenames = filenames(~ind);
+end
+if length(filenames) > 1
+    fprintf(['WARNING: several files for dataset exist\n' ...
+        '%s <- using\n'], filenames{1})
+    fprintf('%s\n', filenames{2:end})
+elseif isempty(filenames)
     error('Could not find cell detection file \n')
 end
-%%
 
-Nk        = numel(stat);   % 1277, Nk > Nkparents, all candidate ROIs are > NkParents
-NkParents = ops.Nk; % 650
+data = load(fullfile(opt.ResultsSavePath, filenames{1}));
+if opt.processed == 1
+    data = data.dat;
+end
+%%
+ops = data.ops;
+Nk       = numel(data.stat); % all ROIs including parents
+useCells = 1:Nk;
+if opt.processed == 1
+    useCells = find(data.cl.iscell);
+end
 [LyU, LxU] = size(ops.mimg);
 LyR=length(ops.yrange);
 LxR=length(ops.xrange);
 
-iscellID=(NkParents+1:Nk);
-nCells1=length(iscellID);
-
-
 allField=zeros(LyR,LxR);
 
-cellFields=nan(nCells1,LyR,LxR);
-for jCell=1:nCells1
-    iCell=iscellID(jCell);
-    ipix=stat(iCell).ipix;
+cellFields=nan(length(useCells),LyR,LxR);
+for jCell=1:length(useCells)
+    iCell=useCells(jCell);
+    ipix=data.stat(iCell).ipix;
     temp=zeros(LyR,LxR);
     temp(ipix)=ones(1,length(ipix));
     cellFields(jCell,:,:)=temp;
     allField=allField+jCell.*temp;
 end
-
-if ~isfield(ops,'zoomMicro')
-    opt.zoomMicro=2; %fixed zoomMicro
-else
-    opt.zoomMicro=ops.zoomMicro;
-end
-if ~isfield(ops,'inNeurop')
-    opt.inNeurop=3; %fixed inner diameter of the neuropil mask donut
-else
-    opt.inNeurop=ops.inNeurop;
-end
-if ~isfield(ops,'outNeurop')
-    opt.outNeurop=45; %radius of Neuropil fixed at 45um
-else
-    opt.outNeurop=ops.outNeurop;
-end
-if ~isfield(ops,'microID')
-    opt.microID='b'; %microscope identity
-else
-    opt.microID=ops.microID;
-end
 opt.totPixels=LxU;
-
-
 
 um2pix=infoPixUm(opt.totPixels,opt.zoomMicro,opt.microID);
 xPU=um2pix.xPU;
@@ -63,73 +88,113 @@ neuropMasks=createNeuropilMasks(cellFields,allField,xPU,yPU,opt);
 fprintf('Slow part\n')
 tic
 mCell=0;
-for k=iscellID
+for k=useCells
     mCell=mCell+1;
     temp=squeeze(neuropMasks(mCell,:,:));
-    stat(k).ipix_neuropil=find(temp==1);
+    data.stat(k).ipix_neuropil=find(temp==1);
 end
 toc
 
-
-% his function needs to add a field of pixel indices to stat called ipix_neuropil, only for ROIs from NkParents+1 to Nk
-%stat = add_neuropil_ROI(stat);
-
 %% get signals
-
-
-nimgbatch = 2000;
-
-ix = 0;
-fclose all;
-fid = fopen(ops.RegFile, 'r');
-
-tic
-F = zeros(Nk, sum(ops.Nframes), 'single');
-Fneu = zeros(Nk-NkParents, sum(ops.Nframes), 'single');
-
-while 1
-    data = fread(fid,  LyU*LxU*nimgbatch, '*int16');
-    if isempty(data)
-        break;
-    end
-    data = reshape(data, LyU, LxU, []);
-    data = data(ops.yrange, ops.xrange, :);
-    data = single(data);
-    NT= size(data,3);
+if opt.redo == 0
+    nimgbatch = 2000;
+    ix = 0;
+    fclose all;
+    fid = fopen(ops.RegFile, 'r');
     
-    data = single(reshape(data, [], NT));
-    
-    for k = 1:Nk
-        ipix = stat(k).ipix;
-        if ~isempty(ipix)
-            %            F(k,ix + (1:NT)) = stat(k).lambda' * data(ipix,:);
-            F(k,ix + (1:NT)) = mean(data(ipix,:), 1);
+    tic
+    F = NaN(Nk, sum(ops.Nframes), 'single');
+    Fneu = NaN(Nk, sum(ops.Nframes), 'single');
+    while 1
+        mov = fread(fid,  LyU*LxU*nimgbatch, '*int16');
+        if isempty(mov)
+            break;
         end
+        mov = reshape(mov, LyU, LxU, []);
+        mov = mov(ops.yrange, ops.xrange, :);
+        mov = single(mov);
+        NT= size(mov,3);
         
-        if k>NkParents
-            ipix_neuropil= stat(k).ipix_neuropil;
+        mov = single(reshape(mov, [], NT));
+        
+        for k = 1:Nk
+            ipix = data.stat(k).ipix;
+            if ~isempty(ipix)
+                % F(k,ix + (1:NT)) = stat(k).lambda' * data(ipix,:);
+                F(k,ix + (1:NT)) = mean(mov(ipix,:), 1);
+            end
+            
+            ipix_neuropil= data.stat(k).ipix_neuropil;
             if ~isempty(ipix_neuropil)
-                Fneu(k-NkParents,ix + (1:NT)) = mean(data(ipix_neuropil,:), 1);
+                Fneu(k,ix + (1:NT)) = mean(mov(ipix_neuropil,:), 1);
             end
         end
+        
+        ix = ix + NT;
+        if rem(ix, 3*NT)==0
+            fprintf('Frame %d done in time %2.2f \n', ix, toc)
+        end
     end
-    
-    ix = ix + NT;
-    if rem(ix, 3*NT)==0
-        fprintf('Frame %d done in time %2.2f \n', ix, toc)
+    fclose(fid);
+    % F = F(:, 1:ix);
+    csumNframes = [0 cumsum(ops.Nframes)];
+    Fcell = cell(1, length(ops.Nframes));
+    FcellNeu = cell(1, length(ops.Nframes));
+    for i = 1:length(ops.Nframes)
+        Fcell{i} 	= F(:, csumNframes(i) + (1:ops.Nframes(i)));
+        FcellNeu{i} = Fneu(:, csumNframes(i) + (1:ops.Nframes(i)));
+    end
+else % opt.redo == 1
+    ind = strfind(filenames{1}, '_Nk');
+    fname = ['SVD' filenames{1}(2:ind-1) '.mat'];
+    svd = load(fullfile(ops.ResultsSavePath, fname), 'U', 'Vcell');
+    U1 = reshape(svd.U, [], size(svd.U,3));
+    Ucell = zeros(length(useCells), size(U1,2));
+    UcellNeu = zeros(length(useCells), size(U1,2));
+    Fcell = cell(size(svd.Vcell));
+    FcellNeu = cell(size(svd.Vcell));
+    for iCell = 1:length(useCells)
+        ipix = data.stat(useCells(iCell)).ipix;
+        if ~isempty(ipix)
+            Ucell(iCell,:) = mean(U1(ipix, :), 1);
+        end
+        ipix_neuropil= data.stat(useCells(iCell)).ipix_neuropil;
+        if ~isempty(ipix_neuropil)
+            UcellNeu(iCell,:) = mean(U1(ipix_neuropil,:), 1);
+        end
+    end
+    for iExp = 1:length(svd.Vcell)
+        if opt.neuropilOnly == 0
+            F = NaN(Nk, size(svd.Vcell{iExp}, 2), 'single');
+            F(useCells,:) = Ucell * svd.Vcell{iExp};
+            Fcell{iExp} = F;
+        end
+        F = NaN(Nk, size(svd.Vcell{iExp}, 2), 'single');
+        F(useCells,:) = UcellNeu * svd.Vcell{iExp};
+        FcellNeu{iExp} = F;
     end
 end
-fclose(fid);
-% F = F(:, 1:ix);
-
-csumNframes = [0 cumsum(ops.Nframes)];
-Fcell = cell(1, length(ops.Nframes));
-FcellNeu = cell(1, length(ops.Nframes));
-for i = 1:length(ops.Nframes)
-    Fcell{i} 	= F(:, csumNframes(i) + (1:ops.Nframes(i)));
-    FcellNeu{i} = Fneu(:, csumNframes(i) + (1:ops.Nframes(i)));
+if opt.neuropilOnly == 0
+    data.F.Fcell = Fcell;
 end
+data.F.FcellNeu = FcellNeu;
 
-save(sprintf('%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ...
-    ops.mouse_name, ops.date, iplane, ops.Nk),  'ops', 'res', 'stat', 'stat0', 'res0', 'Fcell', 'FcellNeu')
+dat = data;
+dat.opsNpil = opt;
+if opt.processed == 1
+    if opt.newFile == 1
+        save(fullfile(opt.ResultsSavePath, [filenames{1}(1:end-4) ...
+            '_new.mat']), 'dat')
+    else
+        save(fullfile(opt.ResultsSavePath, filenames{1}), 'dat');
+    end
+else
+    if opt.newFile == 1
+        save(fullfile(opt.ResultsSavePath, [filenames{1}(1:end-4) ...
+            '_new.mat']), 'struct', dat);
+    else
+        save(fullfile(opt.ResultsSavePath, filenames{1}), 'struct', dat);
+    end
+end
+% save(filenames{1},  'ops', 'res', 'stat', 'stat0', 'res0', 'Fcell', 'FcellNeu')
 

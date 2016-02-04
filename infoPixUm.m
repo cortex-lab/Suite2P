@@ -21,9 +21,12 @@ end
 
 switch microID
     case 'b'
-        zoom = [1.5 1.6 1.7 2 2.2 2.3 2.5 3];
-        measuredHoriz = [680 635 615.5 524 491 460 431.5 371];
-        measuredVert = [664.5 615 593 503.5 452.5 430 401 337.5];
+        zoom = [1.5, 1.6, 1.7, 2, 2.2, 2.3, 2.5, 3, ...
+            3.5, 4, 5, 6.1, 7.1, 9.1];
+        measuredHoriz = [680, 635, 615.5, 524, 491, 460, 431.5, 371, ...
+            318, 287, 237.5, 199, 172.5, 140];
+        measuredVert = [664.5, 615, 593, 503.5, 452.5, 430, 401, 337.5, ...
+            284.5, 249, 179.5, 161, 141, 111.5];
     case 'b2'
         zoom = [1.6 1.9 2 2.2];
         measuredHoriz = [772 653 619.5 565.5];
@@ -34,16 +37,10 @@ switch microID
         measuredVert = [155 117];
 end
 
-ind = find(zoom == zoomMicro);
-if ~isempty(ind)
-    sizeHoriz = measuredHoriz(ind);
-    sizeVert = measuredVert(ind);
-else
-    curve = fit(zoom, measuredHoriz, 'poly2');
-    sizeHoriz = curve(zoomFactor);
-    curve = fit(zoom, measuredVert, 'poly2');
-    sizeVert = curve(zoomFactor);
-end
+curve = fit(zoom', measuredHoriz', 'exp2');
+sizeHoriz = curve(zoomMicro);
+curve = fit(zoom', measuredVert', 'exp2');
+sizeVert = curve(zoomMicro);
 
 xPU = totPixels / sizeHoriz;
 yPU = totPixels / sizeVert;
