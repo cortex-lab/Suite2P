@@ -21,29 +21,33 @@ end
 
 switch microID
     case 'b'
-        zoom = [1.5, 1.6, 1.7, 2, 2.2, 2.3, 2.5, 3, ...
-            3.5, 4, 5, 6.1, 7.1, 9.1];
-        measuredHoriz = [680, 635, 615.5, 524, 491, 460, 431.5, 371, ...
-            318, 287, 237.5, 199, 172.5, 140];
-        measuredVert = [664.5, 615, 593, 503.5, 452.5, 430, 401, 337.5, ...
-            284.5, 249, 179.5, 161, 141, 111.5];
+        zoom = [1.5 1.6 1.7 2 2.2 2.3 2.5 3];
+        measuredHoriz = [680 635 615.5 524 491 460 431.5 371];
+        measuredVert = [664.5 615 593 503.5 452.5 430 401 337.5];
     case 'b2'
-        zoom = [1.6 1.9 2 2.2];
-        measuredHoriz = [772 653 619.5 565.5];
-        measuredVert = [755 640 605.5 547];
+        zoom = [1.6 ];
+        measuredHoriz = [];
+        measuredVert = [];
     case 'm'
-        zoom = [3 4];
-        measuredHoriz = [155 117];
-        measuredVert = [155 117];
+        zoom = [];
+        measuredHoriz = [];
+        measuredVert = [];
 end
 
-curve = fit(zoom', measuredHoriz', 'exp2');
-sizeHoriz = curve(zoomMicro);
-curve = fit(zoom', measuredVert', 'exp2');
-sizeVert = curve(zoomMicro);
 
-xPU = totPixels / sizeHoriz;
-yPU = totPixels / sizeVert;
+if zoomMicro==3 && microID=='b'
+    xPU=totPixels/370;
+    yPU=totPixels/340;
+elseif zoomMicro==2 && microID=='b' 
+    xPU=totPixels/520;
+    yPU=totPixels/500;
+elseif zoomMicro==4 && microID=='m'
+    xPU=totPixels/117;
+    yPU=totPixels/117;
+elseif zoomMicro==3 && microID=='m'
+    xPU=totPixels/155;
+    yPU=totPixels/155;
+end
 
 rPU=sqrt(yPU^2+xPU^2)/sqrt(2);
 
