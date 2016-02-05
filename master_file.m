@@ -52,6 +52,24 @@ ops0.NiterPrealign          = 10;
 ops0.LoadRegMean   			= 0; % 
 ops0.nimgbegend             = 250; % how many frames to average at the beginning and end of each experiment
 
+% parameters for signal and neuropil calculation
+ops1.inNeurop   = 3; % inner diameter of neuropil mask
+ops1.outNeurop  = 30; % outer diameter of neuropil mask
+ops1.microID    = 'b2'; % ID of microscope (b: B-scope, b2: Bergamo2, m: MOM)
+ops1.useSVD     = 1; % uses all SVD components to calculate signal and 
+                     % neuropil instead of bin-file
+ops1.getSignal  = 1; % to extract neural signal
+ops1.getNeuropil= 1; % to extract neuropil
+% NOTE: to save time, first run detected ROIs through the gui to select
+% "good ROIs", then extract signals and neuropil only on those ROIs;
+% to do so, set .getSignal=0 and .getNeuropil=0 in the master_file, then
+% run get_signals_and_neuropi with the following parameters
+% ops1.processed  = 0; % to load processed file
+% ops1.newFile    = 1; % to create new file ending _new.mat, otherwise
+%                        processed file is overwritten
+% ops1.useSVD     = 1; % has to be SVD as bin-file is only temporary
+% set other parameters accordingly
+
 % ops0.sig                    = 0;  % spatial smoothing constant
 % (encourages colocalized clusters) OBSOLETE
 

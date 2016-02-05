@@ -24,13 +24,11 @@ for i = 1:length(ops.planesToProcess)
             [ops, stat0, res0]  = fast_clustering(ops, reshape(U, [], size(U,3)), Sv);
             %
             apply_ROIrules(ops, stat0, res0, clustrules);
-            %
-
-%             get_signals_and_neuropil(ops, iplane);
-%             get_signals(ops, iplane);
-
-            %get_signals_and_neuropil(ops, iplane);
-			get_signals_and_neuropil(ops, iplane);
+            
+            if ~(isfield(ops0,'getSignal') && isfield(ops0,'getNeuropil')) || ...
+                    ops0.getSignal == 1 || ops0.getNeuropil == 1
+                get_signals_and_neuropil(ops, iplane);
+            end
 
         end
     end

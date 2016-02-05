@@ -15,14 +15,16 @@ end
 if ~isfield(opt, 'processed') % use processed data in F_...._proc (generated in gui2P)
     opt.processed = 0;
 end
-if ~isfield(opt, 'redo') % redo calculation of signal and neuropil based on
+if ~isfield(opt, 'useSVD') % redo calculation of signal and neuropil based on
                          % saved SVD components instead of temporary
                          % bin-file
-    opt.redo = 0;
+    opt.useSVD = 0;
 end
-if ~isfield(opt, 'neuropilOnly') % only calculate neuropil, not signal; 
-                                 % useful when redoing the calculation
-    opt.neuropilOnly = 0;
+if ~isfield(opt, 'getSignal') % calculate and save neural signal
+    opt.getSignal = 1;
+end
+if ~isfield(opt, 'getNeuropil') % calculate and save neuropil
+    opt.getNeuropil = 1;
 end
 if ~isfield(opt, 'newFile') % save new file '<name>_new.mat', otherwise
                             % existing file is overwritten
@@ -86,21 +88,19 @@ opt.totPixels=LxU;
 um2pix=infoPixUm(opt.totPixels,opt.zoomMicro,opt.microID);
 xPU=um2pix.xPU;
 yPU=um2pix.yPU;
-neuropMasks=createNeuropilMasks(cellFields,allField,xPU,yPU,opt);
+if opt.getNeuropil
+    neuropMasks=createNeuropilMasks(cellFields,allField,xPU,yPU,opt);
 
-%Note: this part is quite slow
-fprintf('Slow part\n')
-tic
-mCell=0;
-for k=useCells
-    mCell=mCell+1;
-    temp=squeeze(neuropMasks(mCell,:,:));
-    data.stat(k).ipix_neuropil=find(temp==1);
+    mCell=0;
+    for k=useCells
+        mCell=mCell+1;
+        temp=squeeze(neuropMasks(mCell,:,:));
+        data.stat(k).ipix_neuropil=find(temp==1);
+    end
 end
-toc
 
-%% get signals
-if opt.redo == 0
+%% get signals and neuropil
+if opt.useSVD == 0
     nimgbatch = 2000;
     ix = 0;
     fclose all;
@@ -122,15 +122,18 @@ if opt.redo == 0
         mov = single(reshape(mov, [], NT));
         
         for k = 1:Nk
-            ipix = data.stat(k).ipix;
-            if ~isempty(ipix)
-                % F(k,ix + (1:NT)) = stat(k).lambda' * data(ipix,:);
-                F(k,ix + (1:NT)) = mean(mov(ipix,:), 1);
+            if opt.getSignal
+                ipix = data.stat(k).ipix;
+                if ~isempty(ipix)
+                    % F(k,ix + (1:NT)) = stat(k).lambda' * data(ipix,:);
+                    F(k,ix + (1:NT)) = mean(mov(ipix,:), 1);
+                end
             end
-            
-            ipix_neuropil= data.stat(k).ipix_neuropil;
-            if ~isempty(ipix_neuropil)
-                Fneu(k,ix + (1:NT)) = mean(mov(ipix_neuropil,:), 1);
+            if opt.getNeuropil
+                ipix_neuropil= data.stat(k).ipix_neuropil;
+                if ~isempty(ipix_neuropil)
+                    Fneu(k,ix + (1:NT)) = mean(mov(ipix_neuropil,:), 1);
+                end
             end
         end
         
@@ -148,7 +151,7 @@ if opt.redo == 0
         Fcell{i} 	= F(:, csumNframes(i) + (1:ops.Nframes(i)));
         FcellNeu{i} = Fneu(:, csumNframes(i) + (1:ops.Nframes(i)));
     end
-else % opt.redo == 1
+else % opt.useSVD == 1
     ind = strfind(filenames{1}, '_Nk');
     fname = ['SVD' filenames{1}(2:ind-1) '.mat'];
     svd = load(fullfile(ops.ResultsSavePath, fname), 'U', 'Vcell');
@@ -158,30 +161,38 @@ else % opt.redo == 1
     Fcell = cell(size(svd.Vcell));
     FcellNeu = cell(size(svd.Vcell));
     for iCell = 1:length(useCells)
-        ipix = data.stat(useCells(iCell)).ipix;
-        if ~isempty(ipix)
-            Ucell(iCell,:) = mean(U1(ipix, :), 1);
+        if opt.getSignal
+            ipix = data.stat(useCells(iCell)).ipix;
+            if ~isempty(ipix)
+                Ucell(iCell,:) = mean(U1(ipix, :), 1);
+            end
         end
-        ipix_neuropil= data.stat(useCells(iCell)).ipix_neuropil;
-        if ~isempty(ipix_neuropil)
-            UcellNeu(iCell,:) = mean(U1(ipix_neuropil,:), 1);
+        if opt.getNeuropil
+            ipix_neuropil= data.stat(useCells(iCell)).ipix_neuropil;
+            if ~isempty(ipix_neuropil)
+                UcellNeu(iCell,:) = mean(U1(ipix_neuropil,:), 1);
+            end
         end
     end
     for iExp = 1:length(svd.Vcell)
-        if opt.neuropilOnly == 0
+        if opt.getSignal
             F = NaN(Nk, size(svd.Vcell{iExp}, 2), 'single');
             F(useCells,:) = Ucell * svd.Vcell{iExp};
             Fcell{iExp} = F;
         end
-        F = NaN(Nk, size(svd.Vcell{iExp}, 2), 'single');
-        F(useCells,:) = UcellNeu * svd.Vcell{iExp};
-        FcellNeu{iExp} = F;
+        if opt.getNeuropil
+            F = NaN(Nk, size(svd.Vcell{iExp}, 2), 'single');
+            F(useCells,:) = UcellNeu * svd.Vcell{iExp};
+            FcellNeu{iExp} = F;
+        end
     end
 end
-if opt.neuropilOnly == 0
+if opt.getSignal
     data.F.Fcell = Fcell;
 end
-data.F.FcellNeu = FcellNeu;
+if opt.getNeuropil
+    data.F.FcellNeu = FcellNeu;
+end
 
 dat = data;
 dat.opsNpil = opt;
