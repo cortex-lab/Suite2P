@@ -51,6 +51,9 @@ neuropMasks=zeros(nCells,hp,wp);
 %compute the mask of each surrounding neuropils
 for iCell=1:nCells
     stat = regionprops(squeeze(cellFields(iCell,:,:)),'centroid');
+    if isempty(stat)
+        continue
+    end
     centerCell=round(stat.Centroid);
     
     neuropCircle = sqrt((xx_np-centerCell(1)).^2+(yy_np-centerCell(2)).^2)<=outRadius;
