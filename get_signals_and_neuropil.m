@@ -187,11 +187,20 @@ else % opt.useSVD == 1
         end
     end
 end
-if opt.getSignal
-    data.F.Fcell = Fcell;
-end
-if opt.getNeuropil
-    data.F.FcellNeu = FcellNeu;
+if opt.processed
+    if opt.getSignal
+        data.F.Fcell = Fcell;
+    end
+    if opt.getNeuropil
+        data.F.FcellNeu = FcellNeu;
+    end
+else
+    if opt.getSignal
+        data.Fcell = Fcell;
+    end
+    if opt.getNeuropil
+        data.FcellNeu = FcellNeu;
+    end
 end
 
 dat = data;
