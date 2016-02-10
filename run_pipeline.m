@@ -48,6 +48,7 @@ for i = 1:length(ops.planesToProcess)
                     get_signals(ops, iplane);
                 case 'model'
                      get_signals_NEUmodel(ops, iplane);
+
             end
 
         end
