@@ -7,6 +7,8 @@ catch
    error('Could not find cell detection file \n') 
 end
 
+Masks    = getOr(ops, {'Masks'}, 'binary');
+
 Nk = numel(stat);
 Nkpar = ops.Nk;
 %%
@@ -68,21 +70,21 @@ while 1
     for k = 1+ops.Nk:Nk
        ipix = stat(k).ipix; 
        if ~isempty(ipix)
-            if strcmp(ops.masks, 'binary')
+            if strcmp(Masks, 'binary')
                 Ftemp(k,:) = mean(data(ipix,:), 1);       
-            elseif strcmp(ops.masks, 'continuous')
+            elseif strcmp(Masks, 'continuous')
                 Ftemp(k,:) = res.M(ipix) * data(ipix,:);
             end
        end
     end    
     F(:,ix + (1:NT))        = Ftemp;
     
-    if strcmp(ops.masks, 'continuous')
+    if strcmp(Masks, 'continuous')
         i0 = (1+ops.Nk):Nk;
-        Fdeconv = covL(i0, i0) \ cat(1, Ftemp(i0, :), StU);
+        Fdeconv = covL((1+ops.Nk):end, (1+ops.Nk):end) \ cat(1, Ftemp(i0, :), StU);
         Ftemp2 = Fdeconv(1:(Nk-ops.Nk),:);
         
-        Fneu(i0,ix + (1:NT))     = Ftemp(i0,:) - Ftemp2;
+        Fneu(i0,ix + (1:NT))     = Ftemp2;
     end
         
     ix = ix + NT;
