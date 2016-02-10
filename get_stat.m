@@ -21,7 +21,7 @@ for k = 1:Nk
     stat(k).mrs0    = median(rgridsort(1:stat(k).npix));
     stat(k).med     = [median(y0) median(x0)];
     stat(k).ipix    = ipix;
-    stat(k).lambda  = res.lambda(ipix);
+    stat(k).lambda  = res.M(ipix);
     
 
 

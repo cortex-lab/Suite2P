@@ -21,7 +21,10 @@ ops0.CopyDataLocally        = 0;
 ops0.RegFileTiffLocation    = []; %'D:/DATA/'; % leave empty to NOT save registered tiffs
 
 %%
-for iexp = 7 % 1:length(db)        %3:length(db)          
+% ops0.nplanes = 14;
+% ops0.nchannels = 2;
+ops0.expred = [1 3];
+for iexp = 1 % 1:length(db)        %3:length(db)          
    run_REDaddon(iexp, db, ops0) ;
 end
 %%

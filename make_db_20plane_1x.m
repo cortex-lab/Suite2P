@@ -87,3 +87,17 @@ db(i).nplanes       = 10;
 db(i).BiDiPhase     = 0;
 db(i).Nk0           = 2000;
 db(i).Nk            = 1000;
+
+i = i+1;
+db(i).mouse_name    = 'M150824_MP019';
+db(i).date          = '2015-12-19';
+db(i).expts         = [4];
+db(i).Nk0           = 3000;
+db(i).Nk            = 1500;
+
+i = i+1;
+db(i).mouse_name    = 'M150116_FR071';
+db(i).date          = '2016-01-27';
+db(i).expts         = [1 3];
+db(i).Nk0           = 2000;
+db(i).Nk            = 1000;

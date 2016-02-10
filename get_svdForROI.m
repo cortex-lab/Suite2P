@@ -1,4 +1,4 @@
-function [ops, U, Sv] = get_svdForROI(ops)
+function [ops, U, Sv, V] = get_svdForROI(ops)
 
 % iplane = ops.iplane;
 
@@ -44,6 +44,7 @@ fclose(fid);
 mov(:, :, (ix+1):end) = [];
 
 mov = mov(ops.yrange, ops.xrange, :);
+% mov = mov - repmat(mean(mov,3), 1, 1, size(mov,3));
 %% SVD options
 
 ops.nSVDforROI = min(ops.nSVDforROI, size(mov,3));
