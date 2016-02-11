@@ -1,4 +1,4 @@
-This code was written by Marius Pachitariu and is provided here with no warranty. Please direct all questions and requests to marius10patgmaildotcom. 
+This code was written by Marius Pachitariu and members of the lab of Kenneth Harris and Matteo Carandini. It is provided here with no warranty. Please direct all questions and requests to marius10patgmaildotcom. 
 
 I. Introduction 
 
