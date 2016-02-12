@@ -34,12 +34,8 @@ for i = 1:length(ops.planesToProcess)
                 case 'neuropil'
                     [ops, stat, res]  = fast_clustering_with_neuropil(ops,U, Sv);
             end
-            %
+            
             apply_ROIrules(ops, stat, res, clustrules);
-            %
-
-            if ~(isfield(ops0,'getSignal') && isfield(ops0,'getNeuropil')) || ...
-                    ops0.getSignal == 1 || ops0.getNeuropil == 1
 
             switch neuropilSub
                 case 'surround'
