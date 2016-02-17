@@ -64,6 +64,12 @@ end
 %%
 ops = data.ops;
 Nk       = numel(data.stat); % all ROIs including parents
+if opt.processed == 1
+    Nk_parents = find(isinf(data.cl.Mrs), 1, 'last');
+else
+    Nk_parents = ops.Nk;
+end
+
 useCells = 1:Nk;
 if opt.processed == 1
     useCells = find(data.cl.iscell);
@@ -81,7 +87,10 @@ for jCell=1:length(useCells)
     temp=zeros(LyR,LxR);
     temp(ipix)=ones(1,length(ipix));
     cellFields(jCell,:,:)=temp;
-    allField=allField+jCell.*temp;
+    % do not include parent masks into allField
+    if jCell > Nk_parents
+        allField=allField+jCell.*temp;
+    end
 end
 opt.totPixels=LxU;
 
