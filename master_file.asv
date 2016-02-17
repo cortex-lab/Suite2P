@@ -69,8 +69,7 @@ ops1.getNeuropil= 1; % to extract neuropil
 % ops1.processed  = 1; % to load processed file
 % ops1.newFile    = 1; % to create new file ending _new.mat, otherwise
 %                        processed file is overwritten
-% ops1.useSVD     = 1; % only choose 0 if the temporary bin-file still
-%                        contains the data of the current experiment
+% ops1.useSVD     = 1; % only
 
 ops0.sig                    = 0;  % spatial smoothing constant
 % (encourages colocalized clusters) OBSOLETE
