@@ -7,8 +7,6 @@ catch
    error('Could not find cell detection file \n') 
 end
 
-Masks    = getOr(ops, {'Masks'}, 'binary');
-
 Nk = numel(stat);
 Nkpar = ops.Nk;
 %%
@@ -50,6 +48,9 @@ tic
 F        = zeros(Nk, sum(ops.Nframes), 'single');
 Fneu    = zeros(Nk, sum(ops.Nframes), 'single');
 % Fraw = zeros(Nk, sum(ops.Nframes), 'single');
+
+covLinv = inv(covL((1+ops.Nk):end, (1+ops.Nk):end));
+covLinv = covLinv ./ repmat(diag(covLinv), 1, size(covLinv,2));
 while 1
     data = fread(fid,  Ly*Lx*nimgbatch, '*int16');
     if isempty(data)
@@ -70,22 +71,19 @@ while 1
     for k = 1+ops.Nk:Nk
        ipix = stat(k).ipix; 
        if ~isempty(ipix)
-            if strcmp(Masks, 'binary')
-                Ftemp(k,:) = mean(data(ipix,:), 1);       
-            elseif strcmp(Masks, 'continuous')
-                Ftemp(k,:) = res.M(ipix) * data(ipix,:);
-            end
+           Ftemp(k,:) = res.M(ipix) * data(ipix,:);
        end
-    end    
+    end
     F(:,ix + (1:NT))        = Ftemp;
     
-    if strcmp(Masks, 'continuous')
-        i0 = (1+ops.Nk):Nk;
-        Fdeconv = covL((1+ops.Nk):end, (1+ops.Nk):end) \ cat(1, Ftemp(i0, :), StU);
-        Ftemp2 = Fdeconv(1:(Nk-ops.Nk),:);
-        
-        Fneu(i0,ix + (1:NT))     = Ftemp2;
-    end
+    i0 = (1+ops.Nk):Nk;
+    %Fdeconv = covL((1+ops.Nk):end, (1+ops.Nk):end) \ cat(1, Ftemp(i0, :), StU);
+    Fdeconv = covLinv * cat(1, Ftemp(i0, :), StU);
+    
+    Ftemp2 = Fdeconv(1:(Nk-ops.Nk),:);
+    
+    Fneu(i0,ix + (1:NT))     = Ftemp2;
+    
         
     ix = ix + NT;
     if rem(ix, 3*NT)==0
@@ -98,9 +96,9 @@ csumNframes = [0 cumsum(ops.Nframes)];
 Fcell       = cell(1, length(ops.Nframes));
 FcellNeu    = cell(1, length(ops.Nframes));
 for i = 1:length(ops.Nframes)
-    Fcell{i} = F(:, csumNframes(i) + (1:ops.Nframes(i)));
-    FcellNeu{i} = Fneu(:, csumNframes(i) + (1:ops.Nframes(i)));
-%     Fcellraw{i} = Fraw(:, csumNframes(i) + (1:ops.Nframes(i)));
+    Fcell{i} = Fneu(:, csumNframes(i) + (1:ops.Nframes(i)));
+    FcellNeu{i} = Fcell{i} - F(:, csumNframes(i) + (1:ops.Nframes(i)));
+%     FcellNeu{i} =  F(:, csumNframes(i) + (1:ops.Nframes(i))) - Fcell{i};
 end
 
 save(sprintf('%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ...
