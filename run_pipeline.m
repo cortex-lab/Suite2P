@@ -16,7 +16,6 @@ for i = 1:length(ops.planesToProcess)
     iplane  = ops.planesToProcess(i);
     ops     = ops1{i};
 
-    ops.niterclustering = 40;
     ops.iplane  = iplane;
 
     if numel(ops.yrange)>ops.Ly/2 && numel(ops.xrange)>ops.Lx/2
