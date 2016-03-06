@@ -1,4 +1,4 @@
-function run_pipeline(db, ops0, clustrules)
+% function run_pipeline(db, ops0, clustrules)
 
 ops = build_ops3(db, ops0);
 
@@ -9,8 +9,14 @@ end
 
 clustModel     = getOr(ops, {'clustModel'}, 'standard');
 neuropilSub    = getOr(ops, {'neuropilSub'}, 'surround');
-
-ops1         = reg2P(ops);  % do registration
+splitBlocks    = getOr(ops, {'splitBlocks'}, 'none');
+%%
+switch splitBlocks
+    case 'none'
+        ops1         = reg2P(ops);  % do registration
+    otherwise
+        ops1         = blockReg2P(ops);  % do registration
+end
 %%
 for i = 1:length(ops.planesToProcess)
     iplane  = ops.planesToProcess(i);
