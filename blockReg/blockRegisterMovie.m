@@ -1,37 +1,46 @@
-function dreg = register_movie(data, ops, ds)
+function [dreg, Valid]= blockRegisterMovie(data, xyMask, ds)
 
 orig_class = class(data);
 
-if ops.useGPU
-    data = gpuArray(single(data));
-end
+% if ops.useGPU
+%     data = gpuArray(single(data));
+% end
 [Ly, Lx, NT] = size(data);
 
-Ny = ifftshift([-fix(Ly/2):ceil(Ly/2)-1]);
-Nx = ifftshift([-fix(Lx/2):ceil(Lx/2)-1]);
-[Nx,Ny] = meshgrid(Nx,Ny);
-Nx = Nx / Lx;
-Ny = Ny / Ly;
-
-if ops.useGPU
-    dreg = gpuArray.zeros(size(data), orig_class);
-else
-    dreg = zeros(size(data), orig_class);
-end
+%%
 
 
-if ops.useGPU
-    ds = gpuArray(ds);
-    Nx = gpuArray(single(Nx));
-    Ny = gpuArray(single(Ny));
-end
+dx = round(xyMask * squeeze(ds(:,2,:))');
+dy = round(xyMask * squeeze(ds(:,1,:))');
 
+dx = reshape(dx, Ly, Lx, []);
+dy = reshape(dy, Ly, Lx, []);
+
+idy = repmat([1:Ly]', 1, Lx);
+idx = repmat([1:Lx],  Ly, 1);
+
+dreg = zeros(size(data), orig_class);
+Valid = true(Ly, Lx);
 for i = 1:NT
-    dph         = 2*pi*(ds(i,1)*Ny + ds(i,2)*Nx);
-    fdata       = fft2(single(data(:,:,i)));
-    dreg(:,:,i) = real(ifft2(fdata .* exp(1i * dph)));
+    Im = data(:,:,i);    
+    
+    DX = dx(:,:,i) + idx;
+    DY = dy(:,:,i) + idy;
+    
+    
+    xyInvalid = DX<0 | DX>Lx-1 | DY<1 | DY>Ly;
+    Valid(xyInvalid) = false;
+    
+    DX(xyInvalid) = 0;
+    DY(xyInvalid) = 1;
+    
+%     DX = mod(DX, Lx);
+%     DY = mod(DY-1, Ly) + 1;
+%     
+    ind = DY + DX * Ly;
+    Im = Im(ind);
+    dreg(:,:,i) = Im;
+    
+    
 end
 
-if ops.useGPU
-    dreg = gather(dreg);
-end

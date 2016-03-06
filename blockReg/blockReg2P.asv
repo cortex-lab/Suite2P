@@ -1,4 +1,4 @@
-function ops1 = blockReg2P(ops)
+% function ops1 = blockReg2P(ops)
 %%
 % iplane = ops.iplane;
 % bitspersamp = 16;
@@ -21,7 +21,11 @@ else BiDiPhase = 0; end
 if isfield(ops, 'LoadRegMean') && ~isempty(ops.LoadRegMean); LoadRegMean = ops.LoadRegMean;
 else LoadRegMean = 0; end
 
+splitTaper     = getOr(ops, {'splitTaper'}, 20);
+
 fs = ops.fsroot;
+
+
 
 %% find the mean frame after aligning a random subset
 ntifs = sum(cellfun(@(x) numel(x), fs));
@@ -40,6 +44,39 @@ ops.Ly = Ly;
 indx = 0;
 IMG = zeros(Ly, Lx, nplanes, ops.NimgFirstRegistration, 'single');
 
+%%
+
+for 
+     if ~ischar(ops1{i}.splitBlocks)
+        yB = cumsum([0 ops1{i}.splitBlocks{1}]);
+        xB = cumsum([0 ops1{i}.splitBlocks{2}]);
+        
+        ib = 0;
+        for iy = 1:length(yB)-1
+            for ix = 1:length(xB)-1
+               ib = ib+1;
+               ops1{i}.yBL{ib} = (yB(iy)+1):yB(iy+1);
+               ops1{i}.xBL{ib} = (xB(ix)+1):xB(ix+1);
+               ops1{i}.mimgB{ib} = ops1{i}.mimg(ops1{i}.yBL{ib}, ops1{i}.xBL{ib});
+            end
+        end
+    end 
+end
+numBlocks = ib;
+
+% numBlocks = numel(ops.yBL);
+xyMask = zeros(Ly, Lx, numBlocks, 'single');
+for i = 1:numBlocks
+    msk = zeros(Ly, Lx, 'single');
+    msk(ops1{1}.yBL{i},ops1{1}.xBL{i}) = 1;
+    sT = ops1{1}.splitTaper;
+    msk = my_conv(my_conv(msk, sT)',sT)'; 
+    xyMask(:,:,i) = msk;
+end
+xyMask = xyMask./repmat(sum(xyMask, 3), 1, 1, numBlocks);
+xyMask = reshape(xyMask, Ly*Lx, numBlocks);
+
+%%
 if ops.doRegistration
     for k = 1:length(ops.SubDirs)
         iplane0 = 1;
@@ -63,15 +100,7 @@ if ops.doRegistration
             iplane0 = iplane0 - nFr/nchannels;
             data = loadFramesBuff(fs{k}(j).name, ichanset(1),ichanset(2), ichanset(3));
             data = reshape(data, Ly, Lx, nplanes, []);
-            
-            if BiDiPhase
-                yrange = 2:2:Ly;
-                if BiDiPhase>0
-                    data(yrange, (1+BiDiPhase):Lx,:,:) = data(yrange, 1:(Lx-BiDiPhase),:,:);
-                else
-                    data(yrange, 1:Lx+BiDiPhase,:,:) = data(yrange, 1-BiDiPhase:Lx,:,:);
-                end
-            end
+   
             IMG(:,:,:,indx+(1:size(data,4))) = data;
             indx = indx + size(data,4);
             
@@ -80,7 +109,7 @@ if ops.doRegistration
     IMG =  IMG(:,:,:,1:indx);
     %
     for i = 1:numPlanes
-        ops1{i} = align_iterative(squeeze(IMG(:,:,ops.planesToProcess(i),:)), ops);
+        ops1{i} = blockAlignIterative(squeeze(IMG(:,:,ops.planesToProcess(i),:)), ops);
     end
 end
 
@@ -104,7 +133,8 @@ clear IMG
 
 %%
 for i = 1:numPlanes
-    ops1{i}.RegFile = fullfile(ops.RegFileRoot, sprintf('tempreg_plane%d.bin', ops.planesToProcess(i)));
+    ops1{i}.RegFile = fullfile(ops.RegFileRoot, sprintf('tempreg_plane%d.bin',...
+        ops.planesToProcess(i)));
     regdir = fileparts(ops1{i}.RegFile);
     if ~exist(regdir, 'dir')
         mkdir(regdir);
@@ -116,13 +146,15 @@ for i = 1:numPlanes
     ops1{i}.CorrFrame   = [];
     ops1{i}.mimg1       = zeros(Ly, Lx);
     
-    if ~ischar(ops1{i}.splitBlocks)
-        [
-    end
+  
 end
+
 nbytes = fs{1}(1).bytes;
 nFr = img.nFrames(fs{1}(1).name);
+
 %%
+xyValid = true(Ly, Lx);
+
 tic
 for k = 1:length(fs)
     for i = 1:numPlanes
@@ -153,6 +185,7 @@ for k = 1:length(fs)
         end
         
         if ops.doRegistration
+            %
             % get the registration offsets
             dsall = zeros(size(data,3), 2, numBlocks);
             for i = 1:numPlanes
@@ -163,7 +196,9 @@ for k = 1:length(fs)
                 Corr = zeros(numel(indframes), numBlocks,'double');
                 for ib = 1:numBlocks
                     % collect ds
-                    [ds(:,:,k), Corr(:,k)]  = ...
+                    ops1{i}.mimg = ops1{i}.mimgB{ib};
+                    
+                    [ds(:,:,ib), Corr(:,ib)]  = ...
                         registration_offsets(data(ops1{i}.yBL{ib},ops1{i}.xBL{ib},...
                         indframes), ops1{i}, 0);
                 end
@@ -187,17 +222,20 @@ for k = 1:length(fs)
                 data = loadFramesBuff(ops.temp_tiff, ichanset(1), ichanset(2), ichanset(3));               
             end
             
+            tic
             ix0 = 0;
             Nbatch = 1000;
             dreg = zeros(size(data), 'like', data);
             while ix0<size(data,3)
                 indxr = ix0 + (1:Nbatch);
                 indxr(indxr>size(data,3)) = [];
-                dreg(:, :, indxr)        = ...
-                    blockRegisterMovie(data(:, :, indxr), ops1{1}, dsall(indxr,:,:));
+                [dreg(:, :, indxr),  xyVal] = ...
+                    blockRegisterMovie(data(:, :, indxr), xyMask, dsall(indxr,:,:));
                 ix0 = ix0 + Nbatch;
+                
+                xyValid = xyValid & xyVal;
             end
-           
+           toc
         else
             dreg = data;
         end
@@ -236,17 +274,11 @@ end
 % compute xrange, yrange
 for i = 1:numPlanes
     if ops.doRegistration
-        minDs = min(ops1{i}.DS(2:end, [1 2]), [], 1);
-        maxDs = max(ops1{i}.DS(2:end, [1 2]), [], 1);
-        disp([minDs(1) maxDs(1) minDs(2) maxDs(2)])
-        if BiDiPhase>0
-            maxDs(2) = max(1+BiDiPhase, maxDs(2));
-        elseif BiDiPhase<0
-            minDs(2) = min(BiDiPhase, minDs(2));
-        end
-        
-        ops1{i}.yrange = ceil(maxDs(1)):floor(Ly+minDs(1));
-        ops1{i}.xrange = ceil(maxDs(2)):floor(Lx+minDs(2));
+%         minDs = min(min(ops1{i}.DS(2:end, :,:), [], 3), [], 1);
+%         maxDs = max(max(ops1{i}.DS(2:end, :,:), [], 3), [], 1);
+        ops1{i}.yrange  = find(prod(xyValid, 2));
+         ops1{i}.xrange  = find(prod(xyValid, 1));
+         
     else
         ops1{i}.yrange = 1:Ly;
         ops1{i}.xrange = 1:Lx;
