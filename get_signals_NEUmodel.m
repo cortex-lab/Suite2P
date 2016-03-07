@@ -36,7 +36,7 @@ covL = [LtL LtS; LtS' StS];
 covL = covL + 1e-4 * Ireg;
 %% get signals  
 
-[Ly Lx] = size(ops.mimg);
+[Ly Lx] = size(ops.mimg1);
 
 nimgbatch = 2000;
 

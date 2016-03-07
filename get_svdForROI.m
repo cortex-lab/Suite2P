@@ -2,7 +2,7 @@ function [ops, U, Sv, V] = get_svdForROI(ops)
 
 % iplane = ops.iplane;
 
-[Ly, Lx] = size(ops.mimg);
+[Ly, Lx] = size(ops.mimg1);
 
 ntotframes          = ceil(sum(ops.Nframes));
 ops.NavgFramesSVD   = min(ops.NavgFramesSVD, ntotframes);

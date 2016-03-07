@@ -289,7 +289,9 @@ for i = 1:numPlanes
     if ~exist(savepath, 'dir')
         mkdir(savepath)
     end
+    ops1{i}.mimg = ops1{i}.mimg1;
     ops = ops1{i};
+    
     save(sprintf('%s/regops_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
         ops.mouse_name, ops.date,  ops.planesToProcess(i)),  'ops')
 end
