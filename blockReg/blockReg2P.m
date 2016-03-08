@@ -289,7 +289,12 @@ for i = 1:numPlanes
     if ~exist(savepath, 'dir')
         mkdir(savepath)
     end
-    ops1{i}.mimg = ops1{i}.mimg1;
+    
+    mimg = zeros(size(ops1{i}.mimg1));
+    for ib = 1:numBlocks
+        mimg(ops1{i}.yBL{ib}, ops1{i}.xBL{ib}) = ops1{i}.mimgB{ib};
+    end
+    ops1{i}.mimg = mimg;
     ops = ops1{i};
     
     save(sprintf('%s/regops_%s_%s_plane%d.mat', ops.ResultsSavePath, ...

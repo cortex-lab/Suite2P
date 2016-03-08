@@ -1,4 +1,4 @@
-% function ops1 = blockReg2P(ops)
+function ops1 = blockReg2P(ops)
 %%
 % iplane = ops.iplane;
 % bitspersamp = 16;
@@ -45,22 +45,19 @@ indx = 0;
 IMG = zeros(Ly, Lx, nplanes, ops.NimgFirstRegistration, 'single');
 
 %%
-
-for 
-     if ~ischar(ops1{i}.splitBlocks)
-        yB = cumsum([0 ops1{i}.splitBlocks{1}]);
-        xB = cumsum([0 ops1{i}.splitBlocks{2}]);
-        
-        ib = 0;
-        for iy = 1:length(yB)-1
-            for ix = 1:length(xB)-1
-               ib = ib+1;
-               ops1{i}.yBL{ib} = (yB(iy)+1):yB(iy+1);
-               ops1{i}.xBL{ib} = (xB(ix)+1):xB(ix+1);
-               ops1{i}.mimgB{ib} = ops1{i}.mimg(ops1{i}.yBL{ib}, ops1{i}.xBL{ib});
-            end
+if ~ischar(ops.splitBlocks)
+    yB = cumsum([0 ops.splitBlocks{1}]);
+    xB = cumsum([0 ops.splitBlocks{2}]);
+    
+    ib = 0;
+    for iy = 1:length(yB)-1
+        for ix = 1:length(xB)-1
+            ib = ib+1;
+            ops.yBL{ib} = (yB(iy)+1):yB(iy+1);
+            ops.xBL{ib} = (xB(ix)+1):xB(ix+1);
+            
         end
-    end 
+    end
 end
 numBlocks = ib;
 
@@ -68,8 +65,8 @@ numBlocks = ib;
 xyMask = zeros(Ly, Lx, numBlocks, 'single');
 for i = 1:numBlocks
     msk = zeros(Ly, Lx, 'single');
-    msk(ops1{1}.yBL{i},ops1{1}.xBL{i}) = 1;
-    sT = ops1{1}.splitTaper;
+    msk(ops.yBL{i},ops.xBL{i}) = 1;
+    sT = ops.splitTaper;
     msk = my_conv(my_conv(msk, sT)',sT)'; 
     xyMask(:,:,i) = msk;
 end
@@ -109,7 +106,7 @@ if ops.doRegistration
     IMG =  IMG(:,:,:,1:indx);
     %
     for i = 1:numPlanes
-        ops1{i} = blockAlignIterative(squeeze(IMG(:,:,ops.planesToProcess(i),:)), ops);
+        ops1{i} = blockAlignIterative(squeeze(IMG(:,:,ops.planesToProcess(i),:)), ops, xyMask);
     end
 end
 
@@ -131,7 +128,7 @@ clear IMG
 
 % keyboard;
 
-%%
+%% prepare individual options files and open binaries
 for i = 1:numPlanes
     ops1{i}.RegFile = fullfile(ops.RegFileRoot, sprintf('tempreg_plane%d.bin',...
         ops.planesToProcess(i)));
@@ -146,7 +143,11 @@ for i = 1:numPlanes
     ops1{i}.CorrFrame   = [];
     ops1{i}.mimg1       = zeros(Ly, Lx);
     
-  
+    if ~ischar(ops.splitBlocks)
+        for ib = 1:numBlocks
+            ops1{i}.mimgB{ib} = ops1{i}.mimg(ops1{i}.yBL{ib}, ops1{i}.xBL{ib});
+        end
+    end
 end
 
 nbytes = fs{1}(1).bytes;
@@ -185,7 +186,6 @@ for k = 1:length(fs)
         end
         
         if ops.doRegistration
-            %
             % get the registration offsets
             dsall = zeros(size(data,3), 2, numBlocks);
             for i = 1:numPlanes
@@ -222,7 +222,7 @@ for k = 1:length(fs)
                 data = loadFramesBuff(ops.temp_tiff, ichanset(1), ichanset(2), ichanset(3));               
             end
             
-            tic
+            
             ix0 = 0;
             Nbatch = 1000;
             dreg = zeros(size(data), 'like', data);
@@ -235,7 +235,7 @@ for k = 1:length(fs)
                 
                 xyValid = xyValid & xyVal;
             end
-           toc
+           
         else
             dreg = data;
         end
@@ -274,11 +274,11 @@ end
 % compute xrange, yrange
 for i = 1:numPlanes
     if ops.doRegistration
-%         minDs = min(min(ops1{i}.DS(2:end, :,:), [], 3), [], 1);
-%         maxDs = max(max(ops1{i}.DS(2:end, :,:), [], 3), [], 1);
-        ops1{i}.yrange  = find(prod(xyValid, 2));
-         ops1{i}.xrange  = find(prod(xyValid, 1));
-         
+        %         minDs = min(min(ops1{i}.DS(2:end, :,:), [], 3), [], 1);
+        %         maxDs = max(max(ops1{i}.DS(2:end, :,:), [], 3), [], 1);
+        ops1{i}.yrange  = find(xyValid(:, ceil(Lx/2)));
+        ops1{i}.xrange  = find(xyValid(:, ceil(Ly/2)));
+        
     else
         ops1{i}.yrange = 1:Ly;
         ops1{i}.xrange = 1:Lx;
@@ -289,7 +289,12 @@ for i = 1:numPlanes
     if ~exist(savepath, 'dir')
         mkdir(savepath)
     end
+    
+    mimg = zeros(size(ops1{i}.mimg1));
+    for ib = 1:
+    ops1{i}.mimg = ops1{i}.mimg1;
     ops = ops1{i};
+    
     save(sprintf('%s/regops_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
         ops.mouse_name, ops.date,  ops.planesToProcess(i)),  'ops')
 end
