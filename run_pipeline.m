@@ -16,7 +16,7 @@ if iscell(splitBlocks)
 else
     ops1         = reg2P(ops);  % do registration
 end
-%%
+
 for i = 1:length(ops.planesToProcess)
     iplane  = ops.planesToProcess(i);
     ops     = ops1{i};
@@ -32,10 +32,12 @@ for i = 1:length(ops.planesToProcess)
             [ops, U, Sv]        = get_svdForROI(ops);
             %
             U =  reshape(U, [], size(U,3));
+            
             switch clustModel
                 case 'standard'
                     [ops, stat, res]  = fast_clustering(ops,U, Sv);
                 case 'neuropil'
+                    
                     [ops, stat, res]  = fast_clustering_with_neuropil(ops,U, Sv);
             end
             
