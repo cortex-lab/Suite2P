@@ -84,7 +84,7 @@ U = reshape(U, numel(ops.yrange), numel(ops.xrange), []);
 if ~exist(ops.ResultsSavePath, 'dir')
    mkdir(ops.ResultsSavePath); 
 end
-% save(sprintf('%s/%s/%s/SVDmaskForROI_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
-%     ops.mouse_name,ops.date,...
-%     ops.mouse_name, ops.date, iplane), 'U', 'Sv', 'ops');
-
+if getOr(ops, {'writeSVDroi'}, 0)
+    save(sprintf('%s/SVDroi_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
+        ops.mouse_name, ops.date, ops.iplane), 'U', 'Sv', 'V', 'ops');
+end

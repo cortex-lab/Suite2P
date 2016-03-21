@@ -277,7 +277,7 @@ for i = 1:numPlanes
         %         minDs = min(min(ops1{i}.DS(2:end, :,:), [], 3), [], 1);
         %         maxDs = max(max(ops1{i}.DS(2:end, :,:), [], 3), [], 1);
         ops1{i}.yrange  = find(xyValid(:, ceil(Lx/2)));
-        ops1{i}.xrange  = find(xyValid(:, ceil(Ly/2)));
+        ops1{i}.xrange  = find(xyValid(ceil(Ly/2), :));
         
     else
         ops1{i}.yrange = 1:Ly;
