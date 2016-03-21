@@ -220,6 +220,26 @@ for i = 1:numPlanes
     if ~isempty(ops.RegFileTiffLocation)
         ops1{i} = write_reg_to_tiff(fid{i}, ops1{i}, i);
     end    
+    if ~isempty(ops.RegFileBinLocation)
+        folder = fullfile(ops1{i}.RegFileBinLocation, ops1{i}.mouse_name, ...
+            ops1{i}.date);
+        if ~exist(folder, 'dir')
+            mkdir(folder)
+        end
+        fidCopy = fopen(fullfile(folder, sprintf('plane%d.bin', i)), 'w');
+        sz = ops1{i}.Lx * ops1{i}.Ly;
+        parts = ceil(sum(ops1{i}.Nframes) / 2000);
+        for p = 1:parts
+            toRead = 2000;
+            if p == parts
+                toRead = sum(ops1{i}.Nframes) - 2000 * (parts-1);
+            end
+            data = fread(fid{i},  sz*toRead, '*int16');
+            fwrite(fidCopy, data, class(data));
+        end
+        fclose(fidCopy);
+    end
+    fclose(fid{i});
 end
 %%
 % compute xrange, yrange
