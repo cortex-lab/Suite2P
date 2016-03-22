@@ -4,6 +4,8 @@ function ops = align_iterative(data, ops)
 % [~, isort] = sort(uu, 'descend');
 % ops.mimg        = data(:,:,isort(50));
 
+fracImgPreAlign = getOr(ops, 'fracImgPreAlign', 1/2);
+maxImgPreAlign = round(size(data,3) * fracImgPreAlign);
 
 ops.mimg = pick_reg_init(data);
 
@@ -20,7 +22,7 @@ for i = 1:ops.NiterPrealign
     if i<floor(ops.NiterPrealign/2)        
         igood = igood(1:100);  
     else
-        igood = igood(1:round(size(data,3)/2));  
+        igood = igood(1:maxImgPreAlign);  
     end
     ops.mimg = mean(dreg(:,:,igood),3);
     

@@ -1,4 +1,4 @@
-% function run_pipeline(db, ops0, clustrules)
+function run_pipeline(db, ops0, clustrules)
 
 ops = build_ops3(db, ops0);
 

@@ -21,15 +21,15 @@ if ischar(tiff)
   closeTiff = onCleanup(@() close(tiff));
 end
 
-if nargin < 2
+if nargin < 2 || isempty(firstIdx)
   firstIdx = 1;
 end
 
-if nargin < 3
+if nargin < 3 || isempty(lastIdx)
   lastIdx = img.nFrames(tiff);
 end
 
-if nargin < 4
+if nargin < 4 || isempty(stride)
   stride = 1;
 end
 
