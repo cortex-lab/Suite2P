@@ -21,6 +21,7 @@ else BiDiPhase = 0; end
 if isfield(ops, 'LoadRegMean') && ~isempty(ops.LoadRegMean); LoadRegMean = ops.LoadRegMean;
 else LoadRegMean = 0; end
 
+ops.RegFileBinLocation = getOr(ops, 'RegFileBinLocation', []);
 fs = ops.fsroot;
 
 %% find the mean frame after aligning a random subset

@@ -23,7 +23,7 @@ for j = 1:length(ops.SubDirs)
     end
 end
 
-try
+try    
      % MK code for automatically determining number of planes and channels
     [~, header] = loadFramesBuff(ops.fsroot{1}(1).name, 1, 1, 1);
     

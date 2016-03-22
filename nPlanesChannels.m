@@ -1,6 +1,6 @@
 function [nPlanes, nChannels] = nPlanesChannels(fname)
 
-[~, header] = loadFrames(fname, 1, 1, 1);
+[~, header] = loadFramesBuff(fname, 1, 1, 1);
 
 hh=header{1};
 str = hh(strfind(hh, 'channelsSave = '):end);
