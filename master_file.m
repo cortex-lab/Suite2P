@@ -8,8 +8,8 @@ if exist(toolbox_path, 'dir')
 else
 	error('toolbox_path does not exist, please change toolbox_path');
 end
-ops0.clustModel = 'neuropil'; % standard or neuropil
-ops0.neuropilSub = 'model'; % none, surround or model
+ops0.clustModel  = 'neuropil'; % standard or neuropil
+ops0.neuropilSub = 'surround'; % none, surround or model
 
 ops0.useGPU                 = 1; % if you can use a GPU in matlab this accelerate registration approx 3 times
 ops0.doRegistration         = 1;

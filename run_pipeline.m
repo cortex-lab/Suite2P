@@ -20,38 +20,39 @@ end
 for i = 1:length(ops.planesToProcess)
     iplane  = ops.planesToProcess(i);
     ops     = ops1{i};
-
+    
     ops.iplane  = iplane;
-
-    if numel(ops.yrange)>ops.Ly/2 && numel(ops.xrange)>ops.Lx/2
-        if getOr(ops, {'getSVDcomps'}, 0)
-            ops    = get_svdcomps(ops);
+    if numel(ops.yrange)<10 || numel(ops.xrange)<10
+        warning('valid range after registration very small, continuing to next plane')
+        continue;
+    end
+    
+    if getOr(ops, {'getSVDcomps'}, 0)
+        ops    = get_svdcomps(ops);
+    end
+    if ops.getROIs || getOr(ops, {'writeSVDroi'}, 0)
+        [ops, U, Sv]        = get_svdForROI(ops);
+    end
+    if ops.getROIs
+        switch clustModel
+            case 'standard'
+                [ops, stat, res]  = fast_clustering(ops,U, Sv);
+            case 'neuropil'
+                [ops, stat, res]  = fast_clustering_with_neuropil(ops,U, Sv);
         end
-        if ops.getROIs || getOr(ops, {'writeSVDroi'}, 0)
-            [ops, U, Sv]        = get_svdForROI(ops);
-        end
-        if ops.getROIs
-            U =  reshape(U, [], size(U,3));
-            
-            switch clustModel
-                case 'standard'
-                    [ops, stat, res]  = fast_clustering(ops,U, Sv);
-                case 'neuropil'                    
-                    [ops, stat, res]  = fast_clustering_with_neuropil(ops,U, Sv);
-            end
-            
-            apply_ROIrules(ops, stat, res, clustrules);
-
-            switch neuropilSub
-                case 'surround'
-                    get_signals_and_neuropil(ops, iplane);
-                case 'none'
-                    get_signals(ops, iplane);
-                case 'model'
-                     get_signals_NEUmodel(ops, iplane);
-            end
+        
+        [stat, res] = apply_ROIrules(ops, stat, res, clustrules);
+        
+        switch neuropilSub
+            case 'surround'
+                get_signals_and_neuropil(ops, iplane);
+            case 'none'
+                get_signals(ops, iplane);
+            case 'model'
+                get_signals_NEUmodel(ops, iplane);
         end
     end
+    
 
     if ops.DeleteBin
         fclose('all');

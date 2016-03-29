@@ -6,19 +6,19 @@ try
 catch
    error('Could not find cell detection file \n') 
 end
-
+%%
 Nk = numel(stat);
 Nkpar = ops.Nk;
 %%
-S = res.S;
-M = res.M;
+S = reshape(res.S, [], size(res.S, ndims(res.S)));
+M = res.M(:);
 nBasis = round(sqrt(size(S,2)));
 
 StS = S' * S;
 LtL = zeros(Nk, Nk, 'single');
 LtS = zeros(Nk, nBasis^2, 'single');
 Ireg = diag([ones(Nk,1); zeros(nBasis^2,1)]);
-
+%
 for i = ops.Nk+1:Nk
 %     ix = find(iclust==i);
     ix = stat(i).ipix;
@@ -27,7 +27,7 @@ for i = ops.Nk+1:Nk
         LtS(i,:) = 0;
     else
         LtL(i,i) = sum(M(ix).^2);
-        LtS(i,:) = M(ix) * S(ix, :);
+        LtS(i,:) = M(ix)' * S(ix, :);
     end
 end
 
@@ -89,6 +89,7 @@ while 1
     if rem(ix, 3*NT)==0
         fprintf('Frame %d done in time %2.2f \n', ix, toc)
     end
+    
 end
 fclose(fid);
 %%

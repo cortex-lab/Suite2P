@@ -83,33 +83,37 @@ if ops.doRegistration
     for i = 1:numPlanes
         ops1{i} = align_iterative(squeeze(IMG(:,:,ops.planesToProcess(i),:)), ops);
     end
-end
-
-if ops.showTargetRegistration
-    figure('position', [900 50 900 900])
-    ax = ceil(sqrt(numel(ops1)));
-    for i = 1:length(ops1)
-        subplot(ax,ax,i)
-        imagesc(ops1{i}.mimg)
-        colormap('gray')
-        title(sprintf('Registration for plane %d, mouse %s, date %s', ...
-            i, ops.mouse_name, ops.date))
-    end
     
-    drawnow
+    if ops.showTargetRegistration
+        figure('position', [900 50 900 900])
+        ax = ceil(sqrt(numel(ops1)));
+        for i = 1:length(ops1)
+            subplot(ax,ax,i)
+            imagesc(ops1{i}.mimg)
+            colormap('gray')
+            title(sprintf('Registration for plane %d, mouse %s, date %s', ...
+                i, ops.mouse_name, ops.date))
+        end
+        
+        drawnow
+    end
+    %
+    clear IMG
+else
+    for i = 1:numPlanes
+        ops1{i} = ops;
+        ops1{i}.mimg = zeros(Ly, Lx);
+        ops1{i}.Ly   = Ly;
+        ops1{i}.Lx   = Lx;
+     end
 end
-%
-clear IMG
 
-% keyboard;
-
-%%
 for i = 1:numPlanes
     ops1{i}.RegFile = fullfile(ops.RegFileRoot, sprintf('tempreg_plane%d.bin', ops.planesToProcess(i)));
     regdir = fileparts(ops1{i}.RegFile);
     if ~exist(regdir, 'dir')
         mkdir(regdir);
-    end    
+    end
     
     % open bin file for writing
     fid{i}             = fopen(ops1{i}.RegFile, 'w');
@@ -117,7 +121,10 @@ for i = 1:numPlanes
     ops1{i}.CorrFrame   = [];
     ops1{i}.mimg1       = zeros(Ly, Lx);
     
+    
 end
+
+
 nbytes = fs{1}(1).bytes;
 nFr = img.nFrames(fs{1}(1).name);
 %%

@@ -1,8 +1,9 @@
 function [ops, stat, res] = fast_clustering(ops, U, Sv)
 
+U =  reshape(U, [], size(U,3));
 iplane = ops.iplane;
 
-for i = 1:ops.nSVDforROI
+for i = 1:ops.nSVD
   U(:,i) = U(:,i)  * Sv(i).^.5;
 end
 U = U';
@@ -11,11 +12,17 @@ U = U';
 Ly = numel(ops.yrange);
 Lx = numel(ops.xrange);
 
+ops.Nk0 = ceil(sqrt(ops.Nk0)).^2;
+
 Nk      = ops.Nk0;
 niter   = ops.niterclustering;
 
+
+
 xs = repmat(1:Lx, Ly, 1);
 ys = repmat((1:Ly)', 1, Lx);
+
+
 
 randx = rand(1, Nk) * Lx;
 randy = rand(1, Nk) * Ly;
@@ -31,7 +38,7 @@ dxy = dx.^2 + dy.^2;
 clear dx dy
 
 if ops.ShowCellMap
-    figure('position', [100 100 900 900])
+    figure( 'Units', 'pixels', 'position', [100 100 900 900])
     colormap('hsv')
     axes('position', [.05 .05 .925 .925])
     set(gcf, 'Color', 'w')
@@ -114,6 +121,7 @@ for k = 1:niter
     
     err(k) = sum(M(:));
     if rem(k,10)==1 && ops.ShowCellMap
+        %%
         lam = M;
         for i = 1:Nk
             ix = find(iclust==i);

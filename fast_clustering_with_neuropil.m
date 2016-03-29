@@ -1,8 +1,9 @@
 function [ops, stat, res] = fast_clustering_with_neuropil(ops, U, Sv)
 
+U =  reshape(U, [], size(U,3));
 iplane = ops.iplane;
 
-for i = 1:ops.nSVDforROI
+for i = 1:ops.nSVD
   U(:,i) = U(:,i)  * Sv(i).^.5;
 end
 U = U';
@@ -11,27 +12,36 @@ U = U';
 Ly = numel(ops.yrange);
 Lx = numel(ops.xrange);
 
+
+ops.Nk0 = floor(sqrt(ops.Nk0))^2;
+
 Nk      = ops.Nk0;
+nsqrt = round(sqrt(Nk));
+
+xs = repmat(round(linspace(1, nsqrt, Lx)), Ly, 1);
+ys = repmat(round(linspace(1, nsqrt, Ly))', 1, Lx);
+iclust = xs + (ys-1) * nsqrt; 
+
+clear xs ys
+
 niter   = ops.niterclustering;
 
-xs = repmat(1:Lx, Ly, 1);
-ys = repmat((1:Ly)', 1, Lx);
-
-randx = rand(1, Nk) * Lx;
-randy = rand(1, Nk) * Ly;
-
-dx = repmat(xs(:), 1, Nk) - repmat(randx, numel(xs(:)), 1);
-dy = repmat(ys(:), 1, Nk) - repmat(randy, numel(ys(:)), 1);
-
-dxy = dx.^2 + dy.^2;
-
+% xs = repmat(1:Lx, Ly, 1);
+% ys = repmat((1:Ly)', 1, Lx);
+% 
+% randx = rand(1, Nk) * Lx;
+% randy = rand(1, Nk) * Ly;
+% 
+% dx = repmat(xs(:), 1, Nk) - repmat(randx, numel(xs(:)), 1);
+% dy = repmat(ys(:), 1, Nk) - repmat(randy, numel(ys(:)), 1);
+% 
+% dxy = dx.^2 + dy.^2;
+% [~, iclust] = min(dxy, [], 2);
 %%
-[~, iclust] = min(dxy, [], 2);
-
-clear dx dy
+% clear dx dy
 
 if ops.ShowCellMap
-    figure('position', [100 100 900 900])
+    figure( 'Units', 'pixels', 'position', [100 100 900 900])
     colormap('hsv')
     axes('position', [.05 .05 .925 .925])
     set(gcf, 'Color', 'w')
@@ -88,7 +98,6 @@ LtU = zeros(Nk, nSVD, 'single');
 LtS = zeros(Nk, nBasis^2, 'single');
 Ireg = diag([ones(Nk,1); zeros(nBasis^2,1)]);
 
-U0 = U;
 tic
 for k = 1:niter
     
@@ -157,7 +166,7 @@ for k = 1:niter
     err(k) = sum(M(:));
     
     if (rem(k,10)==1 || k==niter) && ops.ShowCellMap
-        %
+        %%
         lam = M;
         for i = 1:Nk
             ix = find(iclust==i);
@@ -168,7 +177,7 @@ for k = 1:niter
                 lam(ix) = vM;
             end
         end
-        V = 10 * reshape(lam, Ly, Lx);
+        V = 30 * reshape(lam, Ly, Lx);
         H = reshape(r(iclust), Ly, Lx);
         rgb_image = hsv2rgb(cat(3, H, Sat, V));
         imagesc(rgb_image)
