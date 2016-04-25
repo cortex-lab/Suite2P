@@ -97,7 +97,8 @@ if ops.doRegistration
         
         drawnow
     end
-    %
+    
+%     keyboard;
     clear IMG
 else
     for i = 1:numPlanes

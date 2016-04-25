@@ -1,9 +1,9 @@
 function [ops, stat, res] = fast_clustering(ops, U, Sv)
 
-U =  reshape(U, [], size(U,3));
+U =  reshape(U, [], size(U,ndims(U)));
 iplane = ops.iplane;
 
-for i = 1:ops.nSVD
+for i = 1:size(U,2)
   U(:,i) = U(:,i)  * Sv(i).^.5;
 end
 U = U';
