@@ -42,7 +42,7 @@ for i = 3:length(ops.planesToProcess)
             case 'standard'
                 [ops, stat, res]  = fast_clustering(ops,U, Sv);
             case 'neuropil'
-                [ops, stat, res]  = fast_clustering_with_neuropil2(ops,U, Sv);
+                [ops, stat, res]  = fast_clustering_with_neuropil(ops,U, Sv);
         end
         
         [stat, res] = apply_ROIrules(ops, stat, res, clustrules);

@@ -177,7 +177,7 @@ for k = 1:niter
                 lam(ix) = vM;
             end
         end
-        V = 30 * reshape(lam, Ly, Lx);
+        V = min(30 * reshape(lam, Ly, Lx), 1);
         H = reshape(r(iclust), Ly, Lx);
         rgb_image = hsv2rgb(cat(3, H, Sat, V));
         imagesc(rgb_image)
