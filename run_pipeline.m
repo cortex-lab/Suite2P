@@ -17,7 +17,7 @@ else
     ops1         = reg2P(ops);  % do registration
 end
  %%
-for i = 3:length(ops.planesToProcess)
+for i = 1:length(ops.planesToProcess)
     iplane  = ops.planesToProcess(i);
     ops     = ops1{i};
     
