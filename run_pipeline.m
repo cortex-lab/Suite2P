@@ -34,8 +34,8 @@ for i = 1:length(ops.planesToProcess)
     end
     if ops.getROIs || getOr(ops, {'writeSVDroi'}, 0)
         [ops, U, Sv]    = get_svdForROI(ops);
-        ops.U           = ops.U(:,:,1:20);
-        ops.Sv          = ops.Sv(1:20);
+        ops.U           = U(:,:,1:20);
+        ops.Sv          = Sv(1:20);
     end
     if ops.getROIs
         switch clustModel
