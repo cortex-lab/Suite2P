@@ -26,8 +26,6 @@ for i = 1:length(ops.planesToProcess)
         warning('valid range after registration very small, continuing to next plane')
         continue;
     end
-    ops.Nk = 1500;
-    ops.Nk0 = 1500;
     
     if getOr(ops, {'getSVDcomps'}, 0)
         ops    = get_svdcomps(ops);
