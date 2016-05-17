@@ -151,7 +151,7 @@ for i = 1:numPlanes
 end
 
 nbytes = fs{1}(1).bytes;
-nFr = img.nFrames(fs{1}(1).name);
+nFr = nFramesTiff(fs{1}(1).name);
 
 %%
 xyValid = true(Ly, Lx);
@@ -166,7 +166,7 @@ for k = 1:length(fs)
     for j = 1:length(fs{k})
         iplane0 = mod(iplane0-1, numPlanes) + 1;
        
-        nFr = img.nFrames(fs{k}(j).name);
+        nFr = nFramesTiff(fs{k}(j).name);
         if red_align
             %                 ichanset = [nchannels*(iplane0-1)+rchannel; nFr; nchannels];
             ichanset = [rchannel; nFr; nchannels];
