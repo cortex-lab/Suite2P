@@ -100,7 +100,6 @@ Ireg = diag([ones(Nk,1); zeros(nBasis^2,1)]);
 
 tic
 for k = 1:niter
-    
     for i = 1:Nk
         ix = find(iclust==i);
         if numel(ix)==0
@@ -132,7 +131,7 @@ for k = 1:niter
         
         dM = M - M2;
         indrem = Nkiter(k) - Nkiter(k+1);
-        dMk = Inf*ones(Nk,1);
+        dMk = 0*ones(Nk,1);
         icl = cell(Nk,1);
         for j = 1:Nk
             icl{j} = iclust==j;
