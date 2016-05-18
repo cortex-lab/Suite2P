@@ -71,7 +71,7 @@ while 1
     for k = 1+ops.Nk:Nk
        ipix = stat(k).ipix(:)'; 
        if ~isempty(ipix)
-           Ftemp(k,:) = res.M(ipix)' * data(ipix,:);
+           Ftemp(k,:) = res.M(ipix) * data(ipix,:);
        end
     end
     F(:,ix + (1:NT))        = Ftemp;
