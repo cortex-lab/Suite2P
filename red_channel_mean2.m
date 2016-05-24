@@ -38,7 +38,7 @@ end
 %%
 D = [];
 for k = 1:length(fsRED)    
-    data = loadFrames(fsRED{k});
+    data = loadFramesBuff(fsRED{k});
     
     data = cat(3, D, data);    
 end

@@ -26,7 +26,7 @@ if nargin < 2 || isempty(firstIdx)
 end
 
 if nargin < 3 || isempty(lastIdx)
-  lastIdx = img.nFrames(tiff);
+  lastIdx = nFramesTiff(tiff);
 end
 
 if nargin < 4 || isempty(stride)

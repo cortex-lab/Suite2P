@@ -26,7 +26,7 @@ if nargin < 2
 end
 
 if nargin < 3
-  lastIdx = img.nFrames(tiff);
+  lastIdx = nFramesTiff(tiff);
 end
 
 if nargin < 4
