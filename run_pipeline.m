@@ -1,5 +1,20 @@
 function run_pipeline(db, ops0, clustrules)
 
+
+ops0.nimgbegend                     = getOr(ops0, {'nimgbegend'}, 250);
+ops0.LoadRegMean                    = getOr(ops0, {'LoadRegMean'}, 0);
+ops0.NiterPrealign                    = getOr(ops0, {'NiterPrealign'}, 10);
+
+
+clustrules.diameter                 = getOr(clustrules, {'diameter'}, 10);
+clustrules.MaxNpix                  = clustrules.diameter^2 /  3;
+clustrules.MinNpix                  = clustrules.diameter^2 * 10;
+clustrules.Compact                  = getOr(clustrules, {'Compact'}, 2);
+clustrules.parent.minPixRelVar      = getOr(clustrules.parent, {'minPixRelVar'}, 1/10);
+clustrules.parent.PixelFractionThreshold     = getOr(clustrules.parent, {'PixelFractionThreshold'}, 0.5);
+clustrules.parent.MaxRegions        = getOr(clustrules.parent, {'MaxRegions'}, 10);
+
+
 ops = build_ops3(db, ops0);
 
 if ops.useGPU

@@ -132,7 +132,7 @@ for k = 1:niter
                 lam(ix) = vM;
             end
         end
-        V = 10 * reshape(lam, Ly, Lx);
+        V = max(0, min(.5 * reshape(lam, Ly, Lx)/mean(lam(:)), 1));
         H = reshape(r(iclust), Ly, Lx);
         rgb_image = hsv2rgb(cat(3, H, Sat, V));
         imagesc(rgb_image)

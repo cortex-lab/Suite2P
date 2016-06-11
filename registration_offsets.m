@@ -99,8 +99,8 @@ for bi = 1:nBatches
   corrClip = corrUps(yCorrRef,xCorrRef,:);
   % find peak
   [dmax, iy] = max(corrClip, [], 1);
-  iy = gather(iy);
-  dmax = gather(dmax);
+  iy = gather_try(iy);
+  dmax = gather_try(dmax);
   [dmax, ix] = max(dmax, [], 2);
   iy = reshape(...
     iy(sub2ind([size(iy,2) size(iy,3)], ix(:), (1:size(iy,3))')),...
@@ -112,7 +112,7 @@ for bi = 1:nBatches
     clipY = bsxfun(@plus, yClipRef, iy);
     clipF = reshape(repmat(1:size(clipX, 3), nClipPixels, 1), [], 1);
     cczoom = reshape(...
-      gather(corrClip(sub2ind(size(corrClip), clipY(:), clipX(:), clipF))),...
+      gather_try(corrClip(sub2ind(size(corrClip), clipY(:), clipX(:), clipF))),...
       nClipPixels, 1, []);
     bcorr = sum(cczoom, 1);
     cczoom = bsxfun(@rdivide, cczoom, bcorr);
@@ -132,7 +132,7 @@ for bi = 1:nBatches
       exp(1j*2*pi*bsxfun(@times, fy, iy)),... y rotation
       exp(1j*2*pi*bsxfun(@times, fx, ix))); % x rotation
     res = real(ifft2(fft2(batchData).*phaseShift));
-    regdata(:,:,fi) = gather(res);
+    regdata(:,:,fi) = gather_try(res);
   end
   dv(fi,:) = [iy(:) ix(:)];
   corr(fi) = squeeze(bcorr);

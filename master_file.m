@@ -1,6 +1,6 @@
 %%
 cd('D:\CODE\MariusBox\runSuite2P') % start this code in the directory with make_db
-make_db_adaptation;
+make_db_example;
 
 toolbox_path = 'D:\CODE\GitHub\Suite2P';
 if exist(toolbox_path, 'dir')

@@ -33,5 +33,5 @@ for i = 1:NT
 end
 
 if ops.useGPU
-    dreg = gather(dreg);
+    dreg = gather_try(dreg);
 end
