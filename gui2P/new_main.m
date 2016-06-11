@@ -78,7 +78,8 @@ else
     h = setOriginalThresh(h);
     
     % start with unit vector map
-    h.dat.img0.V = 10 * reshape(h.dat.res.lambda, h.dat.cl.Ly, h.dat.cl.Lx);
+    lam = h.dat.res.lambda;
+    h.dat.img0.V = max(0, min(1, .5 * reshape(lam, h.dat.cl.Ly, h.dat.cl.Lx)/mean(lam(:))));
     
     h.dat.ylim = [0 h.dat.cl.Ly];
     h.dat.xlim = [0 h.dat.cl.Lx];
