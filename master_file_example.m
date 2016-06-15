@@ -41,6 +41,7 @@ ops0.getSVDcomps            = 0; % whether to save SVD components to disk for la
 
 ops0.niterclustering        = 50;   % how many iterations of clustering
 
+clustrules.diameter         = 10; % expected diameter of cells (used for scaling)
 
 %%
 for iexp = 1 %:length(db)        
