@@ -7,8 +7,8 @@ ops0.NiterPrealign                    = getOr(ops0, {'NiterPrealign'}, 10);
 
 
 clustrules.diameter                 = getOr(clustrules, {'diameter'}, 10);
-clustrules.MaxNpix                  = clustrules.diameter^2 /  3;
-clustrules.MinNpix                  = clustrules.diameter^2 * 10;
+clustrules.MinNpix                  = clustrules.diameter^2 /  3;
+clustrules.MaxNpix                  = clustrules.diameter^2 * 10;
 clustrules.Compact                  = getOr(clustrules, {'Compact'}, 2);
 clustrules.parent.minPixRelVar      = getOr(clustrules.parent, {'minPixRelVar'}, 1/10);
 clustrules.parent.PixelFractionThreshold     = getOr(clustrules.parent, {'PixelFractionThreshold'}, 0.5);
