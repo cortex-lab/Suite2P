@@ -43,8 +43,11 @@ ops0.niterclustering        = 50;   % how many iterations of clustering
 
 clustrules.diameter         = 10; % expected diameter of cells (used for scaling)
 
+db0 = db;
 %%
 for iexp = 1 %:length(db)        
-     run_pipeline(db(iexp), ops0, clustrules);
+    db = db0(iexp);
+    run_pipeline;
+%      run_pipeline(db(iexp), ops0, clustrules);
 end
 %%

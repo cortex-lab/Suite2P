@@ -57,7 +57,7 @@ end
 nindx = zeros(1, ops.nplanes);
 for k = 1:length(fs)
     nimgFirst(k, :) = nindx;
-    nindx = nindx + ceil((-[0:1:(ops.nplanes-1)] + nimgall(k)/ops.nchannels)/ops.nplanes);
+    nindx = nindx + ceil((-[0:1:(ops.nplanes-1)] + nimgall(k)/ops.nchannels_red)/ops.nplanes);
 end
 %%
 for j = 1:length(fsrootRED)
@@ -90,8 +90,8 @@ for k = 1:length(fsRED)
     if nimgall(indx(k))>=median(nimgall(indx))        
         iplane0 = mod(iplane0-1, numPlanes) + 1;
          
-        ichanset = [ops.nchannels*ops.nplanes + [ops.nchannels (ntifs*ops.nchannels*ops.nplanes)] ...
-            ops.nchannels]; 
+        ichanset = [ops.nchannels_red*ops.nplanes + [ops.nchannels_red (ntifs*ops.nchannels_red*ops.nplanes)] ...
+            ops.nchannels_red]; 
         data = loadFrames(fsRED{k}, ichanset(1),ichanset(2), ichanset(3));        
         if ~exist('mimgR')
             [Ly, Lx, ~] = size(data);
@@ -108,7 +108,7 @@ for k = 1:length(fsRED)
         ntf0 = ntf0 + 1;
         
         nFr = img.nFrames(fsRED{k});
-        iplane0 = iplane0 - nFr/ops.nchannels;
+        iplane0 = iplane0 - nFr/ops.nchannels_red;
         
 %         keyboard;
     end
