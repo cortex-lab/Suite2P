@@ -90,7 +90,11 @@ else
     h           = splitROIleftright(h);
     
     icell = find(h.dat.cl.iscell);
-    h.dat.F.ichosen = icell(1); %ceil(rand * numel(icell))
+    if ~isempty(icell)
+        h.dat.F.ichosen = icell(1); %ceil(rand * numel(icell))
+    else
+         h.dat.F.ichosen = 1; %ceil(rand * numel(icell))
+    end
     
     Sat = ones(h.dat.cl.Ly, h.dat.cl.Lx);
     Sat(h.dat.res.iclust==h.dat.F.ichosen) = 0;
@@ -113,7 +117,7 @@ else
         h.dat.maxmap = h.dat.maxmap + 1;
         h.dat.mimg(:,:,h.dat.maxmap) = ops.mimg1(ops.yrange, ops.xrange);
     end
-    if isfield(ops, 'imgPV') && ~isempty(ops.imgPV)
+    if isfield(ops, 'mimgRED') && ~isempty(ops.mimgRED)
         h.dat.maxmap = h.dat.maxmap + 1;
         h.dat.mimg(:,:,h.dat.maxmap) = ops.imgPV(ops.yrange, ops.xrange);
     end
