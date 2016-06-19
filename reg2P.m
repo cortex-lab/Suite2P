@@ -216,11 +216,11 @@ for k = 1:length(fs)
         
         iplane0 = iplane0 - nFr/nchannels;
     end
-    for i = 1:numPlanes
-        ops1{i}.mimg1 = ops1{i}.mimg1/ops1{i}.Nframes(k);
-    end    
+    
 end
-
+for i = 1:numPlanes
+    ops1{i}.mimg1 = ops1{i}.mimg1/sum(ops1{i}.Nframes);
+end
 %%
 for i = 1:numPlanes    
     fclose(fid{i});

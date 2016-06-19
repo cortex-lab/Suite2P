@@ -104,5 +104,5 @@ end
 
 save(sprintf('%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ...
     ops.mouse_name, ops.date, iplane, ops.Nk),  'ops', 'res', 'stat', ...
-    'stat0', 'res0', 'Fcell', 'FcellNeu')
+    'stat0', 'res0', 'Fcell', 'FcellNeu', 'clustrules')
 

@@ -35,16 +35,10 @@ varargout{1} = h.output;
 
 function pushbutton17_Callback(hObject, eventdata, h)
 % [filename1,filepath1]=uigetfile('\\zserver\Lab\Share\Marius\', 'Select Data File');
+[filename1,filepath1]=uigetfile('D:\DATA\F\', 'Select Data File');
 
-flag = 0;
-try
-    [filename1,filepath1]=uigetfile('D:\DATA\F\', 'Select Data File');
-    h.dat = load(fullfile(filepath1, filename1));
-    flag = 1;
-end
+h.dat = load(fullfile(filepath1, filename1));
 
-if flag
-    % if the user selected a file, do all the initializations
 rng('default')
 
 % keyboard;
@@ -54,10 +48,10 @@ else
     h.dat.filename = fullfile(filepath1, filename1);
     
     h.dat.cl.Mrs      = [h.dat.stat.mrs]./[h.dat.stat.mrs0];
-    h.dat.cl.npix     = [h.dat.stat.npix];
-    h.dat.cl.Ly       = numel(h.dat.ops.yrange);
-    h.dat.cl.Lx       = numel(h.dat.ops.xrange);
-    h.dat.cl.MeanM    = 2*mean(h.dat.res.M);
+    h.dat.cl.npix     = [stat.npix];
+    h.dat.cl.Ly       = numel(ops.yrange);
+    h.dat.cl.Lx       = numel(ops.xrange);
+    h.dat.cl.MeanM    = 2*mean(res.M);
     h.dat.cl.excluded_pixels  = zeros(h.dat.cl.Ly, h.dat.cl.Lx);
     h.dat.cl.excluded_regions = zeros(h.dat.cl.Ly, h.dat.cl.Lx);
     h.dat.cl.excl_pix_perc    = zeros(h.dat.cl.Ly, h.dat.cl.Lx);
@@ -68,8 +62,8 @@ else
     
     h.dat.res.iclust = reshape(h.dat.res.iclust, h.dat.cl.Ly, h.dat.cl.Lx);
     
-    h.dat.ops.Nk = numel(h.dat.stat);
-    h.dat.cl.rands_orig   = .1 + .8 * rand(1, h.dat.ops.Nk);
+    h.dat.ops.Nk = numel(stat);
+    h.dat.cl.rands_orig   = rand(1, h.dat.ops.Nk);
     h.dat.cl.rands        = h.dat.cl.rands_orig;
     
     if isfield(h.dat, 'clustrules')
@@ -83,7 +77,8 @@ else
         h.dat.cl.npix_low_orig      = 20;
         h.dat.cl.npix_high_orig     = 500;
     end
-
+    set(h.edit35,'String', num2str(h.dat.res.Mrs_thresh_orig));
+    
     % parent rules
     h.dat.cl.mrs_parent_max = Inf;
     h.dat.cl.npix_res_max   = Inf;
@@ -93,10 +88,6 @@ else
     
     h = setOriginalThresh(h);
     
-    set(h.edit35,'String', num2str(h.dat.res.Mrs_thresh));
-    set(h.edit39,'String', num2str(h.dat.cl.npix_high));
-    set(h.edit40,'String', num2str(h.dat.cl.npix_low));
-
     % start with unit vector map
     lam = h.dat.res.lambda;
     h.dat.img0.V = max(0, min(1, .5 * reshape(lam, h.dat.cl.Ly, h.dat.cl.Lx)/mean(lam(:))));
@@ -130,21 +121,19 @@ else
     h.dat.figure.x1all = round(linspace(1/20 * h.dat.cl.Lx, h.dat.cl.Lx, 4));
     h.dat.figure.y1all = round(linspace(1/20 * h.dat.cl.Ly, h.dat.cl.Ly, 4));
     
-    h.dat.F.Fcell = h.dat.Fcell; h.dat.Fcell = [];
+    h.dat.F.Fcell = Fcell;
     
     h.dat.maxmap = 1;
-    ops = h.dat.ops;
     if isfield(ops, 'mimg1') && ~isempty(ops.mimg1)
         h.dat.maxmap = h.dat.maxmap + 1;
         h.dat.mimg(:,:,h.dat.maxmap) = ops.mimg1(ops.yrange, ops.xrange);
-        h.dat.mimg_proc(:,:,h.dat.maxmap) = normalize_image(h.dat.mimg(:,:,h.dat.maxmap));
     end
     if isfield(ops, 'mimgRED') && ~isempty(ops.mimgRED)
         h.dat.maxmap = h.dat.maxmap + 1;
         h.dat.mimg(:,:,h.dat.maxmap) = ops.mimgRED(ops.yrange, ops.xrange);
-        h.dat.mimg_proc(:,:,h.dat.maxmap) = normalize_image(h.dat.mimg(:,:,h.dat.maxmap));
     end
-    h.dat.procmap = 1;
+    
+    clear Fcell;
 end
 
 h.dat.map = 1;
@@ -157,7 +146,6 @@ redraw_fluorescence(h);
 redraw_figure(h);
 
 guidata(hObject,h)
-end
 
 function pushbutton61_Callback(hObject, eventdata, h)
 % keep TOP variance region
@@ -282,7 +270,6 @@ if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColo
     set(hObject,'BackgroundColor',[.9 .9 .9]);
 end
 function pushbutton35_Callback(hObject, eventdata, h)
-
 function pushbutton37_Callback(hObject, eventdata, h)
 function pushbutton43_Callback(hObject, eventdata, h)
 function pushbutton43_ButtonDownFcn(hObject, eventdata, h)
@@ -604,18 +591,13 @@ switch eventdata.Key
         % manual selection of units
         pushbutton64_Callback(hObject, eventdata, h);
     case 'q'
-        h.dat.map = 1;
         pushbutton87_Callback(hObject, eventdata, h);
     case 'w'
-        h.dat.map = 2;
         pushbutton89_Callback(hObject, eventdata, h);
     case 'e'
-        h.dat.map = 3;
         if h.dat.maxmap>2
             pushbutton90_Callback(hObject, eventdata, h);
         end
-    case 'p'
-        pushbutton86_Callback(hObject, eventdata, h);
 end
 
 
@@ -648,16 +630,7 @@ switch eventdata.Source.SelectionType
         h = splitROIleftright(h);
         h = buildLambdaValue(h);
     case 'extend'
-         h.dat.cl.redcell(h.dat.F.ichosen) = 1 -  h.dat.cl.redcell(h.dat.F.ichosen);
-        
-        if h.dat.cl.redcell(h.dat.F.ichosen)==1
-            h.dat.cl.rands(h.dat.F.ichosen) = 0;
-        else
-             h.dat.cl.rands(h.dat.F.ichosen) = h.dat.cl.rands_orig(h.dat.F.ichosen);
-        end
-        h.dat.img1.H       = reshape(h.dat.cl.rands(h.dat.res.iclust), h.dat.cl.Ly, h.dat.cl.Lx);
-        h.dat.img2.H       = reshape(h.dat.cl.rands(h.dat.res.iclust), h.dat.cl.Ly, h.dat.cl.Lx);
-        
+        h.dat.cl.redcell(h.dat.F.ichosen) = 1 -  h.dat.cl.redcell(h.dat.F.ichosen);
         if h.dat.cl.redcell(h.dat.F.ichosen)
            display('red') 
         else
@@ -710,7 +683,7 @@ function edit46_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to edit46 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
-set(hObject,'String', num2str(Inf));
+set(hObject,'String', num2str(400));
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
@@ -731,7 +704,7 @@ function edit47_CreateFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
-set(hObject,'String', num2str(Inf));
+set(hObject,'String', num2str(100));
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
@@ -751,7 +724,7 @@ function edit48_CreateFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
-set(hObject,'String', num2str(Inf));
+set(hObject,'String', num2str(40));
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
@@ -783,18 +756,13 @@ end
 % --- Executes on button press in pushbutton86.
 function pushbutton86_Callback(hObject, eventdata, h)
 
-h.dat.procmap = 1 -  h.dat.procmap;
-if h.dat.map>1
+if h.dat.map < h.dat.maxmap
+    h.dat.map = h.dat.map + 1;
     redraw_meanimg(h);
+else
+    h.dat.map = 1;
+    redraw_figure(h);
 end
-
-% if h.dat.map < h.dat.maxmap
-%     h.dat.map = h.dat.map + 1;
-%     redraw_meanimg(h);
-% else
-%     h.dat.map = 1;
-%     redraw_figure(h);
-% end
 guidata(hObject,h);
 
 
@@ -802,21 +770,14 @@ guidata(hObject,h);
 function pushbutton87_Callback(hObject, eventdata, h)
  h.dat.map = 1;
 redraw_figure(h);
-guidata(hObject,h);
 
 
 % --- Executes on button press in pushbutton89.
 function pushbutton89_Callback(hObject, eventdata, h)
-h.dat.map = 2;
+ h.dat.map = 2;
 redraw_meanimg(h);
-guidata(hObject,h);
 
 % --- Executes on button press in pushbutton90.
 function pushbutton90_Callback(hObject, eventdata, h)
  h.dat.map = 3;
 redraw_meanimg(h);
-guidata(hObject,h);
-
-
-
-

@@ -28,19 +28,6 @@ for j = 1:length(subDirsRed)
     end
 end
 %%
-
-for j = 1:length(ops.fsroot)
-    ops.fsroot{j}(1).nFrames = nFrames(ops.fsroot{j}(1).name);    
-    
-    for k = 2:length(ops.fsroot{j})
-       if abs(ops.fsroot{j}(1).bytes - ops.fsroot{j}(k).bytes)<10
-           ops.fsroot{j}(k).nFrames = ops.fsroot{j}(1).nFrames;
-        else
-            ops.fsroot{j}(k).nFrames = nFrames(ops.fsroot{j}(k).name);
-       end
-    end
-end
-
 %% check if the RED channel file has already been registered, find indices to shift by
 fsRED   = [];
 fs      = [];
@@ -48,10 +35,23 @@ nimg    = [];
 nimgall = [];
 
 nimgFirst = zeros(length(ops.fsroot), ops.nplanes);
+
 for j = 1:length(ops.fsroot)
-    fs = [fs {ops.fsroot{j}.name}];
-    nimg{j} = [ops.fsroot{j}.nFrames];
-    nimgall = [nimgall ops.fsroot{j}.nFrames];
+    if ~isempty(ops.fsroot{j})
+        ops.fsroot{j}(1).nFrames = nFrames(ops.fsroot{j}(1).name);
+        
+        for k = 2:length(ops.fsroot{j})
+            if abs(ops.fsroot{j}(1).bytes - ops.fsroot{j}(k).bytes)<10
+                ops.fsroot{j}(k).nFrames = ops.fsroot{j}(1).nFrames;
+            else
+                ops.fsroot{j}(k).nFrames = nFrames(ops.fsroot{j}(k).name);
+            end
+        end
+        
+        fs = [fs {ops.fsroot{j}.name}];
+        nimg{j} = [ops.fsroot{j}.nFrames];
+        nimgall = [nimgall ops.fsroot{j}.nFrames];
+    end
 end
 %
 nindx = zeros(1, ops.nplanes);
