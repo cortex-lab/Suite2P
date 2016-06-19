@@ -38,8 +38,15 @@ function pushbutton17_Callback(hObject, eventdata, h)
 
 flag = 0;
 try
-    [filename1,filepath1]=uigetfile('D:\DATA\F\', 'Select Data File');
+    if isfield(h, 'dat') && isfield(h.dat, 'filename')
+        root = fileparts(h.dat.filename);
+    else
+        root = 'D:\DATA\F\';
+    end
+    [filename1,filepath1]=uigetfile(root, 'Select Data File');
     h.dat = load(fullfile(filepath1, filename1));
+    set(h.figure1, 'Name', filename1);
+
     flag = 1;
 end
 
@@ -96,7 +103,14 @@ else
     set(h.edit35,'String', num2str(h.dat.res.Mrs_thresh));
     set(h.edit39,'String', num2str(h.dat.cl.npix_high));
     set(h.edit40,'String', num2str(h.dat.cl.npix_low));
-
+    
+    % set all quadrants as not visited
+    h.quadvalue = zeros(3);
+    for j = 1:3
+        for i = 1:3
+            set(h.(sprintf('Q%d%d', j,i)), 'BackgroundColor',[.92 .92 .92]);
+        end
+    end
     % start with unit vector map
     lam = h.dat.res.lambda;
     h.dat.img0.V = max(0, min(1, .5 * reshape(lam, h.dat.cl.Ly, h.dat.cl.Lx)/mean(lam(:))));
@@ -532,50 +546,65 @@ end
 function Q11_Callback(hObject, eventdata, h)
 iy = 1; ix = 1;
 quadrant(hObject, h, iy, ix)
+paint_quadbutton(h, iy, ix);
 
 % --- Executes on button press in Q12.
 function Q12_Callback(hObject, eventdata, h)
 iy = 1; ix = 2;
 quadrant(hObject, h, iy, ix)
+paint_quadbutton(h, iy, ix);
 
 % --- Executes on button press in Q13.
 function Q13_Callback(hObject, eventdata, h)
 iy = 1; ix = 3;
 quadrant(hObject, h, iy, ix)
+paint_quadbutton(h, iy, ix);
 
 % --- Executes on button press in Q21.
 function Q21_Callback(hObject, eventdata, h)
 iy = 2; ix = 1;
 quadrant(hObject, h, iy, ix)
+paint_quadbutton(h, iy, ix);
 
 % --- Executes on button press in Q22.
 function Q22_Callback(hObject, eventdata, h)
-xlall = round(linspace(0, h.dat.cl.Lx, 4));
-ylall = round(linspace(0, h.dat.cl.Ly, 4));
 iy = 2; ix = 2;
-h.dat.ylim = [ylall(iy) ylall(iy+1)];
-h.dat.xlim = [xlall(ix) xlall(ix+1)];
-guidata(hObject,h);
-redraw_figure(h);
+quadrant(hObject, h, iy, ix)
+paint_quadbutton(h, iy, ix);
+
 % --- Executes on button press in Q23.
 function Q23_Callback(hObject, eventdata, h)
 iy = 2; ix = 3;
 quadrant(hObject, h, iy, ix)
+paint_quadbutton(h, iy, ix);
 
 % --- Executes on button press in Q31.
 function Q31_Callback(hObject, eventdata, h)
 iy = 3; ix = 1;
 quadrant(hObject, h, iy, ix)
+paint_quadbutton(h, iy, ix);
 
 % --- Executes on button press in Q32.
 function Q32_Callback(hObject, eventdata, h)
 iy = 3; ix = 2;
 quadrant(hObject, h, iy, ix)
+paint_quadbutton(h, iy, ix);
 
 % --- Executes on button press in Q33.
 function Q33_Callback(hObject, eventdata, h)
 iy = 3; ix = 3;
-quadrant(hObject, h, iy, ix)
+quadrant(hObject, h, iy, ix);
+paint_quadbutton(h, iy, ix);
+
+function paint_quadbutton(h, iy, ix)
+for j = 1:3
+    for i = 1:3
+        if h.quadvalue(j,i)==1
+            set(h.(sprintf('Q%d%d', j,i)), 'BackgroundColor','yellow'); 
+        end
+    end
+end
+set(h.(sprintf('Q%d%d', iy,ix)), 'BackgroundColor','red'); 
 
 % --- Executes on button press in full.
 function full_Callback(hObject, eventdata, h)
@@ -587,6 +616,8 @@ redraw_figure(h);
 function quadrant(hObject, h, iy, ix)
 h.dat.ylim = [h.dat.figure.y0all(iy) h.dat.figure.y1all(iy+1)];
 h.dat.xlim = [h.dat.figure.x0all(ix) h.dat.figure.x1all(ix+1)];
+h.quadvalue(iy, ix) = 1;
+
 guidata(hObject,h);
 redraw_figure(h);
 
