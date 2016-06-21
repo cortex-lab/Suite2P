@@ -11,7 +11,7 @@ end
 ops0.clustModel             = 'neuropil'; % standard or neuropil
 ops0.neuropilSub            = 'model'; % none, surround or model
 
-ops0.useGPU                 = 0; % if you can use a GPU in matlab this accelerate registration approx 3 times
+ops0.useGPU                 = 0; % if you can use an Nvidia GPU in matlab this accelerate registration approx 3 times. You only need the Nvidia drivers installed (not CUDA).
 ops0.doRegistration         = 1; % skip if the data is already registered
 
 % root paths for files and temporary storage (ideally an SSD drive. my SSD is C:/)
