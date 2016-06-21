@@ -43,8 +43,6 @@ for i = 1:length(ops.planesToProcess)
     end
     if ops.getROIs || getOr(ops, {'writeSVDroi'}, 0)
         [ops, U, Sv]    = get_svdForROI(ops);
-%         ops.U           = U(:,:,1:20);
-%         ops.Sv          = Sv(1:20);
     end
     if ops.getROIs
         switch clustModel
@@ -54,9 +52,7 @@ for i = 1:length(ops.planesToProcess)
                 [ops, stat, res]  = fast_clustering_with_neuropil(ops,U, Sv);
         end
         
-%         keyboard;
         [stat2, res2] = apply_ROIrules(ops, stat, res, clustrules);
-        
         
         switch neuropilSub
             case 'surround'
