@@ -10,7 +10,11 @@ clustrules.diameter                 = getOr(clustrules, {'diameter'}, 10);
 clustrules.MinNpix                  = clustrules.diameter^2 /  3;
 clustrules.MaxNpix                  = clustrules.diameter^2 * 10;
 clustrules.Compact                  = getOr(clustrules, {'Compact'}, 2);
-
+clustrules.parent                   = getOr(clustrules, {'parent'}, []);
+clustrules.parent.minPixRelVar      = getOr(clustrules.parent, {'minPixRelVar'}, 1/10);
+clustrules.parent.PixelFractionThreshold     = getOr(clustrules.parent, {'PixelFractionThreshold'}, 0.5);
+clustrules.parent.MaxRegions        = getOr(clustrules.parent, {'MaxRegions'}, 10);
+ 
 ops = build_ops3(db, ops0);
 
 if ops.useGPU
