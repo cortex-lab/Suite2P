@@ -1,4 +1,4 @@
-function stat = get_regions(stat, res, clustrules)
+function stat = get_regions(stat, res)
 
 Ly = res.Ly;
 Lx = res.Lx;
@@ -23,8 +23,8 @@ for k = 1:Nk
     % needs stat, res, neigh
     pixall = stat(k).ipix;
 
-    minV = clustrules.parent.minPixRelVar * mean(res.M(pixall));
-    pixall(res.M(pixall)< minV) = [];
+%     minV = clustrules.parent.minPixRelVar * mean(res.M(pixall));
+%     pixall(res.M(pixall)< minV) = [];
     
     whclust = 0;
     region = [];

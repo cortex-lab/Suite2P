@@ -1,6 +1,6 @@
 function [stat, res] = apply_ROIrules(ops, stat0, res0, clustrules)
 
-stat0    = get_regions(stat0, res0, clustrules);
+stat0    = get_regions(stat0, res0);
 
 %%
 if 1
