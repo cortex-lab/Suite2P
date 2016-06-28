@@ -51,8 +51,7 @@ for icell = 1:11
         for i = 1:Nbasis
             X0 = conv(kerns(:,i), fs);
             X(:,i) = X0(1:NT);
-        end
-        
+        end        
         X(:, Nbasis+1)= 1;
         
         if iter>1

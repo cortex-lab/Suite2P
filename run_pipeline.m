@@ -1,4 +1,4 @@
-function run_pipeline(db, ops0, clustrules)
+% function  run_pipeline(db, ops0, clustrules)
 
 
 ops0.nimgbegend                     = getOr(ops0, {'nimgbegend'}, 250);
@@ -7,6 +7,7 @@ ops0.NiterPrealign                    = getOr(ops0, {'NiterPrealign'}, 10);
 
 
 clustrules.diameter                 = getOr(clustrules, {'diameter'}, 10);
+ops0.diameter                        = clustrules.diameter;
 clustrules.MinNpix                  = clustrules.diameter^2 /  3;
 clustrules.MaxNpix                  = clustrules.diameter^2 * 10;
 clustrules.Compact                  = getOr(clustrules, {'Compact'}, 2);
@@ -25,21 +26,23 @@ end
 clustModel     = getOr(ops, {'clustModel'}, 'standard');
 neuropilSub    = getOr(ops, {'neuropilSub'}, 'surround');
 splitBlocks    = getOr(ops, {'splitBlocks'}, 'none');
-
+%
 if iscell(splitBlocks)
     ops1         = blockReg2P(ops);  % do registration
 else
     ops1         = reg2P(ops);  % do registration
 end
- %%
+%
+
 for i = 1:length(ops.planesToProcess)
     iplane  = ops.planesToProcess(i);
     ops     = ops1{i};
+    %
     
     ops.iplane  = iplane;
     if numel(ops.yrange)<10 || numel(ops.xrange)<10
         warning('valid range after registration very small, continuing to next plane')
-        continue;
+%         continue;
     end
     
     if getOr(ops, {'getSVDcomps'}, 0)
@@ -48,12 +51,14 @@ for i = 1:length(ops.planesToProcess)
     if ops.getROIs || getOr(ops, {'writeSVDroi'}, 0)
         [ops, U, Sv]    = get_svdForROI(ops);
     end
+    
     if ops.getROIs
         switch clustModel
             case 'standard'
                 [ops, stat, res]  = fast_clustering(ops,U, Sv);
-            case 'neuropil'
-                [ops, stat, res]  = fast_clustering_with_neuropil(ops,U, Sv);
+            case 'neuropil'                    
+%                 [ops, stat, res]  = fast_clustering_with_neuropil(ops,U, Sv);
+                  [ops, stat, res]  = fastClustNeuropilCoef(ops,U, Sv);
         end
         
         [stat2, res2] = apply_ROIrules(ops, stat, res, clustrules);

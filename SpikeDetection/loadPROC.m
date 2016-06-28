@@ -26,8 +26,8 @@ for iplane = igpl
     
     [NN NT] = size(Fcell{1});
 
-    iscell = logical(dat.cl.iscell);
-    statall          = cat(1, statall, dat.stat(iscell)');
+    iscell  = logical(dat.cl.iscell);
+    statall = cat(1, statall, dat.stat(iscell)');
     redcell = cat(1, redcell, dat.cl.redcell(iscell));
     
     for j = 1:length(Fcell)
@@ -80,9 +80,6 @@ parfor i = 1:NN
     Ff(:,i) = Ff(:,i) - ordfilt2(Ff(:,i), 31 * ceil(f0/3), true(201 * ceil(f0/3),1), 'symmetric');
     Ff(:,i) = Ff(:,i) - median(Ff(:,i)); 
 end
-
-sd = std(Ff - my_conv2(Ff, 2, 1), [], 1);
-Ff = 2 * Ff ./ repmat(1e-5 + sd, size(Ff,1), 1);
 
 res.med     = med;
 res.statall = statall;

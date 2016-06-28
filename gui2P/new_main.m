@@ -48,6 +48,7 @@ try
     set(h.figure1, 'Name', filename1);
 
     flag = 1;
+catch
 end
 
 if flag

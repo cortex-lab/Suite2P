@@ -40,7 +40,7 @@ for j = 1:length(ops.fsroot)
     if ~isempty(ops.fsroot{j})
         ops.fsroot{j}(1).nFrames = nFrames(ops.fsroot{j}(1).name);
         
-        for k = 2:length(ops.fsroot{j})
+        for k = 1:length(ops.fsroot{j})
             if abs(ops.fsroot{j}(1).bytes - ops.fsroot{j}(k).bytes)<10
                 ops.fsroot{j}(k).nFrames = ops.fsroot{j}(1).nFrames;
             else
