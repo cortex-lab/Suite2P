@@ -9,9 +9,16 @@ load(fullfile(ops.toolbox_path, 'SpikeDetection\kernel.mat'));
 for i = 1:length(ops.planesToProcess)
     iplane  = ops.planesToProcess(i);
     
-    fpath = sprintf('%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ...
+    fpath = sprintf('%s/F_%s_%s_plane%d_Nk%d_proc.mat', ops.ResultsSavePath, ...
         ops.mouse_name, ops.date, iplane, ops.Nk);
-    dat = load(fpath);
+    if exist(fpath, 'file')
+        load(fpath);
+    else
+        fpath = sprintf('%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ...
+            ops.mouse_name, ops.date, iplane, ops.Nk);
+        dat = load(fpath);
+    end
+    
     if isfield('dat', 'dat')
         dat = dat.dat; % just in case trying to load processed files
     end

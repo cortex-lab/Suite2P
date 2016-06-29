@@ -60,7 +60,8 @@ Npix = Ly * Lx;
 M = .0001 * ones(1, Npix, 'single');
 
 ison = true(Nk,1);
-nTiles = ceil((Ly+Lx)/2 / (10 * ops.diameter)); % neuropil is modelled as nTiles by nTiles 
+TileFactor = getOR(ops, {'TileFactor'}, 1); % this option can be overwritten by the user
+nTiles = ceil(TileFactor * (Ly+Lx)/2 / (10 * ops.diameter)); % neuropil is modelled as nTiles by nTiles 
 
 xc = linspace(1, Lx, nTiles);
 yc = linspace(1, Ly, nTiles);

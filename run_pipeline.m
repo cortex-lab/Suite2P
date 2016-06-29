@@ -1,6 +1,8 @@
 function  run_pipeline(db, ops0, clustrules)
 
 
+% ops0.TileFactor (or db(iexp).TileFactor) can be set to multiply the number of default tiles for the neuropil
+
 ops0.nimgbegend                     = getOr(ops0, {'nimgbegend'}, 250);
 ops0.LoadRegMean                    = getOr(ops0, {'LoadRegMean'}, 0);
 ops0.NiterPrealign                  = getOr(ops0, {'NiterPrealign'}, 10);
