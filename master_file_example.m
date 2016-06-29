@@ -7,7 +7,7 @@ make_db_example; % RUN YOUR OWN MAKE DB FILE HERE
 
 ops0.toolbox_path = 'D:\CODE\GitHub\Suite2P';
 if exist(ops0.toolbox_path, 'dir')
-	addpath(ops0.toolbox_path) % add local path to the toolbox
+	addpath(genpath(ops0.toolbox_path)) % add local path to the toolbox
 else
 	error('toolbox_path does not exist, please change toolbox_path');
 end
