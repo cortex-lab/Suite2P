@@ -17,6 +17,9 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+# My ignored files
+*.asv
+
 # =========================
 # Operating System Files
 # =========================
