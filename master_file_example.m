@@ -15,7 +15,7 @@ end
 ops0.useGPU                 = 1; % if you can use an Nvidia GPU in matlab this accelerates registration approx 3 times. You only need the Nvidia drivers installed (not CUDA).
 
 % root paths for files and temporary storage (ideally an SSD drive. my SSD is C:/)
-ops0.RootStorage            = '/zserver4/Data/2P'; % Suite2P assumes a folder structure, check out README file
+ops0.RootStorage            = '//zserver4/Data/2P'; % Suite2P assumes a folder structure, check out README file
 ops0.temp_tiff              = 'C:/DATA/temp.tif'; % copy each remote tiff locally first, into this file
 ops0.RegFileRoot            = 'C:/DATA/';  % location for binary file
 ops0.DeleteBin              = 1; % set to 1 for batch processing on a limited hard drive
