@@ -97,8 +97,10 @@ csumNframes = [0 cumsum(ops.Nframes)];
 Fcell       = cell(1, length(ops.Nframes));
 FcellNeu    = cell(1, length(ops.Nframes));
 for i = 1:length(ops.Nframes)
-    Fcell{i} = Fneu(:, csumNframes(i) + (1:ops.Nframes(i)));
-    FcellNeu{i} = F(:, csumNframes(i) + (1:ops.Nframes(i))) - Fcell{i};
+%     Fcell{i} = Fneu(:, csumNframes(i) + (1:ops.Nframes(i)));
+%     FcellNeu{i} = F(:, csumNframes(i) + (1:ops.Nframes(i))) - Fcell{i};
+    Fcell{i} = F(:, csumNframes(i) + (1:ops.Nframes(i)));
+    FcellNeu{i} = Fcell{i} - Fneu(:, csumNframes(i) + (1:ops.Nframes(i)));
 %     FcellNeu{i} =  F(:, csumNframes(i) + (1:ops.Nframes(i))) - Fcell{i};
 end
 

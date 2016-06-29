@@ -1,11 +1,8 @@
-function add_deconvolution(ops, db, flag)
+function add_deconvolution(ops, db)
 % if neuropil was obtained by the old "model" method (pre 28.06.16)
 % then set flag to 'old_model'
 ops = build_ops3(db, ops);
 
-if nargin<3
-    flag = 'standard';
-end
 % load the initialization of the kernel    
 load(fullfile(ops.toolbox_path, 'SpikeDetection\kernel.mat'));
 
@@ -19,6 +16,9 @@ for i = 1:length(ops.planesToProcess)
         dat = dat.dat; % just in case trying to load processed files
     end
     
+    % overwrite fields of ops with those saved to file
+    ops = addfields(ops, dat.ops);
+    
     isroi = [dat.stat.mrs]./[dat.stat.mrs0]<dat.clustrules.Compact & ...
         [dat.stat.npix]>dat.clustrules.MinNpix & [dat.stat.npix]<dat.clustrules.MaxNpix;
     
@@ -28,10 +28,11 @@ for i = 1:length(ops.planesToProcess)
         Ff   = cat(1, Ff, dat.Fcell{1}(isroi, :)');
         Fneu = cat(1,Fneu, dat.FcellNeu{1}(isroi, :)');        
     end
-    switch flag
-        case 'old_model'
-            Fneu = -Fneu;
-            Ff   = Ff + Fneu;
+    
+    if mean(sign(dat.FcellNeu{1}(:)))<0
+        % then it means this was processed with old "model" option
+        Fneu = -Fneu;
+        Ff   = Ff + Fneu;
     end
     
     dcell = run_deconvolution3(ops, Ff, Fneu, kernel);

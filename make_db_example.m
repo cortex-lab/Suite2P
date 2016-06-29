@@ -20,3 +20,5 @@ db(i).expts         = [4];
 % db(i).BiDiPhase        = 0; % adjust the relative phase of consecutive lines
 % db(i).nSVD             = 1000; % will overwrite the default, only for this dataset
 % db(i).comments      = 'this was an adaptation experiment';
+% db(i).expred        = [4]; % say one block which had a red channel 
+% db(i).nchannels_red = 2; % how many channels did the red block have in total (assumes red is last)

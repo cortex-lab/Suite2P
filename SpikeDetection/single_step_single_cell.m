@@ -1,4 +1,4 @@
-function [kernel, F1, dcell, Ffr]= single_step_single_cell(Ff, F1, Fneu, Params, kernel, kerns, NT, npad, dcell)
+function [kernel, F1, dcell, Ffr]= single_step_single_cell(ops, Ff, F1, Fneu, Params, kernel, kerns, NT, npad, dcell)
 
 
 Nbasis = size(kerns, 2);
@@ -10,6 +10,7 @@ fs(st+1) = c;
 X0 = conv(kernel, fs);
 A = [X0(npad + [1:NT], 1) ones(NT,1) Fneu];
 B = (Ff' * A) / (A'*A);
+B(3) = min(B(3), ops.maxNeurop);  % force neuropil coefficient below a value
 
 if nargout<=2
     % if only two outputs, re-estimate parameters and 

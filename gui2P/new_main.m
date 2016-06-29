@@ -117,12 +117,11 @@ else
     h.dat.img0.V = max(0, min(1, .5 * reshape(lam, h.dat.cl.Ly, h.dat.cl.Lx)/mean(lam(:))));
     
     h.dat.ylim = [0 h.dat.cl.Ly];
-    h.dat.xlim = [0 h.dat.cl.Lx];
+    h.dat.xlim = [0 h.dat.cl.Lx];    
     
-    
-    h.dat.cl.manual = zeros(h.dat.ops.Nk, 1);
+    h.dat.cl.manual  = zeros(h.dat.ops.Nk, 1);
     h.dat.cl.redcell = zeros(h.dat.ops.Nk, 1);
-    h           = splitROIleftright(h);
+    h                = splitROIleftright(h);
     
     icell = find(h.dat.cl.iscell);
     if ~isempty(icell)
@@ -145,27 +144,54 @@ else
     h.dat.figure.x1all = round(linspace(1/20 * h.dat.cl.Lx, h.dat.cl.Lx, 4));
     h.dat.figure.y1all = round(linspace(1/20 * h.dat.cl.Ly, h.dat.cl.Ly, 4));
     
-    h.dat.F.Fcell = h.dat.Fcell; h.dat.Fcell = [];
-    
-    h.dat.maxmap = 1;
-    ops = h.dat.ops;
-    if isfield(ops, 'mimg1') && ~isempty(ops.mimg1)
-        h.dat.maxmap = h.dat.maxmap + 1;
-        h.dat.mimg(:,:,h.dat.maxmap) = ops.mimg1(ops.yrange, ops.xrange);
-        h.dat.mimg_proc(:,:,h.dat.maxmap) = normalize_image(h.dat.mimg(:,:,h.dat.maxmap));
+    h.dat.F.Fcell = h.dat.Fcell; h.dat.Fcell = [];    
+    if isfield(h.dat, 'FcellNeu')
+        h.dat.F.FcellNeu = h.dat.FcellNeu; h.dat.FcellNeu = [];
+        if mean(sign(h.dat.F.FcellNeu{1}))<0
+            for j = 1:length(h.dat.F.FcellNeu)
+                h.dat.F.FcellNeu{j} = - h.dat.F.FcellNeu{j};
+                h.dat.F.Fcell{j} = h.dat.F.Fcell{j} + h.dat.F.FcellNeu{j};
+            end
+        end    
+        if isfield(h.dat.cl, 'dcell')
+            for k = 1:length(h.dat.cl.dcell)
+                for j = 1:length(h.dat.F.FcellNeu)
+                    if isfield(h.dat.cl.dcell, 'B')
+                        c2 = h.dat.cl.dcell.B(3);
+                        c1 = h.dat.cl.dcell.B(2);
+                        h.dat.F.FcellNeu{j} = c1 + c2 * h.dat.F.FcellNeu{j};
+                    end
+                end
+            end
+        end
     end
-    if isfield(ops, 'mimgRED') && ~isempty(ops.mimgRED)
-        h.dat.maxmap = h.dat.maxmap + 1;
-        h.dat.mimg(:,:,h.dat.maxmap) = ops.mimgRED(ops.yrange, ops.xrange);
-        h.dat.mimg_proc(:,:,h.dat.maxmap) = normalize_image(h.dat.mimg(:,:,h.dat.maxmap));
-    end
-    h.dat.procmap = 1;
 end
+
+h.dat.maxmap = 1;
+ops = h.dat.ops;
+if isfield(ops, 'mimg1') && ~isempty(ops.mimg1)
+    h.dat.maxmap = h.dat.maxmap + 1;
+    h.dat.mimg(:,:,h.dat.maxmap) = ops.mimg1(ops.yrange, ops.xrange);
+    h.dat.mimg_proc(:,:,h.dat.maxmap) = normalize_image(h.dat.mimg(:,:,h.dat.maxmap));
+end
+if isfield(ops, 'mimgRED') && ~isempty(ops.mimgRED)
+    h.dat.maxmap = h.dat.maxmap + 1;
+    h.dat.mimg(:,:,h.dat.maxmap) = ops.mimgRED(ops.yrange, ops.xrange);
+    h.dat.mimg_proc(:,:,h.dat.maxmap) = normalize_image(h.dat.mimg(:,:,h.dat.maxmap));
+end
+h.dat.procmap = 0;
 
 h.dat.map = 1;
 h.dat.F.trace = [];
 for i = 1:length(h.dat.F.Fcell)
     h.dat.F.trace = cat(2, h.dat.F.trace, h.dat.F.Fcell{i});
+end
+if isfield(h.dat.F, 'FcellNeu')
+    h.dat.F.neurop = [];
+    for i = 1:length(h.dat.F.FcellNeu)
+        h.dat.F.neurop = cat(2, h.dat.F.neurop, h.dat.F.FcellNeu{i});
+    end    
+    h.dat.plot_neu = 0;
 end
 
 redraw_fluorescence(h);
@@ -208,22 +234,10 @@ function slider2_CreateFcn(hObject, eventdata, h)
 if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor',[.9 .9 .9]);
 end
-function pushbutton16_Callback(hObject, eventdata, h)
-function pushbutton15_Callback(hObject, eventdata, h)
-function pushbutton14_Callback(hObject, eventdata, h)
-function pushbutton13_Callback(hObject, eventdata, h)
-function pushbutton12_Callback(hObject, eventdata, h)
-function pushbutton11_Callback(hObject, eventdata, h)
-function pushbutton10_Callback(hObject, eventdata, h)
-function pushbutton9_Callback(hObject, eventdata, h)
-function pushbutton8_Callback(hObject, eventdata, h)
-function pushbutton6_Callback(hObject, eventdata, h)
-function slider3_Callback(hObject, eventdata, h)
-function slider3_CreateFcn(hObject, eventdata, h)
-if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor',[.9 .9 .9]);
-end
-function slider1_Callback(hObject, eventdata, h)
+    
+    if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+        set(hObject,'BackgroundColor',[.9 .9 .9]);
+    end
 function slider1_CreateFcn(hObject, eventdata, h)
 if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor',[.9 .9 .9]);
@@ -631,7 +645,9 @@ switch eventdata.Key
         h = splitROIleftright(h);
         h = buildLambdaValue(h);
         guidata(hObject,h);
-        redraw_figure(h);
+        if h.dat.maxmap==1
+            redraw_figure(h);
+        end
     case 's'
         % manual selection of units
         pushbutton64_Callback(hObject, eventdata, h);
@@ -852,3 +868,19 @@ guidata(hObject,h);
 
 
 
+
+
+% --- Executes on button press in pushbutton91.
+function pushbutton91_Callback(hObject, eventdata, h)
+h.dat.plot_neu = 1 - h.dat.plot_neu;
+redraw_fluorescence(h)
+guidata(hObject,h);
+
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over pushbutton86.
+function pushbutton86_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to pushbutton86 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)

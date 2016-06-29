@@ -1,12 +1,7 @@
 function ops = build_ops3(db, ops)
 
 % ops = db;
-fieldNames = fieldnames(db);
-for i = 1:size(fieldNames,1)
-    if ~isempty(db.(fieldNames{i}))
-        ops.(fieldNames{i}) = db.(fieldNames{i});
-    end
-end
+ops = addfields(ops, db);
 
 for k = 1:length(db.expts)
     ops.SubDirs{k}    = num2str(db.expts(k));

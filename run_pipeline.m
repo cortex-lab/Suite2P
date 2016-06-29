@@ -1,15 +1,21 @@
-% function  run_pipeline(db, ops0, clustrules)
+function  run_pipeline(db, ops0, clustrules)
 
 
 ops0.nimgbegend                     = getOr(ops0, {'nimgbegend'}, 250);
 ops0.LoadRegMean                    = getOr(ops0, {'LoadRegMean'}, 0);
-ops0.NiterPrealign                    = getOr(ops0, {'NiterPrealign'}, 10);
+ops0.NiterPrealign                  = getOr(ops0, {'NiterPrealign'}, 10);
+ops0.registrationUpsample           = getOr(ops0, {'registrationUpsample'}, 1);  % upsampling factor during registration, 1 for no upsampling is much faster, 2 may give better subpixel accuracy
+ops0.niterclustering                = getOr(ops0, {'niterclustering'}, 50);   % how many iterations of clustering
+ops0.getROIs                        = getOr(ops0, {'getROIs'}, 1);   % whether to run the optimization
+ops0.getSVDcomps                    = getOr(ops0, {'getSVDcomps'}, 0);   % whether to save SVD components to disk for later processing
+ops0.nSVD                           = getOr(ops0, {'nSVD'}, 1000);   % how many SVD components to save to disk
 
-
+clustrules.npix_fraclow             = getOr(clustrules, {'npix_fraclow'}, 1/4);
+clustrules.npix_frachigh            = getOr(clustrules, {'npix_frachigh'}, 10);
 clustrules.diameter                 = getOr(clustrules, {'diameter'}, 10);
-ops0.diameter                        = clustrules.diameter;
-clustrules.MinNpix                  = clustrules.diameter^2 /  3;
-clustrules.MaxNpix                  = clustrules.diameter^2 * 10;
+ops0.diameter                       = clustrules.diameter;
+clustrules.MinNpix                  = pi/4 * clustrules.diameter^2 *clustrules.npix_fraclow;
+clustrules.MaxNpix                  = pi/4 * clustrules.diameter^2 * clustrules.npix_frachigh;
 clustrules.Compact                  = getOr(clustrules, {'Compact'}, 2);
 clustrules.parent                   = getOr(clustrules, {'parent'}, []);
 clustrules.parent.minPixRelVar      = getOr(clustrules.parent, {'minPixRelVar'}, 1/10);
@@ -33,7 +39,7 @@ else
     ops1         = reg2P(ops);  % do registration
 end
 %
-
+%%
 for i = 1:length(ops.planesToProcess)
     iplane  = ops.planesToProcess(i);
     ops     = ops1{i};
@@ -58,6 +64,7 @@ for i = 1:length(ops.planesToProcess)
                 [ops, stat, res]  = fast_clustering(ops,U, Sv);
             case 'neuropil'                    
 %                 [ops, stat, res]  = fast_clustering_with_neuropil(ops,U, Sv);
+                  % better model of the neuropil
                   [ops, stat, res]  = fastClustNeuropilCoef(ops,U, Sv);
         end
         
