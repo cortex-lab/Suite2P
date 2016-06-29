@@ -6,7 +6,7 @@ addpath('D:\CODE\MariusBox\runSuite2P') % add the path to your make_db file
 make_db_example; % RUN YOUR OWN MAKE DB FILE HERE
 
 ops0.toolbox_path = 'D:\CODE\GitHub\Suite2P';
-if exist(toolbox_path, 'dir')
+if exist(ops0.toolbox_path, 'dir')
 	addpath(ops0.toolbox_path) % add local path to the toolbox
 else
 	error('toolbox_path does not exist, please change toolbox_path');
