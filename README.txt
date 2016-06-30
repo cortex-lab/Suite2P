@@ -1,4 +1,4 @@
-The paper which describes the algorithms implemented here is available at:
+The paper which describes the algorithms implemented here is available at: http://biorxiv.org/content/early/2016/06/30/061507
 
 This code was written by Marius Pachitariu and members of the lab of Kenneth Harris and Matteo Carandini. It is provided here with no warranty. Please direct all questions and requests to marius10patgmaildotcom. 
 
@@ -18,7 +18,7 @@ This is a complete automated pipeline for processing two-photon Calcium imaging 
 
 II. Getting started
 
-The toolbox runs in Matlab (+ one mex file) and currently only supports tiff file inputs. To begin using the toolbox, you will need to make local copies (in a separate folder) of two included files: master_file and make_db. It is important that you make local copies of these files, otherwise updating the repository will overwrite them. The make_db file assembles a database of experiments that you would like to be processed in batch. It also adds per-session specific information that the algorithm requires such as the number of imaged planes and channels. The master_file sets general processing options that are applied to all sessions included in make_db, UNLESS the option is over-ridden in the make_db file.  The global and session-specific options are described in detail below. 
+The toolbox runs in Matlab (+ one mex file) and currently only supports tiff file inputs. To begin using the toolbox, you will need to make local copies (in a separate folder) of two included files: master_file and make_db. It is important that you make local copies of these files, otherwise updating the repository will overwrite them (and you can lose your files). The make_db file assembles a database of experiments that you would like to be processed in batch. It also adds per-session specific information that the algorithm requires such as the number of imaged planes and channels. The master_file sets general processing options that are applied to all sessions included in make_db, UNLESS the option is over-ridden in the make_db file.  The global and session-specific options are described in detail below. 
 
 For spike deconvolution, you need to run mex -largeArrayDims SpikeDetection/deconvL0.c (or .cpp)
 
