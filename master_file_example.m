@@ -3,14 +3,16 @@
 addpath('D:\CODE\MariusBox\runSuite2P') % add the path to your make_db file
 
 % overwrite any of these default options in your make_db file for individual experiments
-make_db_example; % RUN YOUR OWN MAKE DB FILE HERE
+make_db_example; % RUN YOUR OWN MAKE_DB SCRIPT TO RUN HERE
 
-ops0.toolbox_path = 'D:\CODE\GitHub\Suite2P';
+ops0.toolbox_path = 'C:\CODE\GitHub\Suite2P';
 if exist(ops0.toolbox_path, 'dir')
 	addpath(genpath(ops0.toolbox_path)) % add local path to the toolbox
 else
 	error('toolbox_path does not exist, please change toolbox_path');
 end
+
+% mex -largeArrayDims SpikeDetection/deconvL0.c (or .cpp) % MAKE SURE YOU COMPILE THIS FIRST FOR DECONVOLUTION
 
 ops0.useGPU                 = 1; % if you can use an Nvidia GPU in matlab this accelerates registration approx 3 times. You only need the Nvidia drivers installed (not CUDA).
 
@@ -43,7 +45,7 @@ clustrules.diameter         = 10; % expected diameter of cells (used for 0.25 * 
 % spike deconvolution options
 ops0.imageRate              = 30/5;   % imaging rate per plane. Approximate, for initialization of deconvolution kernel.  
 ops0.sensorTau              = 2; % decay half-life (or timescale). Approximate, for initialization of deconvolution kernel.
-ops0.maxNeurop              = Inf; % for the neuropil contamination to be less than this (sometimes good, i.e. for interneurons)
+ops0.maxNeurop              = Inf; % neuropil contamination coef has to be less than this (sometimes good, i.e. for interneurons)
 
 db0 = db;
 %% RUN THE PIPELINE HERE
@@ -57,7 +59,7 @@ for iexp = 1 %:length(db)
     %     run_REDaddon(iexp, db, ops0) ;
 end
 %% STRUCTURE OF RESULTS FILE
-
+% 
 % cell traces are in dat.F.Fcell
 % neuropil traces are in dat.F.FcellNeu
 % neuropil subtraction coefficient is dat.cl.dcell{i}.B(3)

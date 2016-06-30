@@ -16,7 +16,7 @@ sd   = std(Ff - my_conv2(Ff, 2, 1), [], 1);
 Ff   = 2 * Ff ./ repmat(1e-5 + sd, size(Ff,1), 1);
 Fneu = 2 * Fneu ./ repmat(1e-5 + sd, size(Ff,1), 1);
 
-Params = [1 3 3 3000]; %type of deconvolution, Th, Thi(nner loop), maxiter
+Params = [1 3 3 2e4]; %type of deconvolution, Th, Thi(nner loop), max Nspikes
 
 f0 = (mtau/2); % resample the initialization of the kernel to the right number of samples
 kernel = interp1(1:numel(kernel), kernel, ...
