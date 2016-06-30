@@ -54,11 +54,15 @@ if ops.doRegistration
             end
             
             iplane0 = mod(iplane0-1, nplanes) + 1;
+            offset = 0;
+            if j==1
+                offset = nchannels*nplanes;
+            end
             if red_align
-                ichanset = [nchannels*nplanes + nchannels*(iplane0-1) + [rchannel;...
+                ichanset = [offset + nchannels*(iplane0-1) + [rchannel;...
                     nchannels*nplanes*nfmax]; nchannels];
             else
-                ichanset = [nchannels*nplanes + nchannels*(iplane0-1) + [ichannel;...
+                ichanset = [offset + nchannels*(iplane0-1) + [ichannel;...
                     nchannels*nplanes*nfmax]; nchannels];
             end
             iplane0 = iplane0 - nFr/nchannels;

@@ -23,11 +23,13 @@ fsrootRED = [];
 for j = 1:length(subDirsRed)
     fsrootRED{j} = dir(fullfile(ops.RootDir, subDirsRed{j}, '*.tif'));
     jn=find(ops.expts==str2num(subDirsRed{j}));
-    for k = 1:length(ops.fsroot{jn})
-        fsrootRED{j}(k).name = fullfile(ops.RootDir, subDirsRed{j}, fsrootRED{j}(k).name);         
+    if ~isempty(jn)
+        for k = 1:length(fsrootRED{jn})
+            fsrootRED{j}(k).name = fullfile(ops.RootDir, subDirsRed{j}, fsrootRED{j}(k).name);
+        end
     end
 end
-%%
+
 %% check if the RED channel file has already been registered, find indices to shift by
 fsRED   = [];
 fs      = [];
