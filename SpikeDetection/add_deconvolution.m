@@ -32,8 +32,8 @@ for i = 1:length(ops.planesToProcess)
     Ff = [];
     Fneu = [];
     for j = 1:numel(dat.Fcell)
-        Ff   = cat(1, Ff, dat.Fcell{1}(isroi, :)');
-        Fneu = cat(1,Fneu, dat.FcellNeu{1}(isroi, :)');        
+        Ff   = cat(1, Ff, dat.Fcell{j}(isroi, :)');
+        Fneu = cat(1,Fneu, dat.FcellNeu{j}(isroi, :)');        
     end
     
     if mean(sign(dat.FcellNeu{1}(:)))<0
