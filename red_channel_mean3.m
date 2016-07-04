@@ -46,8 +46,8 @@ for k = 1:length(fsRED)
     %
     data = data(:,:,1:floor(nFr/(2*ops.nplanes))*2*ops.nplanes);
     data = reshape(data, Ly, Lx, 2,ops.nplanes, []);
-    dataG = squeeze(data(:,:,1,:,:));
-    dataR = squeeze(data(:,:,2,:,:));
+    dataG = sq(data(:,:,1,:,:), 3);
+    dataR = sq(data(:,:,2,:,:), 3);
     
     for i = 1:numPlanes
         [ds, ~]  = registration_offsets(squeeze(dataG(:,:,i,:)), ops1{i}, 0);
