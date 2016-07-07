@@ -3,10 +3,10 @@ function [dcell, Ffr] = run_deconvolution3(ops, Ff, Fneu, kernel)
 % Optionally output this in matrix form Ffr (very sparse). 
 
 % the basis functions should depend on timescale of sensor and imaging rate
-ops.imageRate    = getOr(ops, {'imageRate'}, 10);
+ops.imageRate    = getOr(ops, {'imageRate'}, 30);
 ops.sensorTau    = getOr(ops, {'sensorTau'}, 2); % approximate timescale in seconds
 ops.sameKernel   = getOr(ops, {'sameKernel'}, 1); % 1 for same kernel per plane, 0 for individual kernels (not recommended)
-mtau             = ops.imageRate * ops.sensorTau; 
+mtau             = ops.imageRate * ops.sensorTau/ops.nplanes; 
 ops.sameKernel   = getOr(ops, {'sameKernel'}, 1);
 ops.maxNeurop    = getOr(ops, {'maxNeurop'}, Inf);
 
