@@ -24,8 +24,9 @@ if nargout<=2
         X0 = conv(kerns(:,i), fs);
         X(:,i) = X0(1:NT2);
     end
-    Cv = X' * X;
-    B2 = Cv\(X' * F1);
+    Cv = (X' * X)/size(X,1);
+    Fv = (X' * F1)/size(X,1);
+    B2 = Cv \ Fv;
     kerneli = kerns * B2(1:Nbasis);
     kernel  = kerneli/sum(kerneli.^2).^.5 ;
 else    
