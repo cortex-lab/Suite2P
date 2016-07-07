@@ -6,6 +6,8 @@ ops = build_ops3(db, ops);
 % load the initialization of the kernel    
 load(fullfile(ops.toolbox_path, 'SpikeDetection\kernel.mat'));
 
+warning('ops0.imageRate now represents the TOTAL frame rate of the recording over all planes. This warning will be disabled in a future version. ')
+
 for i = 1:length(ops.planesToProcess)
     iplane  = ops.planesToProcess(i);
     
