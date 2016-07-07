@@ -9,7 +9,9 @@ fs(st+1) = c;
 
 X0 = conv(kernel, fs);
 A = [X0(npad + [1:NT], 1) ones(NT,1) Fneu];
-B = (Ff' * A) / (A'*A);
+FfA = (Ff' * A)/size(Ff,1);
+AtA = (A'*A + 1e-12)/size(Ff,1);
+B =  FfA/AtA ;
 B(3) = min(B(3), ops.maxNeurop);  % force neuropil coefficient below a value
 
 if nargout<=2
@@ -28,7 +30,9 @@ if nargout<=2
     Fv = (X' * F1)/size(X,1);
     B2 = Cv \ Fv;
     kerneli = kerns * B2(1:Nbasis);
-    kernel  = kerneli/sum(kerneli.^2).^.5 ;
+    kerneli = max(0, kerneli); % make sure kernel is positive
+            
+    kernel  = normc(kerneli) ;
 else    
     imax        = find(c==0, 1);
     c          = c(1:imax-1);

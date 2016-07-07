@@ -34,24 +34,25 @@ end
 %
 
 kernelS = repmat(kernel, 1, NN);
-
+%%
 for iter = 1:10
     fprintf('iter %d... ', iter)
     parfor icell = 1:size(Ff,2)
         [kernelS(:, icell), F1(:,icell)] =...
             single_step_single_cell(ops, Ff(:,icell), F1(:, icell), Fneu(:,icell), Params, ...
             kernelS(:,icell), kerns, NT, npad);
+        
     end
     if ops.sameKernel
-        kernelS = repmat(median(kernelS,2), 1, NN);
+        kernelS = repmat(normc(median(kernelS,2)), 1, NN);
     end
-    
 end
 fprintf('finished, final extraction step... \n')
-%%
+
 dcell = cell(NN,1);
 Ffr = zeros(size(Ff));
 parfor icell = 1:size(Ff,2)
+%     keyboard;
     [~, ~, dcell{icell}, Ffr(:, icell)] = single_step_single_cell(ops, ...
         Ff(:,icell), F1(:, icell), Fneu(:,icell), Params, ...
         kernelS(:,icell), kerns, NT, npad, dcell{icell});

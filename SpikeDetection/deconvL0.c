@@ -12,7 +12,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,
     NT      = (int) mxGetM(prhs[1]);
     nt0     = (int) mxGetM(prhs[2]);
     
-    
+   //mexPrintf("i exist\n");
+
     Params  = mxGetPr(prhs[0]); /* 1 by 1 */
     type    = (int) Params[0];
     Th      = (double) Params[1];
@@ -59,7 +60,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,
     tots = 0;
     while (tots<maxiter){
         inner_it = 0;      
-        
+     //   mexPrintf("iteration %d\n", tots);
          // small loop        
         while (tots>0) {
             M0max = 0.0f;
@@ -87,15 +88,23 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,
                             }
                         }
                     }
-                
+                    
                 }
                 // find best shift overall
-                    if (Mmax[i]>M0max){
-                        M0max = Mmax[i];
-                        imax  = i;
-                    }
+                if (Mmax[i]>M0max){
+                    M0max = Mmax[i];
+                    imax  = i;
+                }
                 //}
             }
+            
+//             if (inner_it==0){
+//                 c[0] = M0max;
+//                 //c[0] = Wf[(int) st[i]];
+//                 //c[0] = WtW[nt0-1];
+//                 // c[0] = cmax[0];
+//                 break;
+//             }
             
             if (M0max<Thi){
                 // exit the inner loop if it's not worth it
@@ -130,7 +139,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,
                     if (curri<NT)
                         F0[curri]        -= c[imax] * kernel[t]; 
                 }
-                
+             
+                 
                 // increment counter of spike reshufflings
                 inner_it++;
             }
