@@ -5,9 +5,17 @@ function [dcell, Ffr] = run_deconvolution3(ops, dat, isroi, kernel)
 % construct Ff and Fneu
 Ff = [];
 Fneu = [];
-for j = 1:numel(dat.Fcell)
-    Ff   = cat(1, Ff, dat.Fcell{j}(isroi, :)');
-    Fneu = cat(1,Fneu, dat.FcellNeu{j}(isroi, :)');
+if isfield('dat', 'F')
+    for j = 1:numel(dat.F.Fcell)
+        Ff   = cat(1, Ff, dat.F.Fcell{j}(isroi, :)');
+        Fneu = cat(1,Fneu, dat.F.FcellNeu{j}(isroi, :)');
+    end
+else
+    for j = 1:numel(dat.Fcell)
+        Ff   = cat(1, Ff, dat.Fcell{j}(isroi, :)');
+        Fneu = cat(1,Fneu, dat.FcellNeu{j}(isroi, :)');
+    end
+    
 end
 
 if mean(sign(dat.FcellNeu{1}(:)))<0
@@ -54,8 +62,9 @@ end
 kernelS = repmat(kernel, 1, NN);
 %%
 maxNeurop = ops.maxNeurop;
+tic
 for iter = 1:10
-    fprintf('iter %d... ', iter)
+    fprintf('%2.2f sec, iter %d... ', toc, iter)
     parfor icell = 1:size(Ff,2)
         [kernelS(:, icell), B(:,icell)] = ...
             single_step_single_cell(maxNeurop, Ff(:,icell), B(:, icell), Fneu(:,icell), Params, ...
@@ -71,7 +80,7 @@ fprintf('finished, final extraction step... \n')
 dcell = cell(NN,1);
 parfor icell = 1:size(Ff,2)
     [~, ~, dcell{icell}] = ...
-        single_step_single_cell(maxNeurop, Ff(:,icell), F1(:, icell), Fneu(:,icell), Params, ...
+        single_step_single_cell(maxNeurop, Ff(:,icell), B(:,icell), Fneu(:,icell), Params, ...
         kernelS(:,icell), kerns, NT, npad, dcell{icell});
 end
 
