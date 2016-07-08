@@ -1,6 +1,22 @@
-function [dcell, Ffr] = run_deconvolution3(ops, Ff, Fneu, kernel)
+function [dcell, Ffr] = run_deconvolution3(ops, dat, isroi, kernel)
 % outputs a cell array of deconvolved spike times and amplitudes.
 % Optionally output this in matrix form Ffr (very sparse). 
+
+% construct Ff and Fneu
+Ff = [];
+Fneu = [];
+for j = 1:numel(dat.Fcell)
+    Ff   = cat(1, Ff, dat.Fcell{j}(isroi, :)');
+    Fneu = cat(1,Fneu, dat.FcellNeu{j}(isroi, :)');
+end
+
+if mean(sign(dat.FcellNeu{1}(:)))<0
+    % then it means this was processed with old "model" option
+    Fneu = -Fneu;
+    Ff   = Ff + Fneu;
+end
+
+
 
 % the basis functions should depend on timescale of sensor and imaging rate
 mtau             = ops.imageRate * ops.sensorTau/ops.nplanes; 
@@ -20,8 +36,10 @@ kernel = normc(kernel');
 
 npad = 250;
 [NT, NN] = size(Ff);
-F1 = cat(1, zeros(npad,NN), double(Ff - coefNeu * Fneu), zeros(npad,NN));
-F1 = bsxfun(@minus, F1 , median(F1,1));
+
+B = zeros(3, NN);
+B(2,:) = median(Ff - coefNeu * Fneu,1);
+B(3,:) = coefNeu;
 
 nt0 = numel(kernel);
 
@@ -35,11 +53,12 @@ end
 
 kernelS = repmat(kernel, 1, NN);
 %%
+maxNeurop = ops.maxNeurop;
 for iter = 1:10
     fprintf('iter %d... ', iter)
-    parfor icell = 1:size(Ff,2)
-        [kernelS(:, icell), F1(:,icell)] =...
-            single_step_single_cell(ops, Ff(:,icell), F1(:, icell), Fneu(:,icell), Params, ...
+    for icell = 1:size(Ff,2)
+        [kernelS(:, icell), B(:,icell)] = ...
+            single_step_single_cell(maxNeurop, Ff(:,icell), B(:, icell), Fneu(:,icell), Params, ...
             kernelS(:,icell), kerns, NT, npad);
         
     end
@@ -50,11 +69,9 @@ end
 fprintf('finished, final extraction step... \n')
 
 dcell = cell(NN,1);
-Ffr = zeros(size(Ff));
 parfor icell = 1:size(Ff,2)
-%     keyboard;
-    [~, ~, dcell{icell}, Ffr(:, icell)] = single_step_single_cell(ops, ...
-        Ff(:,icell), F1(:, icell), Fneu(:,icell), Params, ...
+    [~, ~, dcell{icell}] = ...
+        single_step_single_cell(maxNeurop, Ff(:,icell), F1(:, icell), Fneu(:,icell), Params, ...
         kernelS(:,icell), kerns, NT, npad, dcell{icell});
 end
 
@@ -63,7 +80,5 @@ for icell = 1:size(Ff,2)
    dcell{icell}.B(2) = dcell{icell}.B(2) * sd(icell);
 end
 
-% rescale the deconvolved trace
-Ffr = 1/2 * Ffr .* repmat(1e-5 + sd, size(Ff,1), 1);
 %%
 

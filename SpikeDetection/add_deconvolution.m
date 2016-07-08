@@ -42,25 +42,18 @@ for i = 1:length(ops.planesToProcess)
     ops.sameKernel   = getOr(ops0, {'sameKernel'}, 1);
     ops.maxNeurop    = getOr(ops0, {'maxNeurop'}, Inf);
     
-    isroi = [dat.stat.mrs]./[dat.stat.mrs0]<dat.clustrules.Compact & ...
-        [dat.stat.npix]>dat.clustrules.MinNpix & [dat.stat.npix]<dat.clustrules.MaxNpix;
-    
-    Ff = [];
-    Fneu = [];
-    for j = 1:numel(dat.Fcell)
-        Ff   = cat(1, Ff, dat.Fcell{j}(isroi, :)');
-        Fneu = cat(1,Fneu, dat.FcellNeu{j}(isroi, :)');        
+    if isfield('dat.cl', 'iscell')
+        isroi = dat.cl.iscell;
+    else
+        isroi = [dat.stat.mrs]./[dat.stat.mrs0]<dat.clustrules.Compact & ...
+            [dat.stat.npix]>dat.clustrules.MinNpix & [dat.stat.npix]<dat.clustrules.MaxNpix;
     end
-    
-    if mean(sign(dat.FcellNeu{1}(:)))<0
-        % then it means this was processed with old "model" option
-        Fneu = -Fneu;
-        Ff   = Ff + Fneu;
-    end
-    
+   
     fprintf('Spike deconvolution, plane %d... \n', iplane)
-    dcell = run_deconvolution3(ops, Ff, Fneu, kernel);
-    dat.cl.isroi = isroi;    
+    % split data into batches
+    dcell = run_deconvolution3(ops, dat, isroi, kernel);
+    
+    dat.cl.isroi = isroi;
     dat.cl.dcell = dcell;
     
     save(fpath, '-struct', 'dat')
