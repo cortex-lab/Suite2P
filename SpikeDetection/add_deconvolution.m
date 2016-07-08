@@ -42,7 +42,7 @@ for i = 1:length(ops.planesToProcess)
     ops.sameKernel   = getOr(ops0, {'sameKernel'}, 1);
     ops.maxNeurop    = getOr(ops0, {'maxNeurop'}, Inf);
     
-    if isfield('dat.cl', 'iscell')
+    if isfield(dat.cl, 'iscell')
         isroi = dat.cl.iscell;
     else
         isroi = [dat.stat.mrs]./[dat.stat.mrs0]<dat.clustrules.Compact & ...

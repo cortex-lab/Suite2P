@@ -56,14 +56,14 @@ kernelS = repmat(kernel, 1, NN);
 maxNeurop = ops.maxNeurop;
 for iter = 1:10
     fprintf('iter %d... ', iter)
-    for icell = 1:size(Ff,2)
+    parfor icell = 1:size(Ff,2)
         [kernelS(:, icell), B(:,icell)] = ...
             single_step_single_cell(maxNeurop, Ff(:,icell), B(:, icell), Fneu(:,icell), Params, ...
             kernelS(:,icell), kerns, NT, npad);
         
     end
     if ops.sameKernel
-        kernelS = repmat(normc(median(kernelS,2)), 1, NN);
+        kernelS = repmat(normc(nanmedian(kernelS,2)), 1, NN);
     end
 end
 fprintf('finished, final extraction step... \n')
