@@ -1,4 +1,4 @@
-function [dcell, Ffr] = run_deconvolution3(ops, dat, isroi, kernel)
+function dcell = run_deconvolution3(ops, dat, isroi, kernel)
 % outputs a cell array of deconvolved spike times and amplitudes.
 % Optionally output this in matrix form Ffr (very sparse). 
 
@@ -65,12 +65,13 @@ maxNeurop = ops.maxNeurop;
 tic
 for iter = 1:10
     fprintf('%2.2f sec, iter %d... ', toc, iter)
-    parfor icell = 1:size(Ff,2)
+    for icell = 1:size(Ff,2)
         [kernelS(:, icell), B(:,icell)] = ...
             single_step_single_cell(maxNeurop, Ff(:,icell), B(:, icell), Fneu(:,icell), Params, ...
             kernelS(:,icell), kerns, NT, npad);
         
     end
+    keyboard;
     if ops.sameKernel
         kernelS = repmat(normc(nanmedian(kernelS,2)), 1, NN);
     end

@@ -48,7 +48,8 @@ for i = 1:length(ops.planesToProcess)
         isroi = [dat.stat.mrs]./[dat.stat.mrs0]<dat.clustrules.Compact & ...
             [dat.stat.npix]>dat.clustrules.MinNpix & [dat.stat.npix]<dat.clustrules.MaxNpix;
     end
-   
+    isroi = logical(isroi);
+    
     fprintf('Spike deconvolution, plane %d... \n', iplane)
     % split data into batches
     dcell = run_deconvolution3(ops, dat, isroi, kernel);

@@ -15,7 +15,7 @@ fs(st+1) = c;
 X0 = conv(kernel, fs);
 A(:,1) = X0(npad + [1:NT], 1) ;
 FfA = (Ff' * A)/size(Ff,1);
-AtA = (A'*A + 1e-12)/size(Ff,1);
+AtA = (A'*A + 1e-6)/size(Ff,1);
 B =  FfA/AtA ;
 B(3) = min(B(3), maxNeurop);  % force neuropil coefficient below a value
 
@@ -50,3 +50,5 @@ else
     dcell.B   = B; % full neuropil subtraction coefficient
     Ffr(st,1)  = c; 
 end
+
+1;
