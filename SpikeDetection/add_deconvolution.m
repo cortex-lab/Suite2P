@@ -27,7 +27,7 @@ for i = 1:length(ops.planesToProcess)
         dat = load(fpath);
     end
     
-    if isfield('dat', 'dat')
+    if isfield(dat, 'dat')
         dat = dat.dat; % just in case trying to load processed files
     end
     

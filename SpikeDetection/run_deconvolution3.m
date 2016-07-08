@@ -5,7 +5,7 @@ function [dcell, Ffr] = run_deconvolution3(ops, dat, isroi, kernel)
 % construct Ff and Fneu
 Ff = [];
 Fneu = [];
-if isfield('dat', 'F')
+if isfield(dat, 'F')
     for j = 1:numel(dat.F.Fcell)
         Ff   = cat(1, Ff, dat.F.Fcell{j}(isroi, :)');
         Fneu = cat(1,Fneu, dat.F.FcellNeu{j}(isroi, :)');
