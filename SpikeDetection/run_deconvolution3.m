@@ -76,7 +76,7 @@ tic
 err = zeros(NN, 1);
 for iter = 1:10
     fprintf('%2.2f sec, iter %d... ', toc, iter)
-    parfor icell = 1:100 %size(Ff,2)
+    parfor icell = 1:size(Ff,2)
         [kernelS(:, icell), B(:,icell), err(icell)] = ...
             single_step_single_cell(maxNeurop, Ff(:,icell), B(:, icell), Fneu(:,icell), Params, ...
             kernelS(:,icell), kerns, NT, npad);
@@ -85,19 +85,19 @@ for iter = 1:10
 %     mean(err(:))
     
     if ops.sameKernel
-        kernelS = repmat(normc(nanmedian(kernelS(:, 1:100),2)), 1, NN);
+        kernelS = repmat(normc(nanmedian(kernelS(:, :),2)), 1, NN);
     end
     kernelS = max(0, kernelS); % make sure kernel is positive
     kernelS  = normc(kernelS) ; % renormalize the kernel
 
-    plot(kernelS(:,1:100))
-    drawnow
+%     plot(kernelS(:,1))
+%     drawnow
 end
 
 fprintf('finished, final extraction step... \n')
 %%
 dcell = cell(NN,1);
-for icell = 1:size(Ff,2)
+parfor icell = 1:size(Ff,2)
     [~, ~, dcell{icell}] = ...
         single_step_single_cell(maxNeurop, Ff(:,icell), B(:,icell), Fneu(:,icell), Params, ...
         kernelS(:,icell), kerns, NT, npad, dcell{icell});
