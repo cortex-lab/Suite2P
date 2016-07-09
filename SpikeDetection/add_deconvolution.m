@@ -9,9 +9,6 @@ try
 catch
 end
 
-% load the initialization of the kernel    
-load(fullfile(ops.toolbox_path, 'SpikeDetection\kernel.mat'));
-
 % warning('ops0.imageRate now represents the TOTAL frame rate of the recording over all planes. This warning will be disabled in a future version. ')
 
 for i = 1:length(ops.planesToProcess)
@@ -42,21 +39,14 @@ for i = 1:length(ops.planesToProcess)
     ops.sameKernel   = getOr(ops0, {'sameKernel'}, 1);
     ops.maxNeurop    = getOr(ops0, {'maxNeurop'}, Inf);
     
-    if isfield(dat, 'cl') && isfield(dat.cl, 'iscell')
-        isroi = dat.cl.iscell;
-    else
-        isroi = [dat.stat.mrs]./[dat.stat.mrs0]<dat.clustrules.Compact & ...
-            [dat.stat.npix]>dat.clustrules.MinNpix & [dat.stat.npix]<dat.clustrules.MaxNpix;
-    end
-    isroi = logical(isroi);
     
     fprintf('Spike deconvolution, plane %d... \n', iplane)
     % split data into batches
-    dcell = run_deconvolution3(ops, dat, isroi, kernel);
+    [dcell, isroi] = run_deconvolution3(ops, dat, isroi);
     
     dat.cl.isroi = isroi;
     dat.cl.dcell = dcell;
     
-    save(fpath, '-struct', 'dat')
+    save(fpath, '-struct', 'dat', '-v7.3')
 end
 %

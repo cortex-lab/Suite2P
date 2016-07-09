@@ -1,6 +1,17 @@
-function dcell = run_deconvolution3(ops, dat, isroi, kernel)
+function [dcell, isroi] = run_deconvolution3(ops, dat, isroi, kernel)
 % outputs a cell array of deconvolved spike times and amplitudes.
-% Optionally output this in matrix form Ffr (very sparse). 
+% Optionally output this in matrix form Ffr (very sparse).
+
+% load the initialization of the kernel    
+load(fullfile(ops.toolbox_path, 'SpikeDetection\kernel.mat'));
+
+if isfield(dat, 'cl') && isfield(dat.cl, 'iscell')
+    isroi = dat.cl.iscell;
+else
+    isroi = [dat.stat.mrs]./[dat.stat.mrs0]<dat.clustrules.Compact & ...
+        [dat.stat.npix]>dat.clustrules.MinNpix & [dat.stat.npix]<dat.clustrules.MaxNpix;
+end
+isroi = logical(isroi);
 
 % construct Ff and Fneu
 Ff = [];
@@ -10,21 +21,20 @@ if isfield(dat, 'F')
         Ff   = cat(1, Ff, dat.F.Fcell{j}(isroi, :)');
         Fneu = cat(1,Fneu, dat.F.FcellNeu{j}(isroi, :)');
     end
+    flag = mean(sign(dat.F.FcellNeu{1}(:)))<0;
 else
     for j = 1:numel(dat.Fcell)
         Ff   = cat(1, Ff, dat.Fcell{j}(isroi, :)');
         Fneu = cat(1,Fneu, dat.FcellNeu{j}(isroi, :)');
     end
-    
+    flag = mean(sign(dat.FcellNeu{1}(:)))<0;
 end
 
-if mean(sign(dat.FcellNeu{1}(:)))<0
+if flag
     % then it means this was processed with old "model" option
     Fneu = -Fneu;
     Ff   = Ff + Fneu;
 end
-
-
 
 % the basis functions should depend on timescale of sensor and imaging rate
 mtau             = ops.imageRate * ops.sensorTau/ops.nplanes; 
@@ -41,17 +51,17 @@ f0 = (mtau/2); % resample the initialization of the kernel to the right number o
 kernel = interp1(1:numel(kernel), kernel, ...
     linspace(1, numel(kernel), ceil(f0/3 * numel(kernel))));
 kernel = normc(kernel');
-
+%
 npad = 250;
 [NT, NN] = size(Ff);
-
+%%
 B = zeros(3, NN);
 B(2,:) = median(Ff - coefNeu * Fneu,1);
 B(3,:) = coefNeu;
 
 nt0 = numel(kernel);
 
-taus = mtau * [1/4 1/2 1 2 4];
+taus = mtau * [1/8 1/4 1/2 1 2 4];
 Nbasis = numel(taus);
 kerns = zeros(nt0, Nbasis);
 for i = 1:Nbasis
@@ -60,26 +70,34 @@ end
 %
 
 kernelS = repmat(kernel, 1, NN);
-%%
+
 maxNeurop = ops.maxNeurop;
 tic
+err = zeros(NN, 1);
 for iter = 1:10
     fprintf('%2.2f sec, iter %d... ', toc, iter)
-    for icell = 1:size(Ff,2)
-        [kernelS(:, icell), B(:,icell)] = ...
+    parfor icell = 1:100 %size(Ff,2)
+        [kernelS(:, icell), B(:,icell), err(icell)] = ...
             single_step_single_cell(maxNeurop, Ff(:,icell), B(:, icell), Fneu(:,icell), Params, ...
             kernelS(:,icell), kerns, NT, npad);
         
     end
-    keyboard;
+%     mean(err(:))
+    
     if ops.sameKernel
-        kernelS = repmat(normc(nanmedian(kernelS,2)), 1, NN);
+        kernelS = repmat(normc(nanmedian(kernelS(:, 1:100),2)), 1, NN);
     end
-end
-fprintf('finished, final extraction step... \n')
+    kernelS = max(0, kernelS); % make sure kernel is positive
+    kernelS  = normc(kernelS) ; % renormalize the kernel
 
+    plot(kernelS(:,1:100))
+    drawnow
+end
+
+fprintf('finished, final extraction step... \n')
+%%
 dcell = cell(NN,1);
-parfor icell = 1:size(Ff,2)
+for icell = 1:size(Ff,2)
     [~, ~, dcell{icell}] = ...
         single_step_single_cell(maxNeurop, Ff(:,icell), B(:,icell), Fneu(:,icell), Params, ...
         kernelS(:,icell), kerns, NT, npad, dcell{icell});
