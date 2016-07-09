@@ -1,4 +1,4 @@
-function [dcell, isroi] = run_deconvolution3(ops, dat, isroi, kernel)
+function [dcell, isroi] = run_deconvolution3(ops, dat, kernel)
 % outputs a cell array of deconvolved spike times and amplitudes.
 % Optionally output this in matrix form Ffr (very sparse).
 
