@@ -113,7 +113,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,
             else{
                 // add back contribution of shifted spike
                 for (t=0; t<2*nt0-1;t++){
-                    curri      = st[imax] + t+1 -nt0;
+                    curri      = st[imax] + t -(nt0-1);
                     if (curri>=0 && curri<NT)
                         Wf[curri] += c[imax] * WtW[t];
                 }
@@ -130,7 +130,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,
                 
                 // remove contribution of shifted spike
                for (t=0; t<2*nt0-1;t++){
-                    curri      = st[imax] + t+1 -nt0;
+                    curri      = st[imax] + t -(nt0-1);
                     if (curri>=0 && curri<NT)
                         Wf[curri] -= c[imax] * WtW[t];
                 }

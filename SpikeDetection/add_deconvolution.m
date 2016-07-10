@@ -38,11 +38,12 @@ for i = 1:length(ops.planesToProcess)
     ops.sameKernel   = getOr(ops0, {'sameKernel'}, 1); % 1 for same kernel per plane, 0 for individual kernels (not recommended)
     ops.sameKernel   = getOr(ops0, {'sameKernel'}, 1);
     ops.maxNeurop    = getOr(ops0, {'maxNeurop'}, Inf);
+    ops.recomputeKernel    = getOr(ops0, {'recomputeKernel'}, 0);
     
     
     fprintf('Spike deconvolution, plane %d... \n', iplane)
     % split data into batches
-    [dcell, isroi] = run_deconvolution3(ops, dat, isroi);
+    [dcell, isroi] = run_deconvolution3(ops, dat);
     
     dat.cl.isroi = isroi;
     dat.cl.dcell = dcell;
