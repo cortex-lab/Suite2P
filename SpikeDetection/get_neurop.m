@@ -2,7 +2,7 @@ function [B err] = get_neurop(Ff, Fneu, F1, kerneli, npad)
 
 X = conv(kerneli, F1);
 
-X = X(npad + [1:numel(F1)]);
+X = X([1:numel(F1)]);
 
 A = cat(2, X, ones(numel(F1), 1), Fneu);
 

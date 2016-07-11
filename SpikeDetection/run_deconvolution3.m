@@ -81,7 +81,7 @@ B2 = zeros(Nbasis, NN);
 dcell = cell(NN,1);
 
 tic
-for iter = 1:5
+for iter = 1:10
     plot(kernelS)
     drawnow
     
@@ -102,7 +102,7 @@ for iter = 1:5
     F1   = bsxfun(@rdivide, F1 , 1e-12 + sd/2);
 
     % run the deconvolution to get fs etc\
-    if iter==5
+    if iter==10
         parfor icell = 1:size(Ff,2)
             [~, ~, ~,dcell{icell}] = ...
                 single_step_single_cell(F1(:,icell), Params, kernelS(:,icell), kerns, NT, npad,dcell{icell});
@@ -128,7 +128,10 @@ for iter = 1:5
                 B2(:,i) = FfA(:,i)'/ AtA(:,:,i);
             end
         end
+        
         kernelS = normc(max(0, kerns * B2));
+        kernelS = realign_kernels(kernelS, mtau/2);
+        kernelS = normc(max(0,kernelS));
     end
     
     mean(err(:))

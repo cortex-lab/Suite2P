@@ -1,4 +1,4 @@
-function [ops, stat, res] = fastClustNeuropilCoef(ops, U, Sv)
+% function [ops, stat, res] = fastClustNeuropilCoef(ops, U, Sv)
 % 
 U =  reshape(U, [], size(U,ndims(U)));
 iplane = ops.iplane;
@@ -123,7 +123,7 @@ for k = 1:niter
             vs(:,i) = M(ix) * Ucell(:, ix)';
         end
     end
-    %%
+    %
 %     Ff = Fs' * vs;
 %     vs = Finv * max(0, Ff);
 %     [dcell, Ffr] = run_deconvolution2(Ff, f0, kernel);    

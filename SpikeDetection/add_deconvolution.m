@@ -1,8 +1,8 @@
-function add_deconvolution(ops, db)
-% if neuropil was obtained by the old "model" method (pre 28.06.16)
-% then set flag to 'old_model'
+function add_deconvolution(ops, db, clustrules)
 ops = build_ops3(db, ops);
 ops0 = ops;
+
+clustrules = get_clustrules(clustrules);
 
 try
     ppool = gcp ;
@@ -11,7 +11,7 @@ end
 
 % warning('ops0.imageRate now represents the TOTAL frame rate of the recording over all planes. This warning will be disabled in a future version. ')
 
-for i = 1:length(ops.planesToProcess)
+for i = 2:length(ops.planesToProcess)
     iplane  = ops.planesToProcess(i);
     
     fpath = sprintf('%s/F_%s_%s_plane%d_Nk%d_proc.mat', ops.ResultsSavePath, ...
@@ -31,6 +31,9 @@ for i = 1:length(ops.planesToProcess)
     
     % overwrite fields of ops with those saved to file
     ops = addfields(ops, dat.ops);
+    if ~isfield(dat, 'clustrules');
+        dat.clustrules = clustrules;
+    end
     
     % set up options for deconvolution
     ops.imageRate    = getOr(ops0, {'imageRate'}, 30); % total image rate (over all planes)
@@ -48,6 +51,6 @@ for i = 1:length(ops.planesToProcess)
     dat.cl.isroi = isroi;
     dat.cl.dcell = dcell;
     
-    save(fpath, '-struct', 'dat', '-v7.3')
+    save(fpath, '-struct', 'dat')
 end
 %
