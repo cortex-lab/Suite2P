@@ -1,4 +1,4 @@
-% function [ops, stat, res] = fastClustNeuropilCoef(ops, U, Sv)
+function [ops, stat, res] = fastClustNeuropilCoef(ops, U, Sv)
 % 
 U =  reshape(U, [], size(U,ndims(U)));
 iplane = ops.iplane;
