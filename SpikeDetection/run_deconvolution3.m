@@ -91,8 +91,8 @@ for iter = 1:10
     parfor icell = 1:size(Ff,2)
         [B(:,icell), err(icell)] = get_neurop(Ff(:,icell), Fneu(:,icell), F1(:, icell), kernelS(:,icell), npad);
     end
-    Ball{iter} = B;
-    save('C:\Users\Marius\Documents\MATLAB\Ball.mat', 'Ball')
+%     Ball{iter} = B;
+%     save('C:\Users\Marius\Documents\MATLAB\Ball.mat', 'Ball')
     
     % determine and subtract the neuropil
     F1 = Ff - bsxfun(@times, Fneu, B(3,:)) - bsxfun(@times, ones(NT,1), B(2,:));
