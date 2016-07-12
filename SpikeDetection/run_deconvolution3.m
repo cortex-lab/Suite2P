@@ -130,7 +130,7 @@ for iter = 1:10
         end
         
         kernelS = normc(max(0, kerns * B2));
-        kernelS = realign_kernels(kernelS, mtau/2);
+        kernelS = realign_kernels(kernelS, mtau/2 + ops.nplanes/ops.imageRate);
         kernelS = normc(max(0,kernelS));
     end
     
