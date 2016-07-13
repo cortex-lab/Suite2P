@@ -11,7 +11,7 @@ end
 
 % warning('ops0.imageRate now represents the TOTAL frame rate of the recording over all planes. This warning will be disabled in a future version. ')
 
-for i = 2:length(ops.planesToProcess)
+for i = 1:length(ops.planesToProcess)
     iplane  = ops.planesToProcess(i);
     
     fpath = sprintf('%s/F_%s_%s_plane%d_Nk%d_proc.mat', ops.ResultsSavePath, ...
