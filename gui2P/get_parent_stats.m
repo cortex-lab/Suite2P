@@ -2,7 +2,7 @@ function h = get_parent_stats(h)
 
 h.dat.stat(1).V = [];
 for i = 1:length(h.dat.stat)
-    if isempty(h.dat.stat(i).V)
+    if ~isfield(h.dat.stat(i), 'V') || isempty(h.dat.stat(i).V)
         h.dat.stat(i).V         = sum([h.dat.stat(i).region.V]);
         h.dat.stat(i).mrs = min(h.dat.stat(i).mrs, 1e4);
        % this is a parent region 

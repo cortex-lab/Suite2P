@@ -97,8 +97,12 @@ for bi = 1:nBatches
   corrUps(yEmbedRef,xEmbedRef,:) = corrMap; 
   corrUps = real(ifft2(corrUps));
   corrClip = corrUps(yCorrRef,xCorrRef,:);
+  
+  % added by Marius 20.07.2016, smooth the correlation maps
+  corrClipSmooth = my_conv2(corrClip, 1, [1 2]);
+  
   % find peak
-  [dmax, iy] = max(corrClip, [], 1);
+  [dmax, iy] = max(corrClipSmooth, [], 1);
   iy = gather_try(iy);
   dmax = gather_try(dmax);
   [dmax, ix] = max(dmax, [], 2);

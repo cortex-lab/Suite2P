@@ -53,7 +53,7 @@ ops.nSVDforROI = min(ops.nSVDforROI, size(mov,3));
 if ops.sig>0.05
 	for i = 1:size(mov,3)
 	   I = mov(:,:,i);
-	   I = my_conv(my_conv(I',ops.sig)', ops.sig);
+	   I = my_conv2(I, ops.sig, [1 2]); %my_conv(my_conv(I',ops.sig)', ops.sig);
 	   mov(:,:,i) = I;
 	end
 end

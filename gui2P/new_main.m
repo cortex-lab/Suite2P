@@ -70,9 +70,9 @@ else
     h.dat.cl.excluded_regions = zeros(h.dat.cl.Ly, h.dat.cl.Lx);
     h.dat.cl.excl_pix_perc    = zeros(h.dat.cl.Ly, h.dat.cl.Lx);
     h.dat.cl.topregion        = ones(h.dat.cl.Ly, h.dat.cl.Lx);
-    if isfield(h.dat.stat, 'parent')
+%     if isfield(h.dat.stat, 'parent')
         h = get_parent_stats(h);
-    end
+%     end
     
     h.dat.res.iclust = reshape(h.dat.res.iclust, h.dat.cl.Ly, h.dat.cl.Lx);
     

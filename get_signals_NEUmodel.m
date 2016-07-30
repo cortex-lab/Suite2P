@@ -19,15 +19,17 @@ LtL = zeros(Nk, Nk, 'single');
 LtS = zeros(Nk, nBasis^2, 'single');
 Ireg = diag([ones(Nk,1); zeros(nBasis^2,1)]);
 %
-for i = ops.Nk+1:Nk
-%     ix = find(iclust==i);
-    ix = stat(i).ipix;
-    if numel(ix)==0
-        LtL(i,i) = 0;
-        LtS(i,:) = 0;
-    else
-        LtL(i,i) = sum(M(ix).^2);
-        LtS(i,:) = M(ix)' * S(ix, :);
+for i = 1:Nk
+    if stat(i).igood
+        %     ix = find(iclust==i);
+        ix = stat(i).ipix;
+        if numel(ix)==0
+            LtL(i,i) = 0;
+            LtS(i,:) = 0;
+        else
+            LtL(i,i) = sum(M(ix).^2);
+            LtS(i,:) = M(ix)' * S(ix, :);
+        end
     end
 end
 
@@ -49,8 +51,12 @@ F        = zeros(Nk, sum(ops.Nframes), 'single');
 Fneu    = zeros(Nk, sum(ops.Nframes), 'single');
 % Fraw = zeros(Nk, sum(ops.Nframes), 'single');
 
-covLinv = inv(covL((1+ops.Nk):end, (1+ops.Nk):end));
+i0 = find([stat.igood]);
+
+covLinv = inv(covL([i0 Nk+1:end], [i0 Nk+1:end]));
 covLinv = covLinv ./ repmat(diag(covLinv), 1, size(covLinv,2));
+
+% find indices of good clusters 
 while 1
     data = fread(fid,  Ly*Lx*nimgbatch, '*int16');
     if isempty(data)
@@ -68,7 +74,7 @@ while 1
     StU = res.S' * data;
     %
     Ftemp = zeros(Nk, NT, 'single');
-    for k = 1+ops.Nk:Nk
+    for k = i0
        ipix = stat(k).ipix(:)'; 
        if ~isempty(ipix)
            Ftemp(k,:) = res.M(ipix) * data(ipix,:);
@@ -76,11 +82,10 @@ while 1
     end
     F(:,ix + (1:NT))        = Ftemp;
     
-    i0 = (1+ops.Nk):Nk;
     %Fdeconv = covL((1+ops.Nk):end, (1+ops.Nk):end) \ cat(1, Ftemp(i0, :), StU);
     Fdeconv = covLinv * cat(1, Ftemp(i0, :), StU);
     
-    Ftemp2 = Fdeconv(1:(Nk-ops.Nk),:);
+    Ftemp2 = Fdeconv(1:numel(i0),:);
     
     Fneu(i0,ix + (1:NT))     = Ftemp2;
     
@@ -104,7 +109,13 @@ for i = 1:length(ops.Nframes)
 %     FcellNeu{i} =  F(:, csumNframes(i) + (1:ops.Nframes(i))) - Fcell{i};
 end
 
-save(sprintf('%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ...
-    ops.mouse_name, ops.date, iplane, ops.Nk),  'ops', 'res', 'stat', ...
-    'stat0', 'res0', 'Fcell', 'FcellNeu', 'clustrules', '-v7.3')
+try
+    save(sprintf('%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ...
+        ops.mouse_name, ops.date, iplane, ops.Nk),  'ops', 'res', 'stat', ...
+        'stat0', 'res0', 'Fcell', 'FcellNeu', 'clustrules')
+catch
+    save(sprintf('%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ...
+        ops.mouse_name, ops.date, iplane, ops.Nk),  'ops', 'res', 'stat', ...
+        'stat0', 'res0', 'Fcell', 'FcellNeu', 'clustrules', '-v7.3')
+end
 

@@ -3,6 +3,7 @@ function  run_pipeline(db, ops0, clustrules)
 % ops0.TileFactor (or db(iexp).TileFactor) can be set to multiply the number of default tiles for the neuropil
 
 ops0.nimgbegend                     = getOr(ops0, {'nimgbegend'}, 250);
+ops0.splitROIs                      = getOr(ops0, {'splitROIs'}, 1);
 ops0.LoadRegMean                    = getOr(ops0, {'LoadRegMean'}, 0);
 ops0.NiterPrealign                  = getOr(ops0, {'NiterPrealign'}, 10);
 ops0.registrationUpsample           = getOr(ops0, {'registrationUpsample'}, 1);  % upsampling factor during registration, 1 for no upsampling is much faster, 2 may give better subpixel accuracy
@@ -60,7 +61,7 @@ for i = 1:length(ops.planesToProcess)
                   % better model of the neuropil
                   [ops, stat, res]  = fastClustNeuropilCoef(ops,U, Sv);
         end
-        
+                
         [stat2, res2] = apply_ROIrules(ops, stat, res, clustrules);
         
         switch neuropilSub

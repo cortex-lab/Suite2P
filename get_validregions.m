@@ -25,11 +25,14 @@ for k = 1:length(stat0)
                 
                 ismmb = ismember(stat0(k).ipix, stat(ix).ipix);
                 stat0(k).ipix(ismmb) = [];
+                stat0(k).igood       = 1;
             end
         end
     end
-    stat0(k).mrs = Inf;
+    stat0(k).mrs   = Inf;
+    stat0(k).igood = 0;
 end
+stat(1).igood = 0;
 stat(1).region = [];
 stat0(1).V = [];
 
