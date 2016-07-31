@@ -34,7 +34,7 @@ else
 end
 %
 %%
-for i = 1:length(ops.planesToProcess)
+for i = 10 %1:length(ops.planesToProcess)
     iplane  = ops.planesToProcess(i);
     ops     = ops1{i};
     %

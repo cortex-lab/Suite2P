@@ -19,13 +19,13 @@ for k = 1:length(stat0)
             igood = find(igood);
             for j = 1:length(igood)
                 ix = ix+1;
-                stat(ix) = stat0(k).region(igood(j));
+                stat(ix)             = stat0(k).region(igood(j));
+                stat(ix).igood       = 1;
                 
                 iclust(stat(ix).ipix) = ix + numel(stat0);
                 
                 ismmb = ismember(stat0(k).ipix, stat(ix).ipix);
                 stat0(k).ipix(ismmb) = [];
-                stat0(k).igood       = 1;
             end
         end
     end
