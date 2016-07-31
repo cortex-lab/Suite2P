@@ -5,6 +5,7 @@ ix = 0;
 iclust = res0.iclust;
 % ipixbad = true(size(res0.M));
 for k = 1:length(stat0)
+    
     if ~isempty(stat0(k).region)
         
 %         vs = [stat0(k).region.V];
@@ -20,7 +21,6 @@ for k = 1:length(stat0)
             for j = 1:length(igood)
                 ix = ix+1;
                 stat(ix)             = stat0(k).region(igood(j));
-                stat(ix).igood       = 1;
                 
                 iclust(stat(ix).ipix) = ix + numel(stat0);
                 
@@ -30,9 +30,16 @@ for k = 1:length(stat0)
         end
     end
     stat0(k).mrs   = Inf;
+    
+end
+
+for k = 1:length(stat0)
     stat0(k).igood = 0;
 end
-stat(1).igood = 0;
+for k = 1:length(stat)
+    stat(k).igood = 1;
+end
+
 stat(1).region = [];
 stat0(1).V = [];
 
