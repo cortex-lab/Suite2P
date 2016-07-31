@@ -55,7 +55,7 @@ for iexp = 1 %:length(db)
     run_pipeline(db(iexp), ops0, clustrules);
     
     % deconvolved data into (dat.)cl.dcell, and neuropil subtraction coef
-    add_deconvolution(ops0, db0(iexp));
+    add_deconvolution(ops0, db0(iexp), clustrules);
     
     % add red channel information (if it exists)
     %     run_REDaddon(iexp, db, ops0) ;
