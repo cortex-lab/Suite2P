@@ -76,6 +76,7 @@ else
     
     h.dat.res.iclust = reshape(h.dat.res.iclust, h.dat.cl.Ly, h.dat.cl.Lx);
     
+    Nk = h.dat.ops.Nk;
     h.dat.ops.Nk = numel(h.dat.stat);
     h.dat.cl.rands_orig   = .1 + .8 * rand(1, h.dat.ops.Nk);
     h.dat.cl.rands        = h.dat.cl.rands_orig;
@@ -145,25 +146,27 @@ else
     h.dat.figure.y1all = round(linspace(1/20 * h.dat.cl.Ly, h.dat.cl.Ly, 4));
     
     h.dat.F.Fcell = h.dat.Fcell; h.dat.Fcell = [];    
+    
     if isfield(h.dat, 'FcellNeu')
         h.dat.F.FcellNeu = h.dat.FcellNeu; h.dat.FcellNeu = [];
-        if mean(sign(h.dat.F.FcellNeu{1}))<0
+        if mean(sign(h.dat.F.FcellNeu{1}(:)))<0
             for j = 1:length(h.dat.F.FcellNeu)
                 h.dat.F.FcellNeu{j} = - h.dat.F.FcellNeu{j};
                 h.dat.F.Fcell{j} = h.dat.F.Fcell{j} + h.dat.F.FcellNeu{j};
             end
         end    
-        if isfield(h.dat.cl, 'dcell')
-            for k = 1:length(h.dat.cl.dcell)
-                for j = 1:length(h.dat.F.FcellNeu)
-                    if isfield(h.dat.cl.dcell, 'B')
-                        c2 = h.dat.cl.dcell.B(3);
-                        c1 = h.dat.cl.dcell.B(2);
-                        h.dat.F.FcellNeu{j} = c1 + c2 * h.dat.F.FcellNeu{j};
-                    end
-                end
-            end
-        end
+        
+%         if isfield(h.dat.cl, 'dcell')
+%             for k = 1:length(h.dat.cl.dcell)
+%                 for j = 1:length(h.dat.F.FcellNeu)
+%                     if isfield(h.dat.cl.dcell{k}, 'B')
+%                         c2 = h.dat.cl.dcell{k}.B(3);
+%                         c1 = h.dat.cl.dcell{k}.B(2);
+%                         h.dat.F.FcellNeu{j}(k+Nk, :) = c1 + c2 * h.dat.F.FcellNeu{j}(k+Nk, :);
+%                     end
+%                 end
+%             end
+%         end
     end
 end
 
