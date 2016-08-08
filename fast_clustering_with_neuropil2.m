@@ -1,17 +1,12 @@
-function [ops, stat, res] = fast_clustering_with_neuropil2(ops, U, Sv)
+function [ops, stat, res] = fast_clustering_with_neuropil2(ops, U, Sv, flag_save)
 
-if ~exist('initialized')
-    U =  reshape(U, [], size(U,ndims(U)));
-    iplane = ops.iplane;
-    %
-    for i = 1:size(U,2)
-        U(:,i) = U(:,i)  * Sv(i).^.5;
-    end
-    %
-    U = U';
-    [nSVD, Npix] = size(U);
-    initialized = 1;
+if nargin<4
+    flag_save = 0;  % don't save by default
 end
+
+U =  reshape(U, [], size(U,ndims(U)));
+U = bsxfun(@times, U, Sv'.^.5)';
+[nSVD, Npix] = size(U);
 %% clustering options
 Ly = numel(ops.yrange);
 Lx = numel(ops.xrange);
@@ -61,25 +56,26 @@ Nk = ops.Nk0;
 Nkiter = round(linspace(ops.Nk0, ops.Nk, niter-2));
 Nkiter(end+1:(niter+1)) = ops.Nk;
 
-%
+%%
+Npix = Ly * Lx;
 M = .0001 * ones(1, Npix, 'single');
 
 ison = true(Nk,1);
-%
-nBasis = 10;
+TileFactor = getOr(ops, {'TileFactor'}, 1); % this option can be overwritten by the user
+nTiles = ceil(TileFactor * (Ly+Lx)/2 / (10 * ops.diameter)); % neuropil is modelled as nTiles by nTiles 
 
-xc = linspace(1, Lx, nBasis);
-yc = linspace(1, Ly, nBasis);
+xc = linspace(1, Lx, nTiles);
+yc = linspace(1, Ly, nTiles);
 yc = yc';
 xs = 1:Lx;
 ys = 1:Ly;
 
-sigx = 4*(Lx - 1)/nBasis;
-sigy = 4*(Ly - 1)/nBasis;
+sigx = 4*(Lx - 1)/nTiles;
+sigy = 4*(Ly - 1)/nTiles;
 
-S = zeros(Ly, Lx, nBasis, nBasis, 'single');
-for kx = 1:nBasis
-    for ky = 1:nBasis
+S = zeros(Ly, Lx, nTiles, nTiles, 'single');
+for kx = 1:nTiles
+    for ky = 1:nTiles
         cosx = 1+cos(2*pi*(xs - xc(kx))/sigx);
         cosy = 1+cos(2*pi*(ys - yc(ky))/sigy);
         cosx(abs(xs-xc(kx))>sigx/2) = 0;
@@ -88,51 +84,50 @@ for kx = 1:nBasis
         S(:, :,ky, kx) = cosy' * cosx;
     end
 end
-S = reshape(S, [], nBasis^2);
+S = reshape(S, [], nTiles^2);
 S = normc(S);
 
+nBasis = nTiles^2 ;
+PixL = ones(1, Lx * Ly)';
 %%
-% nBasis = 0;
-% S = zeros(Npix, nBasis^2);
 nFeat = 10;
-
-StS = S' * S;
-StU = S' * U';
-LtL = zeros(Nk, Nk, 'single');
-LtU = zeros(Nk, nSVD, 'single');
-LtS = zeros(Nk, nBasis^2, 'single');
-Ireg = diag([ones(Nk,1); zeros(nBasis^2,1)]);
-
 icl         = get_cl(iclust, Nk);
 iSortFeat   = get_isortfeat(icl, Nk, Ly, nFeat);
 tic
 %
+
+Uneu = U;
+Ireg = diag([ones(Nk,1); zeros(nBasis,1)]);
+
 for k = 1:niter
+   % recompute neuropil
+    Sm = bsxfun(@times, S, PixL);
+    StS = Sm' * Sm;
+    StU = Sm' * Uneu';
+    Lam = (StS + 1e-4 * eye(nBasis)) \ StU;
+    
+    % recompute neuropil pixel contribution 
+    neuropil = Lam' * S';
+    PixL = mean(bsxfun(@times, neuropil, Uneu), 1);
+    PixL = bsxfun(@rdivide, PixL, mean(neuropil.^2,1));
+    PixL = max(0, PixL);
+    neuropil = bsxfun(@times, neuropil, PixL);
+    Ucell = U - neuropil; %what's left over for cell model
+    PixL = PixL';
+    
+    % recompute cell activities
+    vs = zeros(nSVD, Nk); % initialize cell activities
     for i = 1:Nk
-        ix  = icl{i};
-        if numel(ix)==0
-            LtU(i,:) = 0;
-            LtL(i,i) = 0;
-            LtS(i,:) = 0;
-        else
-            LtU(i,:) = M(ix) * U(:, ix)';
-            LtL(i,i) = sum(M(ix).^2);
-            LtS(i,:) = M(ix) * S(ix, :);
+        ix = find(iclust==i);
+        if numel(ix)>0
+            vs(:,i) = M(ix) * Ucell(:, ix)';
         end
     end
-    
-    covL = [LtL LtS; LtS' StS];
-    LtXS = [LtU; StU];
-    
-    Lam = (covL + 1e-4 * Ireg) \ LtXS;
-    vs = normc(Lam(1:Nk, :)');
-    neuropil = Lam(Nk + [1:nBasis^2], :)' * S';
-    
-    Udiff = U- neuropil;
+    vs = bsxfun(@rdivide, vs, sum(vs.^2,1).^.5 + 1e-8);% normalize activity vectors
     
     xs = zeros(nFeat, Npix);
     for i = 1:Nk
-        xs(:, icl{i}) = vs(:, iSortFeat(:,i))' * Udiff(:, icl{i});
+        xs(:, icl{i}) = vs(:, iSortFeat(:,i))' * Ucell(:, icl{i});
     end
     
     [M, ifeat] = max(xs,[],1);
@@ -141,30 +136,33 @@ for k = 1:niter
     icl         = get_cl(iclust, Nk);
     iSortFeat   = get_isortfeat(icl, Nk, Ly, nFeat);
     
+    Uneu        = U - bsxfun(@times, M, vs(:,iclust));
     %---------------------------------------------%
     
     err(k) = sum(M(:));
     
     if (rem(k,10)==1 || k==niter) && ops.ShowCellMap
-        %%
-%         figure
+%         imagesc(reshape(PixL, Ly, Lx), [0 2])
+%         drawnow
+%         
         lam = M;
         for i = 1:Nk
             ix = find(iclust==i);
             nT0 = numel(ix);
             if nT0>0
                 vM = lam(ix);
-%                                 vM = vM/sum(vM.^2)^.5;
+%                 vM = vM/sum(vM.^2)^.5;
                 lam(ix) = vM;
             end
         end
-        V = max(0, min(30 * reshape(lam, Ly, Lx), 1));
+%         V = max(0, min(10 * reshape(lam, Ly, Lx), 1));
+        V = max(0, min(.5 * reshape(lam, Ly, Lx)/mean(lam(:)), 1));
         H = reshape(r(iclust), Ly, Lx);
         rgb_image = hsv2rgb(cat(3, H, Sat, V));
         imagesc(rgb_image)
         axis off
         drawnow
-        fprintf('explained variance is %2.6f time %2.2f \n', err(k), toc)
+        fprintf('residual variance is %2.6f time %2.2f \n', err(k), toc)
     end
     
 end
@@ -188,7 +186,6 @@ clear res
 res.iclust  = iclust';
 res.M       = M';
 res.S       = S;
-res.covL    = covL + 1e-4 * Ireg;
 res.lambda  = lam';
 
 %
@@ -196,14 +193,13 @@ res.Ly  = Ly;
 res.Lx  = Lx;
 stat    = get_stat(res);
 
-% keyboard;
-
-if ~exist(ops.ResultsSavePath, 'dir')
-    mkdir(ops.ResultsSavePath)
+if flag_save
+    if ~exist(ops.ResultsSavePath, 'dir')
+        mkdir(ops.ResultsSavePath)
+    end
+    save(sprintf('%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ...
+        ops.mouse_name, ops.date, ops.iplane, Nk),  'ops', 'res', 'stat')
 end
-save(sprintf('%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ...
-    ops.mouse_name, ops.date, iplane, Nk),  'ops', 'res', 'stat')
-
 %%
 
 

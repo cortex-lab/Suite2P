@@ -1,7 +1,10 @@
-function [ops, stat, res] = fastClustNeuropilCoef(ops, U, Sv)
+function [ops, stat, res] = fastClustNeuropilCoef(ops, U, Sv, flag_save)
 % 
+if nargin<4
+    flag_save = 0;  % don't save by default
+end
+
 U =  reshape(U, [], size(U,ndims(U)));
-iplane = ops.iplane;
 U = bsxfun(@times, U, Sv'.^.5)';
 [nSVD, Npix] = size(U);
 % Fs = bsxfun(@rdivide, Fs, Sv.^.5);
@@ -230,11 +233,14 @@ res.Ly  = Ly;
 res.Lx  = Lx;
 stat    = get_stat(res);
 
-if ~exist(ops.ResultsSavePath, 'dir')
-    mkdir(ops.ResultsSavePath)
+
+if flag_save
+    if ~exist(ops.ResultsSavePath, 'dir')
+        mkdir(ops.ResultsSavePath)
+    end
+    save(sprintf('%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ...
+        ops.mouse_name, ops.date, ops.iplane, Nk),  'ops', 'res', 'stat')
 end
-save(sprintf('%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ...
-    ops.mouse_name, ops.date, iplane, Nk),  'ops', 'res', 'stat')
 
 %%0
 % sk = skewness(F,[],2);
