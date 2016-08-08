@@ -1,7 +1,7 @@
 function dcell = deconvolve_standalone(Ff, ops, Fneu)
 % outputs a cell array of deconvolved spike times and amplitudes.
 
-% you need to set: ops.toolbox_path, 
+% you need to set: ops.toolbox_path, ops.nplanes
 
 % the following options are set to their defaults
 ops.imageRate    = getOr(ops, {'imageRate'}, 30); % total image rate (over all planes)
@@ -9,7 +9,7 @@ ops.sensorTau    = getOr(ops, {'sensorTau'}, 2); % approximate timescale in seco
 ops.sameKernel   = getOr(ops, {'sameKernel'}, 1); % 1 for same kernel per plane, 0 for individual kernels (not recommended)
 ops.maxNeurop    = getOr(ops, {'maxNeurop'}, Inf);
 ops.recomputeKernel    = getOr(ops, {'recomputeKernel'}, 0);
-
+ops.maxNeurop    = getOr(ops, {'maxNeurop'}, Inf);
 
 flag_neurop = 1;
 if nargin<3
@@ -79,10 +79,12 @@ for iter = 1:10
     fprintf('%2.2f sec, iter %d... ', toc, iter)
    
     % determine neuropil and cell contributions
-    parfor icell = 1:size(Ff,2)
-        if flag_neurop
+    if flag_neurop
+        parfor icell = 1:size(Ff,2)
             [B(:,icell), err(icell)] = get_neurop(Ff(:,icell), F1(:, icell), kernelS(:,icell), npad, Fneu(:,icell));
-        else
+        end
+    else
+        parfor icell = 1:size(Ff,2)
             [B(:,icell), err(icell)] = get_neurop(Ff(:,icell), F1(:, icell), kernelS(:,icell), npad);
         end
     end
@@ -136,7 +138,7 @@ for iter = 1:10
     end
     
     % print the mean error
-    fprintf('mean error %2.2f \n', mean(err(:))
+    fprintf('mean error %2.2f \n', mean(err(:)))
    
 end
 %
