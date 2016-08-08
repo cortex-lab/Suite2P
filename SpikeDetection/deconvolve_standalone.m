@@ -42,7 +42,11 @@ npad = 250;
 [NT, NN] = size(Ff);
 
 %%
-B = zeros(3, NN);
+if flag_neurop
+    B = zeros(3, NN);
+else
+    B = zeros(2, NN);
+end
 nt0 = numel(kernel);
 
 taus = mtau * [1/8 1/4 1/2 1 2];
@@ -76,7 +80,11 @@ for iter = 1:10
    
     % determine neuropil and cell contributions
     parfor icell = 1:size(Ff,2)
-        [B(:,icell), err(icell)] = get_neurop(Ff(:,icell), F1(:, icell), kernelS(:,icell), npad, Fneu(:,icell));
+        if flag_neurop
+            [B(:,icell), err(icell)] = get_neurop(Ff(:,icell), F1(:, icell), kernelS(:,icell), npad, Fneu(:,icell));
+        else
+            [B(:,icell), err(icell)] = get_neurop(Ff(:,icell), F1(:, icell), kernelS(:,icell), npad);
+        end
     end
 %     Ball{iter} = B;
 %     save('C:\Users\Marius\Documents\MATLAB\Ball.mat', 'Ball')
