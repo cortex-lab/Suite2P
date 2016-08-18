@@ -195,6 +195,8 @@ if isfield(h.dat.F, 'FcellNeu')
         h.dat.F.neurop = cat(2, h.dat.F.neurop, h.dat.F.FcellNeu{i});
     end    
     h.dat.plot_neu = 0;
+else
+    h.dat.plot_neu = 1;
 end
 
 redraw_fluorescence(h);
