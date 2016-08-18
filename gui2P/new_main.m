@@ -194,10 +194,11 @@ if isfield(h.dat.F, 'FcellNeu')
     for i = 1:length(h.dat.F.FcellNeu)
         h.dat.F.neurop = cat(2, h.dat.F.neurop, h.dat.F.FcellNeu{i});
     end    
-    h.dat.plot_neu = 0;
+    
 else
-    h.dat.plot_neu = 1;
+   h.dat.F.neurop = zeros(size(h.dat.F.trace), 'single');
 end
+h.dat.plot_neu = 0;
 
 redraw_fluorescence(h);
 redraw_figure(h);
