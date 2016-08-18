@@ -36,11 +36,11 @@ for j = 1:length(stat)
         x0 = xs(ipix); y0 = ys(ipix);
         
         rs = ((x0 - mean(x0)).^2 + (y0 - mean(y0)).^2).^.5;
-        stat(j).mrs     = mean(rs);
+        stat(j).mrs     = median(rs);
         stat(j).npix    = numel(ipix);
         stat(j).ipix    = ipix;
         stat(j).lambda    = lambda(lambda>max(lambda)/4);
-        stat(j).mrs0    = mean(rgridsort(1:stat(j).npix));
+        stat(j).mrs0    = median(rgridsort(1:stat(j).npix));
     end
 end
 

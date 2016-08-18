@@ -1,4 +1,4 @@
-function  run_pipeline(db, ops0, clustrules)
+% function  run_pipeline(db, ops0, clustrules)
 
 % ops0.TileFactor (or db(iexp).TileFactor) can be set to multiply the number of default tiles for the neuropil
 
@@ -57,12 +57,10 @@ for i = 1:length(ops.planesToProcess)
             case 'standard'
                 [ops, stat, res]  = fast_clustering(ops,U, Sv);
             case 'neuropil'                    
-%                 [ops, stat, res]  = fast_clustering_with_neuropil(ops,U, Sv);
-                  % better model of the neuropil
-                  [ops, stat, res]  = fastClustNeuropilCoef(ops,U, Sv);
+                  [ops, stat, res]  = fastClustNeuropilCoef(ops,U, Sv, 1);
         end
                 
-        [stat2, res2] = apply_ROIrules(ops, stat, res, clustrules);
+        [stat2, res2] = apply_ROIrules(ops, stat, res, clustrules, 1);
         
         switch neuropilSub
             case 'surround'

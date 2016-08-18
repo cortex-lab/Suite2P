@@ -48,9 +48,9 @@ for k = 1:Nk
         x0 = xs(pixi); y0 = ys(pixi);
         
         rs = ((x0 - mean(x0)).^2 + (y0 - mean(y0)).^2).^.5;
-        region(whclust).mrs     = mean(rs);
+        region(whclust).mrs     = median(rs);
         region(whclust).npix    = numel(pixi);
-        region(whclust).mrs0    = mean(rgridsort(1:region(whclust).npix));
+        region(whclust).mrs0    = median(rgridsort(1:region(whclust).npix));
         region(whclust).med     = [mean(y0) mean(x0)];
         region(whclust).ipix    = pixi;
         region(whclust).lambda  = res.lambda(pixi);

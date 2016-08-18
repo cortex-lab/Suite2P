@@ -93,7 +93,7 @@ for iter = 1:10
    
     % determine neuropil and cell contributions
     parfor icell = 1:size(Ff,2)
-        [B(:,icell), err(icell)] = get_neurop(Ff(:,icell), Fneu(:,icell), F1(:, icell), kernelS(:,icell), npad);
+        [B(:,icell), err(icell)] = get_neurop(Ff(:,icell), F1(:, icell), kernelS(:,icell), npad, Fneu(:,icell));
     end
 %     Ball{iter} = B;
 %     save('C:\Users\Marius\Documents\MATLAB\Ball.mat', 'Ball')
