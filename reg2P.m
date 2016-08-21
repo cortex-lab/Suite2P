@@ -125,8 +125,6 @@ for i = 1:numPlanes
     ops1{i}.DS          = [];
     ops1{i}.CorrFrame   = [];
     ops1{i}.mimg1       = zeros(Ly, Lx);
-    
-    
 end
 
 
