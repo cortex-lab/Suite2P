@@ -10,7 +10,7 @@ nt0 = ceil(ntotframes / ops.NavgFramesSVD);
 
 
 ops.NavgFramesSVD = floor(ntotframes/nt0);
-nimgbatch = nt0 * floor(2000/nt0);
+nimgbatch = nt0 * floor(500/nt0);
 
 ix = 0;
 fid = fopen(ops.RegFile, 'r');
