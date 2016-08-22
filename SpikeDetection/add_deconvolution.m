@@ -51,6 +51,8 @@ for i = 1:length(ops.planesToProcess)
     dat.cl.isroi = isroi;
     dat.cl.dcell = dcell;
     
+    sz            = cellfun(@(x) size(x, 2), dat.Fcell);
+    dat.cl.dSplit = divide_dcell(dcell, sz);
     save(fpath, '-struct', 'dat')
 end
 %

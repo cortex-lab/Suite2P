@@ -239,7 +239,7 @@ if flag_save
         mkdir(ops.ResultsSavePath)
     end
     save(sprintf('%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ...
-        ops.mouse_name, ops.date, ops.iplane, Nk),  'ops', 'res', 'stat', '-v7.3')
+        ops.mouse_name, ops.date, ops.iplane, Nk),  'ops', 'res', 'stat')
 end
 
 %%0

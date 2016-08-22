@@ -144,10 +144,15 @@ end
 %
 fprintf('finished... \n')
 
-% rescale baseline contribution
 for icell = 1:size(Ff,2)
+    % rescale baseline contribution
     dcell{icell}.B = B(:,icell);
     dcell{icell}.B(2) = dcell{icell}.B(2) * sd(icell);
+    
+    % sort timepoints
+    [~, isort] = sort(dcell{icell}.st, 'ascend');
+    dcell{icell}.st = dcell{icell}.st(isort);
+    dcell{icell}.c  = dcell{icell}.c(isort);
 end
 
 %%
