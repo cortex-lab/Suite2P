@@ -233,6 +233,9 @@ for i = 1:numPlanes
     if ~isempty(ops.RegFileTiffLocation)
         ops1{i} = write_reg_to_tiff(fid{i}, ops1{i}, i);
     end    
+    if ~isempty(ops.nimgbegend) && ops.nimgbegend>0
+        ops1{i} = getBlockBegEnd(fid{i}, ops1{i}); % get mean of first and last frames in block (to check for drift)
+    end
     if ~isempty(ops.RegFileBinLocation)
         folder = fullfile(ops1{i}.RegFileBinLocation, ops1{i}.mouse_name, ...
             ops1{i}.date);

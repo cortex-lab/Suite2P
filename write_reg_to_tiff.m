@@ -16,18 +16,19 @@ for k = 1:length(ops.SubDirs)
         data = fread(fid,  Ly*Lx*nfrtoread, '*int16');                
         nframesleft = nframesleft - nfrtoread;
         data = reshape(data, Ly, Lx, []);        
-        
-        if ix==1
-            navg = min(size(data,3), ops.nimgbegend);
-            ops.mimg_beg(:,:,k) = mean(data(:,:,1:navg), 3);
-        end
-        if nframesleft<ops.nimgbegend
-            nconc = min(ops.nimgbegend - nframesleft, nfrtoread);
-            datend = cat(3, datend, data(:,:,(nfrtoread-nconc+1):nfrtoread));
-        end
-        if nframesleft<=0
-             ops.mimg_end(:,:,k) = mean(datend, 3);
-        end
+
+         % this is now done in a separate function
+%         if ix==1
+%             navg = min(size(data,3), ops.nimgbegend);
+%             ops.mimg_beg(:,:,k) = mean(data(:,:,1:navg), 3);
+%         end
+%         if nframesleft<ops.nimgbegend
+%             nconc = min(ops.nimgbegend - nframesleft, nfrtoread);
+%             datend = cat(3, datend, data(:,:,(nfrtoread-nconc+1):nfrtoread));
+%         end
+%         if nframesleft<=0
+%              ops.mimg_end(:,:,k) = mean(datend, 3);
+%         end
         
         foldr = fullfile(ops.RegFileTiffLocation, ops.mouse_name, ops.date, ...
             ops.SubDirs{k}, sprintf('Plane%d', iplane));
