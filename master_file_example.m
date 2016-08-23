@@ -30,6 +30,7 @@ ops0.showTargetRegistration = 1; % shows the image targets for all planes to be 
 ops0.PhaseCorrelation       = 1; % set to 0 for non-whitened cross-correlation
 ops0.SubPixel               = Inf; % 2 is alignment by 0.5 pixel, Inf is the exact number from phase correlation
 ops0.NimgFirstRegistration  = 500; % number of images to include in the first registration pass 
+ops0.nimgbegend             = 250; % frames to average at beginning and end of blocks
 
 % cell detection options
 ops0.clustModel             = 'neuropil'; % standard or neuropil
@@ -41,6 +42,13 @@ ops0.sig                    = 0.5;  % spatial smoothing length in pixels; encour
 ops0.nSVDforROI             = 1000; % how many SVD components for cell clustering
 ops0.NavgFramesSVD          = 5000; % how many (binned) timepoints to do the SVD based on
 clustrules.diameter         = 10; % expected diameter of cells (used for 0.25 * pi/4*diam^2 < npixels < 10*pi/4*diam^2)
+
+% red channel options
+% redratio = red pixels inside / red pixels outside
+% redcell = redratio > mean(redratio) + redthres*std(redratio)
+% notred = redratio < mean(redratio) + redmax*std(redratio)
+ops0.redthres               = 1.5; % the higher the thres the less red cells
+ops0.redmax                 = 1; % the higher the max the more NON-red cells
 
 % spike deconvolution options
 ops0.imageRate              = 30;   % imaging rate (cumulative over planes!). Approximate, for initialization of deconvolution kernel.
@@ -58,7 +66,14 @@ for iexp = 1 %:length(db)
     add_deconvolution(ops0, db0(iexp), clustrules);
     
     % add red channel information (if it exists)
-    %     run_REDaddon(iexp, db, ops0) ;
+    if isfield(db0(iexp),'expred')
+        ops0.nchannels_red = db0(iexp).nchannels_red;
+        run_REDaddon(iexp, db0, ops0) ;
+        % create redcell array
+        DetectRedCells;
+        % fills dat.cl.redcell and dat.cl.notred
+    end
+    
 end
 %% STRUCTURE OF RESULTS FILE
 % 

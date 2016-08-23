@@ -121,7 +121,9 @@ else
     h.dat.xlim = [0 h.dat.cl.Lx];    
     
     h.dat.cl.manual  = zeros(h.dat.ops.Nk, 1);
-    h.dat.cl.redcell = zeros(h.dat.ops.Nk, 1);
+    if ~isfield(h.dat.cl,'redcell')
+        h.dat.cl.redcell = zeros(h.dat.ops.Nk, 1);
+    end
     h                = splitROIleftright(h);
     
     icell = find(h.dat.cl.iscell);
@@ -136,6 +138,19 @@ else
     h.dat.img1.Sat     = Sat;
     h.dat.img2.Sat     = Sat;
     
+    h = buildHue(h);
+    h = buildLambdaValue(h);
+    
+    % loop through redcells and set h.dat.cl.rands(h.dat.F.ichosen) = 0
+    for j = find(h.dat.cl.redcell)
+        h.dat.F.ichosen = j;
+        h.dat.cl.rands(h.dat.F.ichosen) = 0;
+    end
+    if ~isempty(icell)
+        h.dat.F.ichosen = icell(1); %ceil(rand * numel(icell))
+    else
+        h.dat.F.ichosen = 1; %ceil(rand * numel(icell))
+    end
     h = buildHue(h);
     h = buildLambdaValue(h);
     
@@ -182,6 +197,12 @@ if isfield(ops, 'mimgRED') && ~isempty(ops.mimgRED)
     h.dat.mimg(:,:,h.dat.maxmap) = ops.mimgRED(ops.yrange, ops.xrange);
     h.dat.mimg_proc(:,:,h.dat.maxmap) = normalize_image(h.dat.mimg(:,:,h.dat.maxmap));
 end
+if isfield(ops, 'mimgREDcorrected') && ~isempty(ops.mimgREDcorrected)
+    h.dat.maxmap = h.dat.maxmap + 1;
+    h.dat.mimg(:,:,h.dat.maxmap) = ops.mimgREDcorrected;
+    h.dat.mimg_proc(:,:,h.dat.maxmap) = normalize_image(h.dat.mimg(:,:,h.dat.maxmap));
+end
+
 h.dat.procmap = 0;
 
 h.dat.map = 1;
@@ -668,6 +689,12 @@ switch eventdata.Key
         if h.dat.maxmap>2
             pushbutton90_Callback(hObject, eventdata, h);
         end
+    case 'r'
+        h.dat.map = 3;
+        if h.dat.maxmap>3
+            pushbutton92_Callback(hObject, eventdata, h);
+        end
+        
     case 'p'
         pushbutton86_Callback(hObject, eventdata, h);
 end
@@ -871,6 +898,12 @@ function pushbutton90_Callback(hObject, eventdata, h)
 redraw_meanimg(h);
 guidata(hObject,h);
 
+% RED CORRECTED BUTTON
+function pushbutton92_Callback(hObject, eventdata, h)
+h.dat.map = 4;
+redraw_meanimg(h);
+guidata(hObject,h);
+
 
 
 
@@ -890,3 +923,4 @@ function pushbutton86_ButtonDownFcn(hObject, eventdata, handles)
 % hObject    handle to pushbutton86 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+

@@ -1,4 +1,4 @@
-function mimgR = red_channel_mean3(ops)
+function [mimgR,mimgG] = red_channel_mean3(ops)
 
 % numPlanes = length(ops.planesToProcess);
 
@@ -27,9 +27,11 @@ ops1 = cell(ops.nplanes, 1);
 for j = 1:ops.nplanes
     root = ops.ResultsSavePath;
     fname = sprintf('regops_%s_%s_plane%d.mat', ops.mouse_name, ops.date, j);
-    load(fullfile(root, fname))
-    ops1{j} = ops;
+    dat = load(fullfile(root, fname));
+    ops1{j} = dat.ops;
+    ops1{j}.useGPU = ops.useGPU;
 end
+
 %
 ntf0 = 0;
 numPlanes = ops.nplanes;
@@ -42,6 +44,10 @@ for k = 1:length(fsRED)
     if ~exist('mimgR', 'var')
         [Ly, Lx, ~] = size(data);
         mimgR = zeros(Ly, Lx, ops.nplanes);
+    end
+    if ~exist('mimgG', 'var')
+        [Ly, Lx, ~] = size(data);
+        mimgG = zeros(Ly, Lx, ops.nplanes);
     end
     %
     data = data(:,:,1:floor(nFr/(2*ops.nplanes))*2*ops.nplanes);
@@ -56,9 +62,12 @@ for k = 1:length(fsRED)
         end
         dataR(:, :, i,:)        = ...
             register_movie(squeeze(dataR(:, :, i, :)), ops1{i}, ds);
+        dataG(:, :, i,:)        = ...
+            register_movie(squeeze(dataG(:, :, i, :)), ops1{i}, ds);
     end
     
     mimgR = mimgR + mean(dataR(:,:,iplane0,:), 4);
+    mimgG = mimgG + mean(dataG(:,:,iplane0,:), 4);
     ntf0 = ntf0 + 1;
     
     iplane0 = iplane0 - nFr/ops.nchannels_red;
