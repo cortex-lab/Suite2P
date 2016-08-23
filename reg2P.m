@@ -4,6 +4,7 @@ function ops1 = reg2P(ops)
 % bitspersamp = 16;
 numPlanes = length(ops.planesToProcess);
 
+
 if isfield(ops, 'chunk_align') && ~isempty(ops.chunk_align); chunk_align   = ops.chunk_align(1);
 else chunk_align = 1; end
 if isfield(ops, 'nplanes') && ~isempty(ops.nplanes); nplanes   = ops.nplanes;
