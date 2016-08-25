@@ -23,6 +23,7 @@ if isfield(ops, 'LoadRegMean') && ~isempty(ops.LoadRegMean); LoadRegMean = ops.L
 else LoadRegMean = 0; end
 
 ops.RegFileBinLocation = getOr(ops, 'RegFileBinLocation', []);
+ops.smoothInTime = getOr(ops, 'smoothInTime', []);
 fs = ops.fsroot;
 
 %% find the mean frame after aligning a random subset
@@ -169,7 +170,14 @@ for k = 1:length(fs)
             for i = 1:numPlanes
                 ifr0 = iplane0(ops.planesToProcess(i));
                 indframes = ifr0:nplanes:size(data,3);
-                [ds, Corr]  = registration_offsets(data(:,:,indframes), ops1{i}, 0);
+                dat = data(:,:,indframes);
+                if ~isempty(ops.smoothInTime)
+                    dat = reshape(dat, [], size(dat,3));
+                    dat = my_conv(double(dat), ops.smoothInTime, 3);
+                    dat = reshape(int16(dat), size(data,1), size(data,2), ...
+                        length(indframes));
+                end
+                [ds, Corr]  = registration_offsets(dat, ops1{i}, 0);
                 dsall(indframes,:)  = ds;
                 % collect ds
                 if j==1
