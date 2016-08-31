@@ -23,7 +23,7 @@ if isfield(ops, 'LoadRegMean') && ~isempty(ops.LoadRegMean); LoadRegMean = ops.L
 else LoadRegMean = 0; end
 
 ops.RegFileBinLocation = getOr(ops, 'RegFileBinLocation', []);
-ops.smoothInTime = getOr(ops, 'smoothInTime', []);
+ops.smooth_time_space = getOr(ops, 'smooth_time_space', []);
 fs = ops.fsroot;
 
 %% find the mean frame after aligning a random subset
@@ -171,11 +171,34 @@ for k = 1:length(fs)
                 ifr0 = iplane0(ops.planesToProcess(i));
                 indframes = ifr0:nplanes:size(data,3);
                 dat = data(:,:,indframes);
-                if ~isempty(ops.smoothInTime)
-                    dat = reshape(dat, [], size(dat,3));
-                    dat = my_conv(double(dat), ops.smoothInTime, 3);
-                    dat = reshape(int16(dat), size(data,1), size(data,2), ...
-                        length(indframes));
+                if ~isempty(ops.smooth_time_space)
+                    smooth = reshape(ops.smooth_time_space, 1, []);
+                    switch length(smooth)
+                        case 1
+                            smDims = 3;
+                            smSigs = smooth;
+                            if smooth <= 0
+                                smooth = [];
+                            end
+                        case 2
+                            smSigs = smooth([2 2 1]);
+                            smDims = find(smSigs > 0);
+                            smSigs = smSigs(smDims);
+                            if isempty(smDims)
+                                smooth = [];
+                            end
+                        case 3
+                            smSigs = smooth([2 3 1]);
+                            smDims = find(smSigs > 0);
+                            smSigs = smSigs(smDims);
+                            if isempty(smDims)
+                                smooth = [];
+                            end
+                    end
+                    if ~isempty(smooth)
+                        dat = my_conv2(double(dat), smSigs, smDims);
+                        dat = int16(dat);
+                    end
                 end
                 [ds, Corr]  = registration_offsets(dat, ops1{i}, 0);
                 dsall(indframes,:)  = ds;
