@@ -52,6 +52,9 @@ PhaseCorrelation --- whether to use phase correlation (the alternative is normal
 SubPixel --- accuracy level of subpixel registration required. 2 is alignment by 0.5 pixel, Inf is the exact number from phase correlation. 
 NimgFirstRegistration --- number of randomly sampled images to do the target computation from
 NiterPrealign --- number of iterations for the target computation (iterative re-alignment of subset of frames)
+smooth_time_space --- convolves raw movie with a Gaussian of specified size in specified dimensions;
+                      [t]: convolve in time with gauss. of std t, [t s]: convolve in time and space,
+                      [t x y]: convolve in time, and in space with an ellipse rather than circle
 
 V. Options for cell detection
 

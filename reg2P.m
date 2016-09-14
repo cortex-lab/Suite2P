@@ -13,6 +13,8 @@ LoadRegMean        = getOr(ops, {'LoadRegMean'}, 0);
 ops.RegFileBinLocation = getOr(ops, {'RegFileBinLocation'}, []);
 ops.splitFOV           = getOr(ops, {'splitFOV'}, [1 1]);
 
+
+ops.smooth_time_space = getOr(ops, 'smooth_time_space', []);
 fs = ops.fsroot;
 
 %% find the mean frame after aligning a random subset
@@ -168,8 +170,13 @@ for k = 1:length(fs)
             for i = 1:numPlanes
                 ifr0 = iplane0(ops.planesToProcess(i));
                 indframes = ifr0:nplanes:size(data,3);
+
                 for l = 1:size(xFOVs,2)
-                    [ds, Corr]  = registration_offsets(data(yFOVs(:,l),xFOVs(:,l),indframes), ops1{i,l}, 0);
+                    dat = data(yFOVs(:,l),xFOVs(:,l),indframes);
+                    if ~isempty(ops.smooth_time_space)
+                        dat = smooth_movie(dat, ops); 
+                    end
+                    [ds, Corr]  = registration_offsets(dat, ops1{i,l}, 0);
                     dsall(indframes,:, l)  = ds;
                     % collect ds
                     if j==1
