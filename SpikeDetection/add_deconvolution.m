@@ -31,6 +31,7 @@ for i = 1:length(ops.planesToProcess)
     
     % overwrite fields of ops with those saved to file
     ops = addfields(ops, dat.ops);
+%     ops.maxNeurop = 1;
     if ~isfield(dat, 'clustrules');
         dat.clustrules = clustrules;
     end
