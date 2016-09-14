@@ -120,7 +120,7 @@ for i = 1:length(ops.planesToProcess)
     redcell  = rrat > nanmean(rrat)+redthres*nanstd(rrat);
     notred   = rrat <= nanmean(rrat) + redmax*nanstd(rrat);
     
-    sum(redcell)
+    fprintf('plane %d  reds %d\n',iplane,sum(redcell(:)&iscell(:)));
     
     dat.cl.redcell = redcell(:);
     dat.cl.notred  = notred(:);
