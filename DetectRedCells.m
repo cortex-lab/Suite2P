@@ -2,7 +2,7 @@
 
 ops = build_ops3(db0(iexp), ops0);
 redcells = [];
-for i = 2%:length(ops.planesToProcess)
+for i = 1:length(ops.planesToProcess)
     iplane  = ops.planesToProcess(i);
     try
         fname = sprintf('%s/F_%s_%s_plane%d_Nk%d_proc.mat', ops.ResultsSavePath, ops.mouse_name, ops.date, iplane, ops.Nk);

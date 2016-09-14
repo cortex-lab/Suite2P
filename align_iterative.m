@@ -36,4 +36,7 @@ ops.AlignNanThresh = median(Corr) - 4*std(Corr);
 ops.ErrorInitialAlign = err;
 ops.dsprealign = dsnew;
 
+
+ops.Ly = size(data,1);
+ops.Lx = size(data,2);
 end 

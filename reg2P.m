@@ -1,33 +1,23 @@
 function ops1 = reg2P(ops)
 %%
-% iplane = ops.iplane;
-% bitspersamp = 16;
 numPlanes = length(ops.planesToProcess);
 
+chunk_align        = getOr(ops, {'chunk_align'}, 1);
+nplanes            = getOr(ops, {'nplanes'}, 1);
+nchannels          = getOr(ops, {'nchannels'}, 1);
+ichannel           = getOr(ops, {'gchannel'}, 1);
+rchannel           = getOr(ops, {'rchannel'}, 2);
+red_align   = getOr(ops, {'AlignToRedChannel'}, 0);
+BiDiPhase          = getOr(ops, {'BiDiPhase'}, 0);
+LoadRegMean        = getOr(ops, {'LoadRegMean'}, 0);
+ops.RegFileBinLocation = getOr(ops, {'RegFileBinLocation'}, []);
+ops.splitFOV           = getOr(ops, {'splitFOV'}, [1 1]);
 
-if isfield(ops, 'chunk_align') && ~isempty(ops.chunk_align); chunk_align   = ops.chunk_align(1);
-else chunk_align = 1; end
-if isfield(ops, 'nplanes') && ~isempty(ops.nplanes); nplanes   = ops.nplanes;
-else nplanes = 1; end
-if isfield(ops, 'nchannels') && ~isempty(ops.nchannels); nchannels   = ops.nchannels;
-else nchannels = 1; end
-if isfield(ops, 'gchannel') && ~isempty(ops.gchannel); ichannel    = ops.gchannel;
-else ichannel = 1; end
-if nchannels>2 && isfield(ops, 'rchannel') && ~isempty(ops.rchannel); rchannel   = ops.rchannel;
-else rchannel = 2; end
-if isfield(ops, 'AlignToRedChannel') && ~isempty(ops.AlignToRedChannel); red_align = ops.AlignToRedChannel;
-else red_align = 0; end
-if isfield(ops, 'BiDiPhase') && ~isempty(ops.BiDiPhase); BiDiPhase = ops.BiDiPhase;
-else BiDiPhase = 0; end
-if isfield(ops, 'LoadRegMean') && ~isempty(ops.LoadRegMean); LoadRegMean = ops.LoadRegMean;
-else LoadRegMean = 0; end
-
-ops.RegFileBinLocation = getOr(ops, 'RegFileBinLocation', []);
 fs = ops.fsroot;
 
 %% find the mean frame after aligning a random subset
 ntifs = sum(cellfun(@(x) numel(x), fs));
-nfmax = floor(ops.NimgFirstRegistration/ntifs);
+nfmax = ceil(ops.NimgFirstRegistration/ntifs);
 if nfmax>=2000
     nfmax = 1999;
 end
@@ -39,8 +29,10 @@ Lx = Info0(1).Width;
 ops.Lx = Lx;
 ops.Ly = Ly;
 
+[xFOVs, yFOVs] = get_xyFOVs(ops); 
+
 indx = 0;
-IMG = zeros(Ly, Lx, nplanes, ops.NimgFirstRegistration, 'single');
+IMG = zeros(Ly, Lx, nplanes, ops.NimgFirstRegistration, 'int16');
 
 if ops.doRegistration
     for k = 1:length(ops.SubDirs)
@@ -84,26 +76,33 @@ if ops.doRegistration
         end
     end
     IMG =  IMG(:,:,:,1:indx);
-    %
+    
+    ops1 = cell(numPlanes, size(xFOVs,2));
     for i = 1:numPlanes
-        ops1{i} = align_iterative(squeeze(IMG(:,:,ops.planesToProcess(i),:)), ops);
+        for j = 1:size(xFOVs,2)
+            ops1{i,j} = align_iterative(single(squeeze(IMG(yFOVs(:,j),xFOVs(:,j),...
+                ops.planesToProcess(i),:))), ops);
+        end
     end
     
     if ops.showTargetRegistration
         figure('position', [900 50 900 900])
-        ax = ceil(sqrt(numel(ops1)));
-        for i = 1:length(ops1)
-            subplot(ax,ax,i)
-            imagesc(ops1{i}.mimg)
-            colormap('gray')
-            title(sprintf('Registration for plane %d, mouse %s, date %s', ...
-                i, ops.mouse_name, ops.date))
+        ax = ceil(sqrt(numel(ops1)/2));
+        i0 = 0;
+        for i = 1:numPlanes
+            for j = 1:size(xFOVs,2)
+                i0 = i0+1;
+                subplot(ax,2*ax,i0)
+                imagesc(ops1{i,j}.mimg)
+                colormap('gray')
+                title(sprintf('Registration for plane %d, mouse %s, date %s', ...
+                    i, ops.mouse_name, ops.date))
+            end
         end
         
         drawnow
     end
     
-%     keyboard;
     clear IMG
 else
     for i = 1:numPlanes
@@ -113,30 +112,30 @@ else
         ops1{i}.Lx   = Lx;
      end
 end
-
+%%
+fid = cell(numPlanes, size(xFOVs,2));
 for i = 1:numPlanes
-    ops1{i}.RegFile = fullfile(ops.RegFileRoot, sprintf('tempreg_plane%d.bin', ops.planesToProcess(i)));
-    regdir = fileparts(ops1{i}.RegFile);
-    if ~exist(regdir, 'dir')
-        mkdir(regdir);
+    for j = 1:size(xFOVs,2)
+        ops1{i,j}.RegFile = fullfile(ops.RegFileRoot, sprintf('tempreg_plane%d.bin', i + (j-1)*numPlanes));
+        regdir = fileparts(ops1{i,j}.RegFile);
+        if ~exist(regdir, 'dir')
+            mkdir(regdir);
+        end
+        
+        % open bin file for writing
+        fid{i,j}              = fopen(ops1{i,j}.RegFile, 'w');
+        ops1{i,j}.DS          = [];
+        ops1{i,j}.CorrFrame   = [];
+        ops1{i,j}.mimg1       = zeros(ops1{i,j}.Ly, ops1{i,j}.Lx);
+        
     end
-    
-    % open bin file for writing
-    fid{i}             = fopen(ops1{i}.RegFile, 'w');
-    ops1{i}.DS          = [];
-    ops1{i}.CorrFrame   = [];
-    ops1{i}.mimg1       = zeros(Ly, Lx);
-    
-    
 end
 
 
-nbytes = fs{1}(1).bytes;
-nFr = nFramesTiff(fs{1}(1).name);
 %%
 tic
 for k = 1:length(fs)
-    for i = 1:numPlanes
+    for i = 1:numel(ops1)
          ops1{i}.Nframes(k)  = 0;
     end
     
@@ -165,18 +164,20 @@ for k = 1:length(fs)
         
         if ops.doRegistration
             % get the registration offsets
-            dsall = zeros(size(data,3), 2);
+            dsall = zeros(size(data,3), 2, size(xFOVs,2));
             for i = 1:numPlanes
                 ifr0 = iplane0(ops.planesToProcess(i));
                 indframes = ifr0:nplanes:size(data,3);
-                [ds, Corr]  = registration_offsets(data(:,:,indframes), ops1{i}, 0);
-                dsall(indframes,:)  = ds;
-                % collect ds
-                if j==1
-                    ds(1,:) = 0;
+                for l = 1:size(xFOVs,2)
+                    [ds, Corr]  = registration_offsets(data(yFOVs(:,l),xFOVs(:,l),indframes), ops1{i,l}, 0);
+                    dsall(indframes,:, l)  = ds;
+                    % collect ds
+                    if j==1
+                        ds(1,:,:) = 0;
+                    end
+                    ops1{i,l}.DS          = cat(1, ops1{i,l}.DS, ds);
+                    ops1{i,l}.CorrFrame   = cat(1, ops1{i,l}.CorrFrame, Corr);
                 end
-                ops1{i}.DS          = cat(1, ops1{i}.DS, ds);
-                ops1{i}.CorrFrame   = cat(1, ops1{i}.CorrFrame, Corr);
             end
             
             % if aligning by the red channel, data needs to be reloaded as the
@@ -192,15 +193,17 @@ for k = 1:length(fs)
             
             ix0 = 0;
             Nbatch = 1000;
-            dreg = zeros(size(data), class(data));
+            dreg = zeros(size(data), class(data));            
             while ix0<size(data,3)
                 indxr = ix0 + (1:Nbatch);
                 indxr(indxr>size(data,3)) = [];
-                dreg(:, :, indxr)        = ...
-                    register_movie(data(:, :, indxr), ops1{1}, dsall(indxr,:));
+                for l = 1:size(xFOVs,2)
+                    dreg(yFOVs(:,l), xFOVs(:,l), indxr)        = ...
+                        register_movie(data(yFOVs(:,l), xFOVs(:,l), indxr), ops1{1,l}, dsall(indxr,:,l));
+                end
                 ix0 = ix0 + Nbatch;
             end
-           
+            
         else
             dreg = data;
         end
@@ -208,11 +211,13 @@ for k = 1:length(fs)
         for i = 1:numPlanes
             ifr0 = iplane0(ops.planesToProcess(i));
             indframes = ifr0:nplanes:size(data,3);
-            dwrite = dreg(:,:,indframes);
-            fwrite(fid{i}, dwrite, class(data));
-            
-            ops1{i}.Nframes(k) = ops1{i}.Nframes(k) + size(dwrite,3);
-            ops1{i}.mimg1 = ops1{i}.mimg1 + sum(dwrite,3);
+            for l = 1:size(xFOVs,2)
+                dwrite = dreg(yFOVs(:,l),xFOVs(:,l),indframes);
+                fwrite(fid{i,l}, dwrite, class(data));
+                
+                ops1{i,l}.Nframes(k) = ops1{i,l}.Nframes(k) + size(dwrite,3);
+                ops1{i,l}.mimg1 = ops1{i,l}.mimg1 + sum(dwrite,3);
+            end
         end
         
         if rem(j,5)==1
@@ -223,7 +228,7 @@ for k = 1:length(fs)
     end
     
 end
-for i = 1:numPlanes
+for i = 1:numel(ops1)
     ops1{i}.mimg1 = ops1{i}.mimg1/sum(ops1{i}.Nframes);
 end
 %%
@@ -260,7 +265,7 @@ for i = 1:numPlanes
 end
 %%
 % compute xrange, yrange
-for i = 1:numPlanes
+for i = 1:numel(ops1)
     if ops.doRegistration
         minDs = min(ops1{i}.DS(2:end, [1 2]), [], 1);
         maxDs = max(ops1{i}.DS(2:end, [1 2]), [], 1);
@@ -271,8 +276,8 @@ for i = 1:numPlanes
             minDs(2) = min(BiDiPhase, minDs(2));
         end
         
-        ops1{i}.yrange = ceil(maxDs(1)):floor(Ly+minDs(1));
-        ops1{i}.xrange = ceil(maxDs(2)):floor(Lx+minDs(2));
+        ops1{i}.yrange = ceil(maxDs(1)):floor(ops1{i}.Ly+minDs(1));
+        ops1{i}.xrange = ceil(maxDs(2)):floor(ops1{i}.Lx+minDs(2));
     else
         ops1{i}.yrange = 1:Ly;
         ops1{i}.xrange = 1:Lx;
@@ -285,7 +290,7 @@ for i = 1:numPlanes
     end
     ops = ops1{i};
     save(sprintf('%s/regops_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
-        ops.mouse_name, ops.date,  ops.planesToProcess(i)),  'ops')
+        ops.mouse_name, ops.date, i),  'ops')
 end
 
 

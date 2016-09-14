@@ -18,10 +18,6 @@ clustrules = get_clustrules(clustrules);
  
 ops = build_ops3(db, ops0);
 
-if ops.useGPU
-    gpuDevice(1);   % reset GPU at each dataset
-end
-%
 
 clustModel     = getOr(ops, {'clustModel'}, 'standard');
 neuropilSub    = getOr(ops, {'neuropilSub'}, 'surround');
