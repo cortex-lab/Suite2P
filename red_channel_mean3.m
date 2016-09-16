@@ -57,7 +57,7 @@ for k = 1:length(fsRED)
     
     
     for iPlane=1:ops.nplanes
-        mPlot=mPlot+1;
+      
         idx0=mod((ops.nplanes-startPlane+iPlane)*2,ops.nplanes*2);
         planesG=(idx0+1):(2*ops.nplanes):nFr;
         planesR=(idx0+2):(2*ops.nplanes):nFr;
