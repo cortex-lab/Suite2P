@@ -66,7 +66,7 @@ for iexp = 1 %:length(db)
     add_deconvolution(ops0, db0(iexp), clustrules);
     
     % add red channel information (if it exists)
-    if isfield(db0(iexp),'expred')
+    if isfield(db0,'expred') && ~isempty(db0(iexp).expred)
         ops0.nchannels_red = db0(iexp).nchannels_red;
         run_REDaddon(iexp, db0, ops0) ;
         % create redcell array
