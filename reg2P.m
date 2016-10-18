@@ -269,8 +269,10 @@ for i = 1:numPlanes
         ops1{i} = getBlockBegEnd(fid{i}, ops1{i}); % get mean of first and last frames in block (to check for drift)
     end
     if ~isempty(ops.RegFileBinLocation)
+        str = sprintf('%d_',ops1{i}.expts);
+        str(end) = [];
         folder = fullfile(ops1{i}.RegFileBinLocation, ops1{i}.mouse_name, ...
-            ops1{i}.date);
+            ops1{i}.date, str);
         if ~exist(folder, 'dir')
             mkdir(folder)
         end
