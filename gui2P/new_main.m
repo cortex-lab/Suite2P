@@ -199,7 +199,7 @@ if isfield(ops, 'mimgRED') && ~isempty(ops.mimgRED)
 end
 if isfield(ops, 'mimgREDcorrected') && ~isempty(ops.mimgREDcorrected)
     h.dat.maxmap = h.dat.maxmap + 1;
-    h.dat.mimg(:,:,h.dat.maxmap) = ops.mimgREDcorrected;
+    h.dat.mimg(:,:,h.dat.maxmap) = ops.mimgREDcorrected(ops.yrange, ops.xrange);
     h.dat.mimg_proc(:,:,h.dat.maxmap) = normalize_image(h.dat.mimg(:,:,h.dat.maxmap));
 end
 

@@ -5,7 +5,7 @@ function [mimgR,mimgG] = red_channel_mean3(ops)
 % build file list with red channel
 
 if (isfield(ops, 'SubDirsRed') && ~isempty(ops.SubDirsRed))
-   subDirsRed = ops.SubDirsRed;
+    subDirsRed = ops.SubDirsRed;
 else
     if (isfield(ops, 'expred') && ~isempty(ops.expred))
         for i = 1:length(ops.expred)
@@ -14,7 +14,7 @@ else
     else
         warning('could not find red channel info, returning...')
         return;
-    end 
+    end
 end
 %
 % build file list
@@ -35,10 +35,14 @@ end
 %
 ntf0 = 0;
 numPlanes = ops.nplanes;
-iplane0 = 1:1:ops.nplanes;
+%iplane0 = 1:1:ops.nplanes;
+totFrames=0;
 for k = 1:length(fsRED)
-    iplane0 = mod(iplane0-1, numPlanes) + 1;
+    %iplane0 = mod(iplane0-1, numPlanes) + 1;
+    startPlane=((mod(totFrames+1,ops.nplanes*2)-1)/2)+1;
+    
     nFr = nFramesTiff(fsRED(k).name);
+    totFrames=totFrames+nFr;
     data = loadFramesBuff(fsRED(k).name, 1, nFr, 1, ops.temp_tiff);
     
     if ~exist('mimgR', 'var')
@@ -50,27 +54,36 @@ for k = 1:length(fsRED)
         mimgG = zeros(Ly, Lx, ops.nplanes);
     end
     %
-    data = data(:,:,1:floor(nFr/(2*ops.nplanes))*2*ops.nplanes);
-    data = reshape(data, Ly, Lx, 2,ops.nplanes, []);
-    dataG = sq(data(:,:,1,:,:), 3);
-    dataR = sq(data(:,:,2,:,:), 3);
     
-    for i = 1:numPlanes
-        [ds, ~]  = registration_offsets(squeeze(dataG(:,:,i,:)), ops1{i}, 0);
+    
+    for iPlane=1:ops.nplanes
+      
+        idx0=mod((ops.nplanes-startPlane+iPlane)*2,ops.nplanes*2);
+        planesG=(idx0+1):(2*ops.nplanes):nFr;
+        planesR=(idx0+2):(2*ops.nplanes):nFr;
+        dataG0=data(:,:,planesG);
+        dataR0=data(:,:,planesR);
+        
+        [ds, ~]  = registration_offsets(dataG0, ops1{iPlane}, 0);
         if k==1
             ds(1,:) = 0;
         end
-        dataR(:, :, i,:)        = ...
-            register_movie(squeeze(dataR(:, :, i, :)), ops1{i}, ds);
-        dataG(:, :, i,:)        = ...
-            register_movie(squeeze(dataG(:, :, i, :)), ops1{i}, ds);
+        dataR       = ...
+            register_movie(dataR0, ops1{iPlane}, ds);
+        dataG     = ...
+            register_movie(dataG0, ops1{iPlane}, ds);
+        
+        
+        mimgR(:,:,iPlane) = mimgR(:,:,iPlane) + mean(dataR, 3);
+        mimgG(:,:,iPlane) = mimgG(:,:,iPlane) + mean(dataG, 3);
+        
     end
     
-    mimgR = mimgR + mean(dataR(:,:,iplane0,:), 4);
-    mimgG = mimgG + mean(dataG(:,:,iplane0,:), 4);
     ntf0 = ntf0 + 1;
     
-    iplane0 = iplane0 - nFr/ops.nchannels_red;
+    %iplane0 = iplane0 - nFr/ops.nchannels_red;
+    fprintf('processing tiff %d/%d\n',k,length(fsRED))
 end
 
 mimgR = mimgR/ntf0;
+mimgG = mimgG/ntf0;

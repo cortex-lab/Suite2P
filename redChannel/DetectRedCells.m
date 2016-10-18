@@ -2,7 +2,7 @@
 
 ops = build_ops3(db0(iexp), ops0);
 redcells = [];
-for i = 2%:length(ops.planesToProcess)
+for i = 1:length(ops.planesToProcess)
     iplane  = ops.planesToProcess(i);
     try
         fname = sprintf('%s/F_%s_%s_plane%d_Nk%d_proc.mat', ops.ResultsSavePath, ops.mouse_name, ops.date, iplane, ops.Nk);
@@ -120,7 +120,7 @@ for i = 2%:length(ops.planesToProcess)
     redcell  = rrat > nanmean(rrat)+redthres*nanstd(rrat);
     notred   = rrat <= nanmean(rrat) + redmax*nanstd(rrat);
     
-    sum(redcell)
+    fprintf('plane %d  reds %d\n',iplane,sum(redcell(:)&iscell(:)));
     
     dat.cl.redcell = redcell(:);
     dat.cl.notred  = notred(:);
