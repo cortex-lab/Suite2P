@@ -55,7 +55,7 @@ if phaseCorrelation
   cfRefImg = cfRefImg./(eps0 + abs(cfRefImg)).*fhg;
 end
 if useGPU
-  batchSize = 2^25/2^ceil(log2(lyus*lxus)); % works well on GTX 970
+  batchSize = getBatchSize(lyus*lxus);
   maskMul = gpuArray(maskMul);
   maskOffset = gpuArray(maskOffset);
   cfRefImg = gpuArray(cfRefImg);

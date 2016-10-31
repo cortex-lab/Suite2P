@@ -2,7 +2,7 @@ function n = nFramesTiff(tiff)
 %nFrames find the number of frames in the Tiff
 
 %keep guessing until we seek too far
-guess = 1000;
+guess = 2001;
 overSeeked = false;
 
 if ischar(tiff)

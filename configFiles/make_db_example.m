@@ -15,6 +15,14 @@ db(i).mouse_name    = 'M150824_MP019';
 db(i).date          = '2015-12-19';
 db(i).expts         = [4];
 
+% example of datasets, which consist of several sessions - use cell arrays
+% will be treated as subsets of experiment with the same FOV, with
+% different names/dates (for one reason or another), analyzed together
+i = i+1;
+db(i).mouse_name    = {'MK020', 'M150416_MK020'};
+db(i).date          = {'2015-07-30', '2015-07-30'};
+db(i).expts         = {[2010 2107], [1 2 3]};
+
 % example extra entries
 % db(i).AlignToRedChannel= 1;
 % db(i).BiDiPhase        = 0; % adjust the relative phase of consecutive lines
