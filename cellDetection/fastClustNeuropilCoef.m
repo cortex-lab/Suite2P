@@ -1,5 +1,5 @@
 function [ops, stat, res] = fastClustNeuropilCoef(ops, U, Sv)
-% 
+%
 U =  reshape(U, [], size(U,ndims(U)));
 iplane = ops.iplane;
 U = bsxfun(@times, U, Sv'.^.5)';
@@ -18,7 +18,7 @@ nsqrt = round(sqrt(Nk));
 
 xs = repmat(round(linspace(1, nsqrt, Lx)), Ly, 1);
 ys = repmat(round(linspace(1, nsqrt, Ly))', 1, Lx);
-iclust = xs + (ys-1) * nsqrt; 
+iclust = xs + (ys-1) * nsqrt;
 
 clear xs ys
 
@@ -26,13 +26,13 @@ niter   = ops.niterclustering;
 
 % xs = repmat(1:Lx, Ly, 1);
 % ys = repmat((1:Ly)', 1, Lx);
-% 
+%
 % randx = rand(1, Nk) * Lx;
 % randy = rand(1, Nk) * Ly;
-% 
+%
 % dx = repmat(xs(:), 1, Nk) - repmat(randx, numel(xs(:)), 1);
 % dy = repmat(ys(:), 1, Nk) - repmat(randy, numel(ys(:)), 1);
-% 
+%
 % dxy = dx.^2 + dy.^2;
 % [~, iclust] = min(dxy, [], 2);
 %%
@@ -61,7 +61,7 @@ M = .0001 * ones(1, Npix, 'single');
 
 ison = true(Nk,1);
 TileFactor = getOr(ops, {'TileFactor'}, 1); % this option can be overwritten by the user
-nTiles = ceil(TileFactor * (Ly+Lx)/2 / (10 * ops.diameter)); % neuropil is modelled as nTiles by nTiles 
+nTiles = ceil(TileFactor * (Ly+Lx)/2 / (10 * ops.diameter)); % neuropil is modelled as nTiles by nTiles
 
 xc = linspace(1, Lx, nTiles);
 yc = linspace(1, Ly, nTiles);
@@ -106,7 +106,7 @@ for k = 1:niter
     StU = Sm' * Uneu';
     Lam = (StS + 1e-4 * eye(nBasis)) \ StU;
     
-    % recompute neuropil pixel contribution 
+    % recompute neuropil pixel contribution
     neuropil = Lam' * S';
     PixL = mean(bsxfun(@times, neuropil, Uneu), 1);
     PixL = bsxfun(@rdivide, PixL, mean(neuropil.^2,1));
@@ -124,18 +124,28 @@ for k = 1:niter
         end
     end
     %
-%     Ff = Fs' * vs;
-%     vs = Finv * max(0, Ff);
-%     [dcell, Ffr] = run_deconvolution2(Ff, f0, kernel);    
-%     vs = Finv * Ffr;
+    %     Ff = Fs' * vs;
+    %     vs = Finv * max(0, Ff);
+    %     [dcell, Ffr] = run_deconvolution2(Ff, f0, kernel);
+    %     vs = Finv * Ffr;
     
     vs = bsxfun(@rdivide, vs, sum(vs.^2,1).^.5 + 1e-8);% normalize activity vectors
+    vs = single(vs);
     
     % recompute pixels' assignments
-    xs          = vs' * Ucell;
+    if ops.useGPU
+        xs          = gpuBlockSmallXtY(vs, Ucell);
+    else
+        xs          = vs' * Ucell;
+    end
+    
     [M, iclust] = max(xs,[],1);
+    %     Uneu        = U - bsxfun(@times, M, vs(:,iclust)); %what's left over for neuropil model
     Uneu        = U - bsxfun(@times, M, vs(:,iclust)); %what's left over for neuropil model
-    err(k)      = sum(sum((Uneu-neuropil).^2)).^.5;
+    %     vs = double(vs);
+    
+    %     err(k)      = sum(sum((Uneu-neuropil).^2)).^.5;
+    err(k)      = norm(Uneu(:)-neuropil(:));
     
     if 1
         %---------------------------------------------%
@@ -177,20 +187,20 @@ for k = 1:niter
     
     
     if (rem(k,10)==1 || k==niter) && ops.ShowCellMap
-%         imagesc(reshape(PixL, Ly, Lx), [0 2])
-%         drawnow
-%         
+        %         imagesc(reshape(PixL, Ly, Lx), [0 2])
+        %         drawnow
+        %
         lam = M;
         for i = 1:Nk
             ix = find(iclust==i);
             nT0 = numel(ix);
             if nT0>0
                 vM = lam(ix);
-%                 vM = vM/sum(vM.^2)^.5;
+                %                 vM = vM/sum(vM.^2)^.5;
                 lam(ix) = vM;
             end
         end
-%         V = max(0, min(10 * reshape(lam, Ly, Lx), 1));
+        %         V = max(0, min(10 * reshape(lam, Ly, Lx), 1));
         V = max(0, min(.5 * reshape(lam, Ly, Lx)/mean(lam(:)), 1));
         H = reshape(r(iclust), Ly, Lx);
         rgb_image = hsv2rgb(cat(3, H, Sat, V));
@@ -199,7 +209,7 @@ for k = 1:niter
         drawnow
         fprintf('residual variance is %2.6f time %2.2f \n', err(k), toc)
     end
-   
+    
 end
 
 lam = M;

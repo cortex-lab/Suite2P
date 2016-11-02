@@ -88,17 +88,19 @@ if ops.doRegistration
     end
     
     if ops.showTargetRegistration
-        figure('position', [900 50 900 900])
-        ax = ceil(sqrt(numel(ops1)/2));
+        nRows = floor(sqrt(numel(ops1)));
+        nColumns = ceil(numel(ops1)/nRows);
+        figure('Name', 'Registration Target Frames', ...
+            'Position', [50 50 nColumns*500 nRows*500])
         i0 = 0;
         for i = 1:numPlanes
             for j = 1:size(xFOVs,2)
                 i0 = i0+1;
-                subplot(ax,2*ax,i0)
-                imagesc(ops1{i,j}.mimg)
+                subplot(nRows, nColumns, i0);
+                imagesc(ops1{i,j}.mimg);
                 colormap('gray')
-                title(sprintf('Registration for plane %d, mouse %s, date %s', ...
-                    i, ops.mouse_name, ops.date))
+                axis equal tight
+                title(sprintf('Plane %d, %s_%s', i, ops.mouse_name, ops.date))
             end
         end
         
