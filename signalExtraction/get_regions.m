@@ -22,9 +22,9 @@ Nk = numel(unique(res.iclust));
 for k = 1:Nk
     % needs stat, res, neigh
     pixall = stat(k).ipix;
-
-%     minV = clustrules.parent.minPixRelVar * mean(res.M(pixall));
-%     pixall(res.M(pixall)< minV) = [];
+    
+    %     minV = clustrules.parent.minPixRelVar * mean(res.M(pixall));
+    %     pixall(res.M(pixall)< minV) = [];
     
     whclust = 0;
     region = [];
@@ -47,15 +47,23 @@ for k = 1:Nk
         
         x0 = xs(pixi); y0 = ys(pixi);
         
-        rs = ((x0 - mean(x0)).^2 + (y0 - mean(y0)).^2).^.5;
-        region(whclust).mrs     = mean(rs);
+        meanX0 = mean(x0);
+        meanY0 = mean(y0);
+        rs = ((x0 - meanX0).^2 + (y0 - meanY0).^2).^.5;
         region(whclust).npix    = numel(pixi);
-        region(whclust).mrs0    = mean(rgridsort(1:region(whclust).npix));
-        region(whclust).med     = [mean(y0) mean(x0)];
+        if region(whclust).npix>1
+            region(whclust).mrs     = mean(rs);
+            region(whclust).mrs0    = mean(rgridsort(1:region(whclust).npix));
+            region(whclust).V       = sum(res.M(pixi));
+        else
+            region(whclust).mrs     = rs;
+            region(whclust).mrs0    = rgridsort(1);
+            region(whclust).V       = res.M(pixi);
+        end
+        region(whclust).med     = [meanY0 meanX0];
         region(whclust).ipix    = pixi;
         region(whclust).lambda  = res.lambda(pixi);
-        region(whclust).V       = sum(res.M(pixi));
-        region(whclust).parent      = k;  
+        region(whclust).parent      = k;
     end
     stat(k).region = region;
     

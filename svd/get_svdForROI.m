@@ -15,7 +15,7 @@ nimgbatch = nt0 * floor(2000/nt0);
 ix = 0;
 fid = fopen(ops.RegFile, 'r');
 
-mov = zeros(Ly, Lx, ops.NavgFramesSVD, 'single');
+mov = zeros(numel(ops.yrange), numel(ops.xrange), ops.NavgFramesSVD, 'single');
 
 while 1
     data = fread(fid,  Ly*Lx*nimgbatch, '*int16');
@@ -30,21 +30,21 @@ while 1
     data = bsxfun(@minus, data, mean(data,3));
 %     data = bsxfun(@minus, data, ops.mimg1);
     
-    irange = 1:nt0*floor(size(data,3)/nt0);
-    data = data(:,:, irange);
+    nSlices = nt0*floor(size(data,3)/nt0);
+    if nSlices~=size(data,3)
+        data = data(:,:, 1:nSlices);
+    end
     
     data = reshape(data, Ly, Lx, nt0, []);
-    davg = single(squeeze(mean(data,3)));
+    davg = squeeze(mean(data,3));
       
-    mov(:,:,ix + (1:size(davg,3))) = davg;
+    mov(:,:,ix + (1:size(davg,3))) = davg(ops.yrange, ops.xrange, :);
         
     ix = ix + size(davg,3);    
 end
 fclose(fid);
-%%
-mov(:, :, (ix+1):end) = [];
 
-mov = mov(ops.yrange, ops.xrange, :);
+mov = mov(:, :, 1:ix);
 % mov = mov - repmat(mean(mov,3), 1, 1, size(mov,3));
 %% SVD options
 
@@ -60,8 +60,13 @@ end
 
 mov             = reshape(mov, [], size(mov,3));
 sdmov           = mean(mov.^2,2).^.5;
-mov             = mov./repmat(sdmov, 1, size(mov,2));
-COV             = mov' * mov/size(mov,1);
+% mov             = mov./repmat(sdmov, 1, size(mov,2));
+mov             = bsxfun(@rdivide, mov, sdmov);
+if ops.useGPU
+    COV             = gpuBlockXtX(mov)/size(mov,1);
+else
+    COV             = mov' * mov/size(mov,1);
+end
 
 ops.nSVDforROI = min(size(COV,1)-2, ops.nSVDforROI);
 
@@ -78,8 +83,13 @@ else
     Sv              = single(diag(Sv));
 end
 
-U               = normc(mov * V);
+if ops.useGPU
+    U               = normc(gpuBlockXY(mov, V));
+else
+    U               = normc(mov * V);
+end
 U               = single(U);
+
 %%
 fid = fopen(ops.RegFile, 'r');
 
@@ -97,7 +107,11 @@ while 1
     data = bsxfun(@minus, data, mean(data,3));
 %     data = bsxfun(@minus, data, ops.mimg1);
     data = data(ops.yrange, ops.xrange, :);
-    Fs(:, ix + (1:size(data,3))) = U' * reshape(data, [], size(data,3));
+    if ops.useGPU
+      Fs(:, ix + (1:size(data,3))) = gpuBlockXtY(U, reshape(data, [], size(data,3)));
+    else
+      Fs(:, ix + (1:size(data,3))) = U' * reshape(data, [], size(data,3));
+    end
     
     ix = ix + size(data,3);
 end
@@ -109,6 +123,11 @@ if ~exist(ops.ResultsSavePath, 'dir')
    mkdir(ops.ResultsSavePath); 
 end
 if getOr(ops, {'writeSVDroi'}, 0)
-    save(sprintf('%s/SVDroi_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
-        ops.mouse_name, ops.date, ops.iplane), 'U', 'Sv', 'V', 'ops');
+    try
+        save(sprintf('%s/SVDroi_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
+            ops.mouse_name, ops.date, ops.iplane), 'U', 'Sv', 'V', 'ops', '-v6');
+    catch
+        save(sprintf('%s/SVDroi_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
+            ops.mouse_name, ops.date, ops.iplane), 'U', 'Sv', 'V', 'ops');
+    end
 end
