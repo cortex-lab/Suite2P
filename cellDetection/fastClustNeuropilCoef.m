@@ -133,7 +133,7 @@ for k = 1:niter
     vs = single(vs);
     
     % recompute pixels' assignments
-    if 0 %ops.useGPU
+    if ops.useGPU
         xs          = gpuBlockSmallXtY(vs, Ucell);
     else
         xs          = vs' * Ucell;
