@@ -9,7 +9,7 @@ ny = floor(Ly/iR(1));
 nx = floor(Lx/iR(2));
 
 xFOVs = zeros(nx, iR(2), iR(1));
-yFOVs = zeros(nx, iR(2), iR(1));
+yFOVs = zeros(ny, iR(2), iR(1));
 for i = 1:iR(1)
     for j = 1:iR(2)
         xFOVs(:,j,i) = [1:nx] + (j-1)*nx;
