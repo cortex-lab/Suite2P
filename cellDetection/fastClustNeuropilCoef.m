@@ -189,14 +189,14 @@ for k = 1:niter
     if (rem(k,10)==1 || k==niter) && ops.ShowCellMap
         %         imagesc(reshape(PixL, Ly, Lx), [0 2])
         %         drawnow
-        %
+        %%
         lam = M;
         for i = 1:Nk
             ix = find(iclust==i);
             nT0 = numel(ix);
             if nT0>0
                 vM = lam(ix);
-                %                 vM = vM/sum(vM.^2)^.5;
+                                vM = vM/sum(vM.^2)^.5;
                 lam(ix) = vM;
             end
         end
