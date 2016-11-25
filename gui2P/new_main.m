@@ -70,9 +70,9 @@ else
     h.dat.cl.excluded_regions = zeros(h.dat.cl.Ly, h.dat.cl.Lx);
     h.dat.cl.excl_pix_perc    = zeros(h.dat.cl.Ly, h.dat.cl.Lx);
     h.dat.cl.topregion        = ones(h.dat.cl.Ly, h.dat.cl.Lx);
-%     if isfield(h.dat.stat, 'parent')
+    if isfield(h.dat.stat, 'parent')
         h = get_parent_stats(h);
-%     end
+    end
     
     h.dat.res.iclust = reshape(h.dat.res.iclust, h.dat.cl.Ly, h.dat.cl.Lx);
     
@@ -115,7 +115,7 @@ else
     end
     % start with unit vector map
     lam = h.dat.res.lambda;
-    h.dat.img0.V = max(0, min(1, .5 * reshape(lam, h.dat.cl.Ly, h.dat.cl.Lx)/mean(lam(:))));
+    h.dat.img0.V = max(0, min(1, .5 * reshape(lam, h.dat.cl.Ly, h.dat.cl.Lx)/mean(lam(lam>1e-10))));
     
     h.dat.ylim = [0 h.dat.cl.Ly];
     h.dat.xlim = [0 h.dat.cl.Lx];    
