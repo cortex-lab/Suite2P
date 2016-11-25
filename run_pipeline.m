@@ -1,4 +1,4 @@
-% function  run_pipeline(db, ops0, clustrules)
+function  run_pipeline(db, ops0, clustrules)
 
 % ops0.TileFactor (or db(iexp).TileFactor) can be set to multiply the number of default tiles for the neuropil
 
@@ -33,7 +33,7 @@ end
 for i = 1:length(ops.planesToProcess)
     iplane  = ops.planesToProcess(i);
     ops     = ops1{i};
-    %
+%     clustModel             = 'CNMF';
     
     ops.iplane  = iplane;
     if numel(ops.yrange)<10 || numel(ops.xrange)<10
@@ -45,11 +45,10 @@ for i = 1:length(ops.planesToProcess)
         ops    = get_svdcomps(ops);
     end
     if ops.getROIs || getOr(ops, {'writeSVDroi'}, 0)
-        [ops, U, Sv, ~, ~, ~, mov]    = get_svdForROI(ops);
+        [ops, U, Sv, ~, ~, ~, Y]    = get_svdForROI(ops, clustModel);
     end
     
     
-    keyboard;
     
     if ops.getROIs
         flag = 1;
@@ -61,7 +60,7 @@ for i = 1:length(ops.planesToProcess)
                   % better model of the neuropil
                   [ops, stat, res]  = fastClustNeuropilCoef(ops,U, Sv);
             case 'CNMF'
-                
+                sourceExtractionCNMF(ops, Y);
                 
                 flag = 0;
         end
