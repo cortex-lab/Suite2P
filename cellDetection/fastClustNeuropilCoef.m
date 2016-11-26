@@ -1,7 +1,7 @@
-function [ops, stat, res] = fastClustNeuropilCoef(ops, U, Sv)
+function [ops, stat, res, PixL] = fastClustNeuropilCoef(ops, U, Sv)
 %
 U =  reshape(U, [], size(U,ndims(U)));
-iplane = ops.iplane;
+
 U = bsxfun(@times, U, Sv'.^.5)';
 [nSVD, Npix] = size(U);
 % Fs = bsxfun(@rdivide, Fs, Sv.^.5);
@@ -133,11 +133,8 @@ for k = 1:niter
     vs = single(vs);
     
     % recompute pixels' assignments
-    if ops.useGPU
-        xs          = gpuBlockSmallXtY(vs, Ucell);
-    else
-        xs          = vs' * Ucell;
-    end
+   
+    xs          = vs' * Ucell;
     
     [M, iclust] = max(xs,[],1);
     %     Uneu        = U - bsxfun(@times, M, vs(:,iclust)); %what's left over for neuropil model
@@ -189,14 +186,14 @@ for k = 1:niter
     if (rem(k,10)==1 || k==niter) && ops.ShowCellMap
         %         imagesc(reshape(PixL, Ly, Lx), [0 2])
         %         drawnow
-        %
+        %%
         lam = M;
         for i = 1:Nk
             ix = find(iclust==i);
             nT0 = numel(ix);
             if nT0>0
                 vM = lam(ix);
-                %                 vM = vM/sum(vM.^2)^.5;
+                                vM = vM/sum(vM.^2)^.5;
                 lam(ix) = vM;
             end
         end
@@ -240,11 +237,15 @@ res.Ly  = Ly;
 res.Lx  = Lx;
 stat    = get_stat(res);
 
-if ~exist(ops.ResultsSavePath, 'dir')
-    mkdir(ops.ResultsSavePath)
+if isfield(ops, 'ResultsSavePath')
+    iplane = ops.iplane;
+    if ~exist(ops.ResultsSavePath, 'dir')
+        mkdir(ops.ResultsSavePath)
+    end
+
+    save(sprintf('%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ...
+        ops.mouse_name, ops.date, iplane, Nk),  'ops', 'res', 'stat');
 end
-save(sprintf('%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ...
-    ops.mouse_name, ops.date, iplane, Nk),  'ops', 'res', 'stat')
 
 %%0
 % sk = skewness(F,[],2);

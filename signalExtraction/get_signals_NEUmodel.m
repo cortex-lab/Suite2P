@@ -109,13 +109,13 @@ for i = 1:length(ops.Nframes)
 %     FcellNeu{i} =  F(:, csumNframes(i) + (1:ops.Nframes(i))) - Fcell{i};
 end
 
-try
-    save(sprintf('%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ...
-        ops.mouse_name, ops.date, iplane, ops.Nk),  'ops', 'res', 'stat', ...
-        'stat0', 'res0', 'Fcell', 'FcellNeu', 'clustrules')
-catch
+% try
+%     save(sprintf('%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ...
+%         ops.mouse_name, ops.date, iplane, ops.Nk),  'ops', 'res', 'stat', ...
+%         'stat0', 'res0', 'Fcell', 'FcellNeu', 'clustrules')
+% catch
     save(sprintf('%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ...
         ops.mouse_name, ops.date, iplane, ops.Nk),  'ops', 'res', 'stat', ...
         'stat0', 'res0', 'Fcell', 'FcellNeu', 'clustrules', '-v7.3')
-end
+% end
 
