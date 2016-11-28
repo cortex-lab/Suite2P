@@ -227,9 +227,12 @@ Nk      = numel(unique(iclust));
 %
 clear res
 
+res.S          = Sm;
+res.Sraw       = S;
+
 res.iclust  = iclust;
 res.M       = M;
-res.S       = S;
+% res.S       = S;
 res.lambda  = lam;
 
 %
