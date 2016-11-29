@@ -14,31 +14,32 @@ S = reshape(res.S, [], size(res.S, ndims(res.S)));
 M = res.M(:);
 nBasis = round(sqrt(size(S,2)));
 
-StS = S' * S;
-LtL = zeros(Nk, Nk, 'single');
+% StS = S' * S;
+% LtL = zeros(Nk, Nk, 'single');
 LtS = zeros(Nk, nBasis^2, 'single');
-Ireg = diag([ones(Nk,1); zeros(nBasis^2,1)]);
+% Ireg = diag([ones(Nk,1); zeros(nBasis^2,1)]);
 %
+
+maskNeu = ones(size(S,1), 1);
+
+
 for i = 1:Nk
     if stat(i).igood
         %     ix = find(iclust==i);
         ix = stat(i).ipix;
+        maskNeu(ix)= 0;
         if numel(ix)==0
-            LtL(i,i) = 0;
             LtS(i,:) = 0;
         else
-            LtL(i,i) = sum(M(ix).^2);
             LtS(i,:) = M(ix)' * S(ix, :);
         end
     end
 end
 
-covL = [LtL LtS; LtS' StS];
+% covL = [LtL LtS; LtS' StS];
 
-covL = covL + 1e-4 * Ireg;
+% covL = covL + 1e-4 * Ireg;
 %% get signals  
-
-[Ly Lx] = size(ops.mimg1);
 
 nimgbatch = 2000;
 
@@ -53,8 +54,13 @@ Fneu    = zeros(Nk, sum(ops.Nframes), 'single');
 
 i0 = find([stat.igood]);
 
-covLinv = inv(covL([i0 Nk+1:end], [i0 Nk+1:end]));
-covLinv = covLinv ./ repmat(diag(covLinv), 1, size(covLinv,2));
+S    = bsxfun(@times, S, maskNeu(:));
+StS = S' * S;
+
+% covLinv = inv(covL([i0 Nk+1:end], [i0 Nk+1:end]));
+% covLinv = covLinv ./ repmat(diag(covLinv), 1, size(covLinv,2));
+
+[Ly Lx] = size(ops.mimg1);
 
 % find indices of good clusters 
 while 1
@@ -71,7 +77,6 @@ while 1
     %
 %     data = data - repmat(mean(data,2), 1, size(data,2));
     
-    StU = res.S' * data;
     %
     Ftemp = zeros(Nk, NT, 'single');
     for k = i0
@@ -83,12 +88,12 @@ while 1
     F(:,ix + (1:NT))        = Ftemp;
     
     %Fdeconv = covL((1+ops.Nk):end, (1+ops.Nk):end) \ cat(1, Ftemp(i0, :), StU);
-    Fdeconv = covLinv * cat(1, Ftemp(i0, :), StU);
+    %     Fdeconv = covLinv * cat(1, Ftemp(i0, :), StU);
     
-    Ftemp2 = Fdeconv(1:numel(i0),:);
-    
-    Fneu(i0,ix + (1:NT))     = Ftemp2;
-    
+    Tneu   = StS\(S' * data);
+    Ftemp2 = LtS * Tneu;
+
+    Fneu(:,ix + (1:NT))     = Ftemp2;
         
     ix = ix + NT;
     if rem(ix, 3*NT)==0
@@ -104,8 +109,8 @@ FcellNeu    = cell(1, length(ops.Nframes));
 for i = 1:length(ops.Nframes)
 %     Fcell{i} = Fneu(:, csumNframes(i) + (1:ops.Nframes(i)));
 %     FcellNeu{i} = F(:, csumNframes(i) + (1:ops.Nframes(i))) - Fcell{i};
-    Fcell{i} = F(:, csumNframes(i) + (1:ops.Nframes(i)));
-    FcellNeu{i} = Fcell{i} - Fneu(:, csumNframes(i) + (1:ops.Nframes(i)));
+    Fcell{i}     = F(:, csumNframes(i) + (1:ops.Nframes(i)));
+    FcellNeu{i}  = Fneu(:, csumNframes(i) + (1:ops.Nframes(i)));
 %     FcellNeu{i} =  F(:, csumNframes(i) + (1:ops.Nframes(i))) - Fcell{i};
 end
 
