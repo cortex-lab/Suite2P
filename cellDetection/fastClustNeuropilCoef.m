@@ -220,7 +220,7 @@ for i = 1:Nk
     end
 end
 
-keyboard;
+% keyboard;
 
 %%
 newindx = cumsum(ison);
