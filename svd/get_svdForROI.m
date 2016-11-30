@@ -50,7 +50,7 @@ fclose(fid);
 mov = mov(:, :, 1:ix);
 % mov = mov - repmat(mean(mov,3), 1, 1, size(mov,3));
 %% SVD options
-if nargin==1
+if nargin==1 || ~strcmp(clustModel, 'CNMF')
     ops.nSVDforROI = min(ops.nSVDforROI, size(mov,3));
     
     if ops.sig>0.05

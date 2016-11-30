@@ -1,4 +1,5 @@
 function TiffWriter(image,fname,bitspersamp)
+% written by Adam Packer (I think).
 
 t = Tiff(fname,'w');
 tagstruct.ImageLength = size(image,1);

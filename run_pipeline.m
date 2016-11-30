@@ -45,7 +45,7 @@ for i = 1:length(ops.planesToProcess)
         ops    = get_svdcomps(ops);
     end
     if ops.getROIs || getOr(ops, {'writeSVDroi'}, 0)
-        [ops, U, Sv, ~, ~, ~, Y]    = get_svdForROI(ops, clustModel);
+        [ops, U, Sv]    = get_svdForROI(ops);
     end
     
     if ops.getROIs
@@ -57,10 +57,7 @@ for i = 1:length(ops.planesToProcess)
 %                 [ops, stat, res]  = fast_clustering_with_neuropil(ops,U, Sv);
                   % better model of the neuropil
                   [ops, stat, res]  = fastClustNeuropilCoef(ops,U, Sv);
-            case 'CNMF'
-                Y = Y - min(Y(:));
-                sourceExtractionCNMF; %(ops, mov);
-                flag = 0;
+
         end
                 
         if flag

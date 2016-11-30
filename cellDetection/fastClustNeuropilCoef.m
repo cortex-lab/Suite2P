@@ -220,6 +220,8 @@ for i = 1:Nk
     end
 end
 
+keyboard;
+
 %%
 newindx = cumsum(ison);
 iclust  = newindx(iclust);
