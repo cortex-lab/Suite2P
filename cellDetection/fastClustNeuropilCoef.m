@@ -34,10 +34,10 @@ Nkiter(end+1:(niter+1)) = ops.Nk;
 
 %%
 Npix = Ly * Lx;
-M = .0001 * ones(1, Npix, 'single');
+M = ones(1, Npix, 'single');
 
 ison = true(Nk,1);
-S = getNeuropilBasis(ops, 'raisedcosyne');
+S = getNeuropilBasis(ops, Ly, Lx, 'raisedcosyne'); % 'raisedcosyne', 'Fourier'
 
 nBasis = size(S,2);
 PixL = ones(1, Lx * Ly)';
@@ -46,9 +46,11 @@ PixL = ones(1, Lx * Ly)';
 Uneu = U;
 % Ireg = diag([ones(Nk,1); zeros(nBasis,1)]);
 
+
 tic
 for k = 1:niter
-    % recompute neuropil
+    %recompute neuropil
+    
     Sm = bsxfun(@times, S, PixL);
     StS = Sm' * Sm;
     StU = Sm' * Uneu';
@@ -60,11 +62,15 @@ for k = 1:niter
     PixL = bsxfun(@rdivide, PixL, mean(neuropil.^2,1));
     PixL = max(0, PixL);
     neuropil = bsxfun(@times, neuropil, PixL);
-    Ucell = U - neuropil; %what's left over for cell model
+
+%     [A Sv B] = svdecon(gpuArray(single(Uneu)));
+%     neuropil = A(:, 1:3) * Sv(1:3,1:3) * B(:, 1:3)';
+    
+    Ucell = U - gather(neuropil); %what's left over for cell model
     PixL = PixL';
     
     if k==1
-        iclust = initialize_clusters(Ucell, Nk, 'random', Lx, Ly);       % 'Voronoi'
+        iclust = initialize_clusters(Ucell, Nk, 'squares', Lx, Ly);       % 'random', Voronoi', 'squares'
     end
     
     % recompute cell activities
@@ -76,20 +82,29 @@ for k = 1:niter
         end
     end
     
-    vs = bsxfun(@rdivide, vs, sum(vs.^2,1).^.5 + 1e-8);% normalize activity vectors
+    nuVS = sum(vs.^2,1).^.5 + 1e-8;
+    vs = bsxfun(@rdivide, vs, nuVS);% normalize activity vectors
     vs = single(vs);
     
     % recompute pixels' assignments
     xs          = vs' * Ucell;
     
+    % exclude the pixel's contribution from its own cluster
+%             U2 = sum(Ucell.^2,1);
+%             xs(iclust + (0:Nk:numel(xs)-1)) = xs(iclust + (0:Nk:numel(xs)-1)) - ...
+%                 (M(:) .* U2(:))'./nuVS(iclust);
+    %
     [M, iclust] = max(xs,[],1);
     Uneu        = U - bsxfun(@times, M, vs(:,iclust)); %what's left over for neuropil model
     
     %     err(k)      = sum(sum((Uneu-neuropil).^2)).^.5;
     err(k)      = norm(Uneu(:)-neuropil(:));
     
+    footPrint = get_footprint(xs, Ly, Lx, ops);
+        
     if 1
         %---------------------------------------------%
+        % remove clusters
         xs(iclust + (0:Nk:numel(xs)-1)) = 0;
         [M2, iclust2] = max(abs(xs),[],1);
         
@@ -150,6 +165,8 @@ for k = 1:niter
     
 end
 
+keyboard;
+
 lam = M;
 for i = 1:Nk
     ix = find(iclust==i);
@@ -160,8 +177,6 @@ for i = 1:Nk
         lam(ix) = vM/sum(vM.^2)^.5;
     end
 end
-
-keyboard;
 
 %%
 newindx = cumsum(ison);
@@ -175,7 +190,6 @@ res.Sraw       = S;
 
 res.iclust  = iclust;
 res.M       = M;
-% res.S       = S;
 res.lambda  = lam;
 
 %

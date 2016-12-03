@@ -1,7 +1,5 @@
-function S = getNeuropilBasis(ops, type)
+function S = getNeuropilBasis(ops, Ly, Lx, type)
 
-Ly = ops.Ly;
-Lx = ops.Lx;
 
 switch type
     case 'raisedcosyne'

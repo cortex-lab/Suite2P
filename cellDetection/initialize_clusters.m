@@ -29,3 +29,5 @@ switch type
         
 end
 
+
+iclust = iclust(:)';
