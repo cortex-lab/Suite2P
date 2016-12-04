@@ -157,7 +157,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,
                 M0max = Wf[t];
                 imax = t;
             }
-        if (M0max*M0max<Th) break;
+        if (M0max<Th) break;
                 
         
         c[tots]   = M0max;

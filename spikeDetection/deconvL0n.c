@@ -7,7 +7,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,
     
     int *cmax,  imaxPre, tots, imax, curri, t, i, k,  inner_it, nt0, NT, type, maxiter, *inner_all;
     double *c, *Params, *st, *kernel, *F0, *WtW, *Wf, *Mmax, Th, Thi, M0max;
-    double  *delta, ncoef, *new_coef, newD, *DD;
+    double  Vtot,  *delta, ncoef, *new_coef, newD, *DD;
         
     NT      = (int) mxGetM(prhs[1]);
     nt0     = (int) mxGetM(prhs[2]);
@@ -55,6 +55,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,
             if (t-k>=0 && t-k<NT)
                 Wf[t-k] = Wf[t-k] + F0[t] * kernel[k];
     
+    Vtot = 0.0f; 
+    for (t=0;t<NT;t++){
+        Vtot = Vtot + F0[t]*F0[t];
+    }
     
     //big loop   
     tots = 0;
@@ -143,6 +147,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,
                  
                 // increment counter of spike reshufflings
                 inner_it++;
+                
+                // update total variance
+                Vtot = Vtot - M0max;
             }
                 
         }
@@ -157,8 +164,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,
                 M0max = Wf[t];
                 imax = t;
             }
-        if (M0max*M0max<Th) break;
-                
+        //if (M0max<Th) break;
         
         c[tots]   = M0max;
         st[tots]  = imax;
@@ -177,6 +183,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,
                 Wf[curri] = Wf[curri] - M0max * WtW[i];
         }
         tots++;
+        
+        // update total variance
+        Vtot = Vtot - M0max*M0max;
+        
+        // break if constraint is satisfied
+        if (Vtot<NT) break;        
     }
     
     free(WtW); free(Wf); free(delta); free(cmax); free(DD); free(Mmax); free(new_coef);
