@@ -58,17 +58,18 @@ npad = 250;
 
 if ops.recomputeKernel
     ops.fs = getOr(ops, 'fs', ops.imageRate/ops.nplanes);
-    tlag            = 1;
-    [kernel, mtau]  = estimateKernel(ops, Ff - coefNeu * Fneu, tlag);
+    tlag                     = 1;
+    [kernel, mtau]           = estimateKernel(ops, Ff - coefNeu * Fneu, tlag);
+    
+%     [kernel, mtau, coefNeu]  = estimateKernel(ops, Ff - coefNeu * Fneu, tlag);
+    
     fprintf('Timescale determined is %4.4f samples \n', mtau);
 end
 kernel = normc(kernel(:));
 %%
 B = zeros(3, NN);
-nt0 = numel(kernel);
 
 kernelS   = repmat(kernel, 1, NN);
-maxNeurop = ops.maxNeurop;
 
 err = zeros(NN, 1);
 
@@ -89,9 +90,7 @@ for iter = 1:niter
         [B(:,icell), err(icell)] = ...
             get_neurop(Ff(:,icell), Fneu(:,icell), F1(:, icell), kernelS(:,icell), npad);
     end
-%     Ball{iter} = B;
-%     save('C:\Users\Marius\Documents\MATLAB\Ball.mat', 'Ball')
-    
+   
     % determine and subtract the neuropil
     F1 = Ff - bsxfun(@times, Fneu, B(3,:)) - bsxfun(@times, ones(NT,1), B(2,:));
     
@@ -120,6 +119,7 @@ end
 
 % rescale baseline contribution
 for icell = 1:size(Ff,2)
+    dcell{icell}.c    = dcell{icell}.c * sd(icell)/2;
     dcell{icell}.B    = B(:,icell);
     dcell{icell}.B(2) = dcell{icell}.B(2) * sd(icell);
 end

@@ -46,7 +46,8 @@ for i = 1:length(ops.planesToProcess)
     
     
     fprintf('Spike deconvolution, plane %d... \n', iplane)
-    % split data into batches
+    
+    
     [dcell, isroi] = run_deconvolution3(ops, dat);
     
     dat.cl.isroi = isroi;
