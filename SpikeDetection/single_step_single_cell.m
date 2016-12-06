@@ -16,7 +16,6 @@ st = st + 1- npad;
 c(st<1 | st>NT) = [];
 st(st<1 | st>NT) = [];
 
-fs = [];
 fs = zeros(NT, 1);
 fs(st) = c;
 
