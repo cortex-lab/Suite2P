@@ -1,10 +1,15 @@
 function [sp, dcell] = deconvolution_standalone(ops, ca, neu)
 % takes as input the calcium and (optionally) neuropil traces,  
 % both NT by NN (number of neurons).
-
 % outputs a cell array dcell containing spike times (dcell.st) and amplitudes
 % (dcell.c). dcell.B(3) is the neuropil contamination coefficient. 
 % dcell.B(2) is an estimate of the baseline. 
+
+% specify in ops the following options, or leave empty for defaults
+%       fs = sampling rate
+%       recomputeKernel = whether to estimate kernel from data
+%       sensorTau  = timescale of sensor, if recomputeKernel = 0
+% additional options can be specified (mostly for linking with Suite2p, see below).
 
 ops.imageRate    = getOr(ops, {'imageRate'}, 30); % total image rate (over all planes)
 ops.nplanes      = getOr(ops, {'nplanes'}, 1); % how many planes at this total imaging rate
