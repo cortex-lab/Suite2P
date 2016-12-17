@@ -46,33 +46,10 @@ indx = 0;
 IMG = zeros(Ly, Lx, nplanes, ops.NimgFirstRegistration, 'single');
 
 %%
-if ~ischar(ops.splitBlocks)
-    yB = cumsum([0 ops.splitBlocks{1}]);
-    xB = cumsum([0 ops.splitBlocks{2}]);
-    
-    ib = 0;
-    for iy = 1:length(yB)-1
-        for ix = 1:length(xB)-1
-            ib = ib+1;
-            ops.yBL{ib} = (yB(iy)+1):yB(iy+1);
-            ops.xBL{ib} = (xB(ix)+1):xB(ix+1);
-            
-        end
-    end
-end
-numBlocks = ib;
 
-% numBlocks = numel(ops.yBL);
-xyMask = zeros(Ly, Lx, numBlocks, 'single');
-for i = 1:numBlocks
-    msk = zeros(Ly, Lx, 'single');
-    msk(ops.yBL{i},ops.xBL{i}) = 1;
-    sT = ops.splitTaper;
-    msk = my_conv(my_conv(msk, sT)',sT)'; 
-    xyMask(:,:,i) = msk;
-end
-xyMask = xyMask./repmat(sum(xyMask, 3), 1, 1, numBlocks);
-xyMask = reshape(xyMask, Ly*Lx, numBlocks);
+ops = MakeBlocks(ops);
+numBlocks = ops.numBlocks;
+xyMask    = ops.xyMask;
 
 %%
 if ops.doRegistration
@@ -200,7 +177,7 @@ for k = 1:length(fs)
                     ops1{i}.mimg = ops1{i}.mimgB{ib};
                     
                     [ds(:,:,ib), Corr(:,ib)]  = ...
-                        registration_offsets(data(ops1{i}.yBL{ib},ops1{i}.xBL{ib},...
+                        regoffKriging(data(ops1{i}.yBL{ib},ops1{i}.xBL{ib},...
                         indframes), ops1{i}, 0);
                 end
                 if j==1
@@ -210,6 +187,7 @@ for k = 1:length(fs)
                 
                 ops1{i}.DS          = cat(1, ops1{i}.DS, ds);
                 ops1{i}.CorrFrame   = cat(1, ops1{i}.CorrFrame, Corr);
+               
             end
             
             % if aligning by the red channel, data needs to be reloaded as the

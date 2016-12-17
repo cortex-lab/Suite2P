@@ -1,4 +1,4 @@
-function  run_pipeline(db, ops0, clustrules)
+%function  run_pipeline(db, ops0, clustrules)
 
 % ops0.TileFactor (or db(iexp).TileFactor) can be set to multiply the number of default tiles for the neuropil
 
@@ -24,8 +24,10 @@ neuropilSub    = getOr(ops, {'neuropilSub'}, 'surround');
 splitBlocks    = getOr(ops, {'splitBlocks'}, 'none');
 %
 if iscell(splitBlocks)
+    disp('running non-rigid registration');
     ops1         = blockReg2P(ops);  % do registration
 else
+    disp('running registration');
     ops1         = reg2P(ops);  % do registration
 end
 %

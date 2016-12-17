@@ -179,7 +179,9 @@ for k = 1:length(fs)
                     if ~isempty(ops.smooth_time_space)
                         dat = smooth_movie(dat, ops); 
                     end
-                    [ds, Corr]  = registration_offsets(dat, ops1{i,l}, 0);
+                    [ds, Corr]  = regoffKriging(dat, ops1{i,l}, 0);
+                    ds          = RemoveBadShifts(ds);
+
                     dsall(indframes,:, l)  = ds;
                     % collect ds
                     if j==1
