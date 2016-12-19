@@ -1,4 +1,4 @@
-function [footPrint nPix]= get_footprint(xs, Ly, Lx, ops)
+function [footPrint, nPix]= get_footprint(xs, Ly, Lx, ops)
 
 
 [Mmax, imax] = max(xs, [], 2);

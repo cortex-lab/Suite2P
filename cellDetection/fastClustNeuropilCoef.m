@@ -1,5 +1,5 @@
-function [ops, stat, res, PixL] = fastClustNeuropilCoef(ops, U, Sv)
-%
+% function [ops, stat, res, PixL] = fastClustNeuropilCoef(ops, U, Sv)
+
 U =  reshape(U, [], size(U,ndims(U)));
 
 U = bsxfun(@times, U, Sv'.^.5)';
@@ -68,6 +68,8 @@ for k = 1:niter
     
     Ucell = U - gather(neuropil); %what's left over for cell model
     PixL = PixL';
+    
+    keyboard;
     
     if k==1
         iclust = initialize_clusters(Ucell, Nk, 'squares', Lx, Ly);       % 'random', Voronoi', 'squares'

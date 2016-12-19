@@ -1,20 +1,20 @@
-function Smooth = my_conv(S1, sig, varargin)
+function S1 = my_conv(S1, sig)
 
-NN = size(S1,1);
-NT = size(S1,2);
+dsnew = size(S1);
 
-dt = -4*sig:1:4*sig;
+S1 = reshape(S1, size(S1,1), []);
+dsnew2 = size(S1);
+
+tmax = ceil(4*sig);
+dt = -tmax:1:tmax;
 gaus = exp( - dt.^2/(2*sig^2));
 gaus = gaus'/sum(gaus);
 
-% Norms = conv(ones(NT,1), gaus, 'same');
-%Smooth = zeros(NN, NT);
-%for n = 1:NN
-%    Smooth(n,:) = (conv(S1(n,:)', gaus, 'same')./Norms)';
-%end
+cNorm = filter(gaus, 1, cat(1, ones(dsnew2(1), 1), zeros(tmax,1)));
+cNorm = cNorm(1+tmax:end, :);
 
-Smooth = filter(gaus, 1, [S1' ones(NT,1); zeros(ceil(4*sig), NN+1)]);
-Smooth = Smooth(1+ceil(4*sig):end, :);
-Smooth = Smooth(:,1:NN) ./ (Smooth(:, NN+1) * ones(1,NN));
+S1 = filter(gaus, 1, cat(1, S1, zeros([tmax, dsnew2(2)])));
+S1(1:tmax, :) = [];
+S1 = reshape(S1, dsnew);
 
-Smooth = Smooth';
+S1 = bsxfun(@rdivide, S1, cNorm);
