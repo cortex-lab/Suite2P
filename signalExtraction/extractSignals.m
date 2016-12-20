@@ -25,7 +25,7 @@ fid = fopen(ops.RegFile, 'r');
 tic
 F        = zeros(Nk, sum(ops.Nframes), 'single');
 Fneu    = zeros(Nk, sum(ops.Nframes), 'single');
-
+Ntraces = zeros(Nbasis, sum(ops.Nframes), 'single');
 % S    = bsxfun(@times, S, maskNeu(:));
 
 [Ly Lx] = size(ops.mimg1);
@@ -55,16 +55,20 @@ while 1
        end
     end
     %
-    Fdeconv = covLinv * cat(1, Ftemp, S' * data);
+    StU         = S' * data;
+    Fdeconv     = covLinv * cat(1, Ftemp, StU);
     
     Fneu(:,ix + (1:NT))     = m.LtS * Fdeconv(1+Nk:end, :); % estimated neuropil
     F(:,ix + (1:NT))        = Fneu(:,ix + (1:NT)) + Fdeconv(1:Nk, :); % estimated ROI signal
+    
+    if ops.saveNeuropil
+        Ntraces(:,ix + (1:NT)) = Fdeconv(1+Nk:end, :);
+    end
     
     ix = ix + NT;
     if rem(ix, 3*NT)==0
         fprintf('Frame %d done in time %2.2f \n', ix, toc)
     end
-    
 end
 fclose(fid);
 %% get activity stats
@@ -89,8 +93,8 @@ for i = 1:length(ops.Nframes)
     FcellNeu{i}  = Fneu(:, csumNframes(i) + (1:ops.Nframes(i)));
 end
 
-% save(sprintf('%s/F_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
-%     ops.mouse_name, ops.date, ops.iplane),  'ops',  'stat',...
-%         'Fcell', 'FcellNeu', 'clustrules', '-v7.3')
-
-
+if getOr(ops, 'saveNeuropil', 0)
+    S = reshape(S, numel(ops.yrange), numel(ops.xrange), Nbasis);
+    save(sprintf('%s/NEU_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
+        ops.mouse_name, ops.date, ops.iplane),  'ops', 'S', 'Ntraces', '-v7.3')
+end

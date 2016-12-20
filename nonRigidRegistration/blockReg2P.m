@@ -316,12 +316,11 @@ for i = 1:numPlanes
         mimg(ops1{i}.yBL{ib}, ops1{i}.xBL{ib}) = ops1{i}.mimgB{ib};
     end
     ops1{i}.mimg = mimg;
-    ops = ops1{i};
     
-    save(sprintf('%s/regops_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
-        ops.mouse_name, ops.date,  ops.planesToProcess(i)),  'ops')
 end
 
+save(sprintf('%s/regops_%s_%s.mat', ops.ResultsSavePath, ...
+        ops.mouse_name, ops.date),  'ops1')
 
 %save(sprintf('%s/F_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
  %   ops.mouse_name, ops.date, iplane), 'ops')

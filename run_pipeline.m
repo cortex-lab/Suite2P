@@ -17,16 +17,34 @@ ops.clustrules.diameter             = getOr(ops, 'diameter', 10);
 ops.clustrules                      = get_clustrules(ops.clustrules);
 
 splitBlocks    = getOr(ops, {'splitBlocks'}, 'none');
-%
-if iscell(splitBlocks)
-    ops1         = blockReg2P(ops);  % do registration
+
+% this loads ops1 and checks if processed binary files exist
+opath = sprintf('%s/regops_%s_%s.mat', ops.ResultsSavePath, ops.mouse_name, ops.date);
+processed = 1;
+if exist(opath, 'file')
+    load(opath);
+    for j = 1:numel(ops1)
+       % check if the registered binary file exists
+       if ~exist(ops1{j}.RegFile, 'file')
+          processed = 0; 
+       end
+    end
 else
-    ops1         = reg2P(ops);  % do registration
+    processed = 0;
 end
-%
+
+% do registration if the processed binaries do not exist
+if processed==0
+    if iscell(splitBlocks)
+        ops1 = blockReg2P(ops);  % do registration
+    else
+        ops1 = reg2P(ops);  % do registration
+    end
+end
+
 %%
 for i = 1:numel(ops1)
-    ops     = ops1{i};    
+    ops         = ops1{i};    
     ops.iplane  = i;
     
     if numel(ops.yrange)<10 || numel(ops.xrange)<10
@@ -56,7 +74,8 @@ for i = 1:numel(ops1)
         
         save(sprintf('%s/F_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
             ops.mouse_name, ops.date, ops.iplane),  'ops',  'stat',...
-                'Fcell', 'FcellNeu', '-v7.3')
+            'Fcell', 'FcellNeu', '-v7.3')
+        
     end
 
     

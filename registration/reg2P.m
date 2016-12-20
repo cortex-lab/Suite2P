@@ -120,7 +120,8 @@ end
 fid = cell(numPlanes, size(xFOVs,2));
 for i = 1:numPlanes
     for j = 1:size(xFOVs,2)
-        ops1{i,j}.RegFile = fullfile(ops.RegFileRoot, sprintf('tempreg_plane%d.bin', i + (j-1)*numPlanes));
+        ops1{i,j}.RegFile = fullfile(ops.RegFileRoot, ...
+            sprintf('%s_%s_%s_plane%d.bin', ops.mname, ops.date, ops.CharSubDirs, i + (j-1)*numPlanes));
         regdir = fileparts(ops1{i,j}.RegFile);
         if ~exist(regdir, 'dir')
             mkdir(regdir);
@@ -302,11 +303,11 @@ for i = 1:numel(ops1)
     
     if ~exist(savepath, 'dir')
         mkdir(savepath)
-    end
-    ops = ops1{i};
-    save(sprintf('%s/regops_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
-        ops.mouse_name, ops.date, i),  'ops')
+    end   
 end
+
+save(sprintf('%s/regops_%s_%s.mat', ops.ResultsSavePath, ...
+    ops.mouse_name, ops.date),  'ops1')
 
 
 %save(sprintf('%s/F_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
