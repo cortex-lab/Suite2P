@@ -24,7 +24,7 @@ if nfmax>=2000
     nfmax = 1999;
 end
 nbytes = fs{1}(1).bytes;
-nFr = nFrames(fs{1}(1).name);
+nFr = nFramesTiff(fs{1}(1).name);
 Info0 = imfinfo(fs{1}(1).name);
 Ly = Info0(1).Height;
 Lx = Info0(1).Width;
@@ -42,7 +42,7 @@ if ops.doRegistration
         for j = 1:length(fs{k})
             if abs(nbytes - fs{k}(j).bytes)>1e3
                 nbytes = fs{k}(j).bytes;
-                nFr = nFrames(fs{k}(j).name);
+                nFr = nFramesTiff(fs{k}(j).name);
             end
             if nFr<(nchannels*nplanes*nfmax + nchannels*nplanes)
                 continue;
@@ -139,6 +139,8 @@ end
 
 %%
 tic
+% if two consecutive files have as many bytes, they have as many frames
+nbytes = 0;
 for k = 1:length(fs)
     for i = 1:numel(ops1)
          ops1{i}.Nframes(k)  = 0;
@@ -146,18 +148,23 @@ for k = 1:length(fs)
     
     iplane0 = 1:1:ops.nplanes;
     for j = 1:length(fs{k})
+        if abs(nbytes - fs{k}(j).bytes)>1e3
+            nbytes = fs{k}(j).bytes;
+            nFr = nFramesTiff(fs{k}(j).name);
+        end
+        
         iplane0 = mod(iplane0-1, numPlanes) + 1;
        
         if red_align
             %                 ichanset = [nchannels*(iplane0-1)+rchannel; nFr; nchannels];
-            ichanset = [rchannel; NaN; nchannels];
+            ichanset = [rchannel; nFr; nchannels];
         else
             % using NaN instead of nFrames, we want to ask for nFrames
             % after copying the file locally (way faster)
-            ichanset = [ichannel; NaN; nchannels];
+            ichanset = [ichannel; nFr; nchannels];
         end
         data = loadFramesBuff(fs{k}(j).name, ichanset(1), ichanset(2), ichanset(3), ops.temp_tiff);
-        nFr = size(data, 3)*nchannels;
+%         nFr = size(data, 3)*nchannels;
         
         if BiDiPhase
             yrange = 2:2:Ly;
@@ -194,7 +201,7 @@ for k = 1:length(fs)
             % if aligning by the red channel, data needs to be reloaded as the
             % green channel
             if red_align
-                nFr = nFramesTiff(fs{k}(j).name);
+%                 nFr = nFramesTiff(fs{k}(j).name);
                 if mod(nFr, nchannels) ~= 0
                     fprintf('  WARNING: number of frames in tiff (%d) is NOT a multiple of number of channels!\n', j);
                 end
@@ -202,6 +209,8 @@ for k = 1:length(fs)
 %                 data = img.loadFrames(fs{k}(j).name, ichanset(1), ichanset(2), ichanset(3));           
                 % providing the last argument ops.temp_tiff to let the
                 % function know that this is already a local file (will load faster)
+%                 data = loadFramesBuff(ops.temp_tiff, ichanset(1), ichanset(2), ichanset(3), ops.temp_tiff);               
+                
                 data = loadFramesBuff(ops.temp_tiff, ichanset(1), ichanset(2), ichanset(3), ops.temp_tiff);               
             end
             
