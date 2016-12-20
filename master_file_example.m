@@ -1,10 +1,14 @@
 %% SET ALL DEFAULT OPTIONS HERE
+
+% UPDATE Christmas 2016: number of clusters determined automatically, but
+% do specify the "diameter" of an average cell for best results. You can do this with either
+% db(iexp).diameter, or ops(iexp).diameter
+
 % check out the README file for detailed instructions (and extra options)
 addpath('D:\CODE\MariusBox\runSuite2P') % add the path to your make_db file
 
 % overwrite any of these default options in your make_db file for individual experiments
 make_db_example; % RUN YOUR OWN MAKE_DB SCRIPT TO RUN HERE
-make_db_MarioBench;
 
 ops0.toolbox_path = 'C:\CODE\GitHub\Suite2P';
 if exist(ops0.toolbox_path, 'dir')
@@ -55,7 +59,7 @@ ops0.sameKernel             = 1; % whether the same kernel should be estimated f
 
 db0 = db;
 %% RUN THE PIPELINE HERE
-for iexp = 1 %:length(db)
+for iexp = [3:length(db) 1:2]
     run_pipeline(db(iexp), ops0);
     
     % deconvolved data into (dat.)cl.dcell, and neuropil subtraction coef
