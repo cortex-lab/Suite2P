@@ -1,4 +1,4 @@
-function [ops, U, Sv, V, Fs, sdmov, mov] = get_svdForROI(ops, clustModel)
+function [ops, U, model] = get_svdForROI(ops, clustModel)
 
 % iplane = ops.iplane;
 U = []; Sv = []; V = []; Fs = []; sdmov = [];
@@ -51,6 +51,7 @@ mov = mov(:, :, 1:ix);
 % mov = mov - repmat(mean(mov,3), 1, 1, size(mov,3));
 %% SVD options
 if nargin==1 || ~strcmp(clustModel, 'CNMF')
+    % smooth spatially to get high SNR SVD components
     ops.nSVDforROI = min(ops.nSVDforROI, size(mov,3));
     
     if ops.sig>0.05
@@ -63,8 +64,10 @@ if nargin==1 || ~strcmp(clustModel, 'CNMF')
     
     mov             = reshape(mov, [], size(mov,3));
     sdmov           = mean(mov.^2,2).^.5;
-    % mov             = mov./repmat(sdmov, 1, size(mov,2));
     mov             = bsxfun(@rdivide, mov, sdmov);
+    
+    model.sdmov     = reshape(sdmov, numel(ops.yrange), numel(ops.xrange));
+    
     if ops.useGPU
         COV             = gpuBlockXtX(mov)/size(mov,1);
     else
@@ -79,17 +82,17 @@ if nargin==1 || ~strcmp(clustModel, 'CNMF')
         Sv              = single(diag(Sv));
         Sv              = Sv(1:ops.nSVDforROI);
         %
-        Sv = gather(Sv);
+%         Sv = gather(Sv);
         V = gather(V);
     else
         [V, Sv]          = eigs(double(COV), ops.nSVDforROI);
-        Sv              = single(diag(Sv));
+%         Sv              = single(diag(Sv));
     end
     
     if ops.useGPU
-        U               = normc(gpuBlockXY(mov, V));
+        U               = gpuBlockXY(mov, V);
     else
-        U               = normc(mov * V);
+        U               = mov * V;
     end
     U               = single(U);
     
@@ -128,11 +131,12 @@ if nargin==1 || ~strcmp(clustModel, 'CNMF')
     if getOr(ops, {'writeSVDroi'}, 0)
         try
             save(sprintf('%s/SVDroi_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
-                ops.mouse_name, ops.date, ops.iplane), 'U', 'Sv', 'V', 'ops', '-v6');
+                ops.mouse_name, ops.date, ops.iplane), 'U', 'Sv', 'Fs', 'ops', '-v6');
         catch
             save(sprintf('%s/SVDroi_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
-                ops.mouse_name, ops.date, ops.iplane), 'U', 'Sv', 'V', 'ops');
+                ops.mouse_name, ops.date, ops.iplane), 'U', 'Sv', 'Fs', 'ops');
         end
     end
     
 end
+

@@ -1,4 +1,4 @@
-function [rd, rd0, V, Vpp, iscell] = anatomize(ops, mPix, mLam, mLam0)
+function stat = anatomize(ops, mPix, mLam, stat)
 
 di = ops.diameter;
 d0   = ceil(ops.diameter); % expected cell diameter
@@ -26,6 +26,7 @@ d2p0 = d2p0(isort, isort);
 rd = zeros(size(mPix,2), 1);
 rd0 = zeros(size(mPix,2), 1);
 
+
 for j = 1:size(mPix,2)
     
     lam  = mLam(:,j);
@@ -33,28 +34,16 @@ for j = 1:size(mPix,2)
     gpix = lam>1e-3;
 
     dd = d2p(gpix, gpix);
-    rd(j,1) = mean(dd(:))/d0; %mean(ds(gpix));
+    stat(j).mrs(1) = mean(dd(:))/d0; %mean(ds(gpix));
     
-    ds = ((dx(gpix) - median(dx(gpix))).^2 + ...
-        (dy(gpix) - median(dy(gpix))).^2).^.5;
-    rd(j,2) = mean(ds(:))/di; %mean(ds(gpix));
+%     ds = ((dx(gpix) - median(dx(gpix))).^2 + ...
+%         (dy(gpix) - median(dy(gpix))).^2).^.5;
+%     stat(j).mrs(2) = mean(ds(:))/di; %mean(ds(gpix));
     
     dd = d2p0(1:sum(gpix), 1:sum(gpix));
-    rd0(j,1) = mean(dd(:))/di;    
-    rd0(j,2) = mean(rgridsort(1:sum(gpix)))/di;
-    
-    V(j)    = mean(mLam0(:,j).^2).^.5;
-    Vpp(j)  = mean(mLam0(lam>0, j).^2).^.5;
+    stat(j).mrs0(1) = mean(dd(:))/di;    
+%     stat(j).mrs0(2) = mean(rgridsort(1:sum(gpix)))/di;    
 end
-%
-ThL = 1/4;
-ThH = 1;
-iscell = rd<ThH & rd>ThL;
-
-ThL = 1.0;
-ThH = 1.2;
-iscell = iscell & rd./rd0<ThH & rd./rd0>ThL;
-
 
 
 

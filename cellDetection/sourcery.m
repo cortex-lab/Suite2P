@@ -1,8 +1,8 @@
-function [mPix, mLam, mLam0, model, Foot] = sourcery(ops, U, Sv)
+function [ops, stat, model] = sourcery(ops, U, model)
 
-% clearvars -except U Sv Ly Lx ops
-U0 =  reshape(U, [], size(U,ndims(U)));
-U0 = bsxfun(@times, U0, Sv'.^.5)';
+ops.fig = getOr(ops, 'fig', 1);
+
+U0 =  reshape(U, [], size(U,ndims(U)))';
 
 Ly = numel(ops.yrange);
 Lx = numel(ops.xrange);
@@ -10,8 +10,6 @@ Lx = numel(ops.xrange);
 [nSVD, Npix] = size(U0);
 
 U0 = reshape(U0, nSVD, Ly, Lx);
-
-% U0 = U0 - my_conv2(U0, 5, [2 3]);
 
 ops.TileFactor = 4;
 S = getNeuropilBasis(ops, Ly, Lx, 'Fourier'); % 'raisedcosyne', 'Fourier'
@@ -156,7 +154,7 @@ while 1
         lam(lam<max(lam)/5) = 0;
         
         
-        mLam0(ipos,j) = lam;
+        mLam0(ipos,j) = normc(lam(:) .* model.sdmov(ipix));
         
         lam = normc(lam(:));
         mLam(ipos,j) = lam;
@@ -169,23 +167,23 @@ while 1
         Ucell(:, ipix) = Usub - (Usub * lam)* lam';
     end
     
-    err(iter) = mean(Ucell(:).^2*1e6);
-    fprintf('%d total cells %d new, err %4.4f, thresh %4.4f \n', icell, size(new_codes,2), err(iter), Th)
+    err(iter) = mean(Ucell(:).^2);
+    fprintf('%d total ROIs %d new, err %4.4f, thresh %4.4f \n', icell, size(new_codes,2), err(iter), Th)
     
     Vnew = sq(sum(Ucell.^2,1));
     
     if ops.fig
         figure(1)
         my_subplot(1,3, 3, [.9 .9]);
-        imagesc(V, [Th 2*Th])
+        imagesc(V, [Th 4*Th])
         axis off
         
         my_subplot(1,3, 2, [.9 .9]);
-        imagesc(V, [0 2*Th])
+        imagesc(V, [0 4*Th])
         axis off
         
         figure(2)
-        r = drawClusters(r, mPix, mLam, Ly, Lx);
+        [r] = drawClusters(ops, r, mPix, mLam0, Ly, Lx);
         
         drawnow
     end
@@ -196,38 +194,14 @@ mLam0 = mLam0(:, 1:icell);
 mPix = mPix(:, 1:icell);
 %%
 
+stat = anatomize(ops, mPix, mLam);
+
 % subtract off neuropil only
 Ucell = U0 - reshape(neu' * S', size(U0));
 
-%%
-dx = repmat([-2*d0:2*d0], 4*d0+1, 1);
-dy = dx';
+stat = getFootprint(ops, codes, Ucell, mPix, mLam, mLam0, stat);
 
-rs = (dx.^2 + dy.^2).^.5;
-dx = dx(rs<=2*d0);
-dy = dy(rs<=2*d0);
-rs = rs(rs<=2*d0);
-
-frac = [0.15 0.25 0.33 0.5 .75];
-Foot = zeros(icell, numel(frac));
-
-% find maximum contamination distance for each ROI
-for j = 1:icell
-    ipos = find(mPix(:,j)>0);
-    ipix = mPix(ipos,j);
-    y0 = ceil(median(rem(ipix-1, Ly) + 1));
-    x0 = ceil(median(ceil(ipix/Ly)));
-    
-    ivalid = find((x0 + dx)>=1 & (x0 + dx)<=Lx & (y0 + dy)>=1 & (y0 + dy)<=Ly);
-    
-    ipix = (y0+dy(ivalid)) + (x0 + dx(ivalid)-1) * Ly;
-    proj = codes(j,:) * Ucell(:, ipix);
-    
-    for l = 1:numel(frac)
-        Foot(j,l) = mean(rs(ivalid(proj>max(proj) * frac(l))));        
-    end
-end
-Foot = Foot/ops.diameter;
+[~, iclust, lam] = drawClusters(ops, r, mPix, mLam, Ly, Lx);
 
 model.L = L;
 model.S = S;

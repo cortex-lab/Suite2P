@@ -33,15 +33,10 @@ ops0.NimgFirstRegistration  = 500; % number of images to include in the first re
 ops0.nimgbegend             = 250; % frames to average at beginning and end of blocks
 
 % cell detection options
-ops0.clustModel             = 'neuropil'; % standard or neuropil
-ops0.neuropilSub            = 'model'; % none, surround or model
 ops0.ShowCellMap            = 1; % during optimization, show a figure of the clusters
-ops0.Nk0                    = 1300; % how many clusters to start with
-ops0.Nk                     = 650;  % how many clusters to end with (before anatomical segmentation)
 ops0.sig                    = 0.5;  % spatial smoothing length in pixels; encourages localized clusters
 ops0.nSVDforROI             = 1000; % how many SVD components for cell clustering
 ops0.NavgFramesSVD          = 5000; % how many (binned) timepoints to do the SVD based on
-clustrules.diameter         = 10; % expected diameter of cells (used for 0.25 * pi/4*diam^2 < npixels < 10*pi/4*diam^2)
 
 % red channel options
 % redratio = red pixels inside / red pixels outside
@@ -60,7 +55,7 @@ ops0.sameKernel             = 1; % whether the same kernel should be estimated f
 db0 = db;
 %% RUN THE PIPELINE HERE
 for iexp = 1 %:length(db)
-    run_pipeline(db(iexp), ops0, clustrules);
+    run_pipeline(db(iexp), ops0);
     
     % deconvolved data into (dat.)cl.dcell, and neuropil subtraction coef
     add_deconvolution(ops0, db0(iexp), clustrules);
@@ -68,20 +63,20 @@ for iexp = 1 %:length(db)
     % add red channel information (if it exists)
     if isfield(db0,'expred') && ~isempty(db0(iexp).expred)
         ops0.nchannels_red = db0(iexp).nchannels_red;
-        run_REDaddon(iexp, db0, ops0) ;
-        % create redcell array
-        DetectRedCells;
-        % fills dat.cl.redcell and dat.cl.notred
+        
+        run_REDaddon(iexp, db0, ops0) ; % create redcell array
+        
+        DetectRedCells; % fills dat.cl.redcell and dat.cl.notred
     end
     
 end
 %% STRUCTURE OF RESULTS FILE
 % 
-% cell traces are in dat.F.Fcell
-% neuropil traces are in dat.F.FcellNeu
+% cell traces are in dat.Fcell
+% neuropil traces are in dat.FcellNeu
 % neuropil subtraction coefficient is dat.cl.dcell{i}.B(3)
 % baseline is dat.cl.dcell{i}.B(2)
-% anatomical cell criterion is in dat.cl.isroi
+% anatomical cell criterion is in dat.stat(k).iscell
 % manual overwritten cell labels are in dat.cl.iscell
 % dat.cl.dcell{i}.st are the deconvolved spike times (in frames)
 % dat.cl.dcell{i}.c  are the deconvolved amplitudes

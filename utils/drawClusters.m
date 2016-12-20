@@ -1,7 +1,7 @@
-function [r, iclust] = drawClusters(r, mPix, mLam, Ly, Lx, I)
+function [r, iclust, lam] = drawClusters(ops, r, mPix, mLam, Ly, Lx)
 
 icell = size(mPix,2);
-iclust = (icell+1) * ones(Ly, Lx);
+iclust = zeros(Ly, Lx);
 
 lam      = zeros(Ly, Lx);
 for i = icell:-1:1
@@ -11,15 +11,21 @@ for i = icell:-1:1
     lam(mPix(ipos(ipix),i))      = mLam(ipos(ipix),i);
 end
 
-if nargin>5
-    lam = I;
-end
-%
-r = cat(1, r, rand(icell+1-numel(r), 1));
-Sat = ones(Ly, Lx);
+% if nargin>5
+%     lam = I;
+% end
 
-V = max(0, min(.75 * reshape(lam, Ly, Lx)/mean(lam(lam>1e-10)), 1));
-H = reshape(r(iclust), Ly, Lx);
-rgb_image = hsv2rgb(cat(3, H, Sat, V));
-imagesc(rgb_image)
-axis off
+r = cat(1, r, rand(icell+1-numel(r), 1));
+
+if ops.fig
+    Sat = ones(Ly, Lx);
+    H = zeros(Ly, Lx);
+    
+    H(iclust>0) = r(iclust(iclust>0));
+    
+    V = max(0, min(.75 * reshape(lam, Ly, Lx)/mean(lam(lam>1e-10)), 1));
+    H = reshape(H, Ly, Lx);
+    rgb_image = hsv2rgb(cat(3, H, Sat, V));
+    imagesc(rgb_image)
+    axis off
+end

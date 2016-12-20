@@ -1,8 +1,6 @@
-function add_deconvolution(ops, db, clustrules)
+function add_deconvolution(ops, db)
 ops = build_ops3(db, ops);
 ops0 = ops;
-
-clustrules = get_clustrules(clustrules);
 
 try
     ppool = gcp ;
@@ -14,27 +12,23 @@ end
 for i = 1:length(ops.planesToProcess)
     iplane  = ops.planesToProcess(i);
     
-    fpath = sprintf('%s/F_%s_%s_plane%d_Nk%d_proc.mat', ops.ResultsSavePath, ...
-        ops.mouse_name, ops.date, iplane, ops.Nk);
+    fpath = sprintf('%s/F_%s_%s_plane%d_proc.mat', ops.ResultsSavePath, ...
+        ops.mouse_name, ops.date, iplane);
     if exist(fpath, 'file')
         load(fpath);
     else
-        fpath = sprintf('%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ...
-            ops.mouse_name, ops.date, iplane, ops.Nk);
+        fpath = sprintf('%s/F_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
+            ops.mouse_name, ops.date, iplane);
         dat = load(fpath);
     end
     
     if isfield(dat, 'dat')
-        dat = dat.dat; % just in case trying to load processed files
+        dat = dat.dat; % just in case...
     end
     
     
     % overwrite fields of ops with those saved to file
     ops = addfields(ops, dat.ops);
-%     ops.maxNeurop = 1;
-    if ~isfield(dat, 'clustrules');
-        dat.clustrules = clustrules;
-    end
     
     % set up options for deconvolution
     ops.imageRate    = getOr(ops0, {'imageRate'}, 30); % total image rate (over all planes)
@@ -47,9 +41,8 @@ for i = 1:length(ops.planesToProcess)
     
     fprintf('Spike deconvolution, plane %d... \n', iplane)
     % split data into batches
-    [dcell, isroi] = run_deconvolution3(ops, dat);
+    [dcell] = run_deconvolution3(ops, dat);
     
-    dat.cl.isroi = isroi;
     dat.cl.dcell = dcell;
     
     save(fpath, '-struct', 'dat')

@@ -5,18 +5,6 @@ function [dcell, isroi] = run_deconvolution3(ops, dat)
 % load the initialization of the kernel    
 load(fullfile(ops.toolbox_path, 'SpikeDetection\kernel.mat'));
 
-if isfield(dat.stat, 'igood')
-   isroi = logical([dat.stat.igood]); 
-else
-    if isfield(dat, 'cl') && isfield(dat.cl, 'iscell')
-        isroi = dat.cl.iscell;
-    else
-        isroi = [dat.stat.mrs]./[dat.stat.mrs0]<dat.clustrules.Compact & ...
-            [dat.stat.npix]>dat.clustrules.MinNpix & [dat.stat.npix]<dat.clustrules.MaxNpix;
-    end
-    isroi = logical(isroi);
-end
-
 % construct Ff and Fneu
 Ff = [];
 Fneu = [];
