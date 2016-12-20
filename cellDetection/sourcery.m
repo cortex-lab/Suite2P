@@ -188,7 +188,7 @@ while 1
     end
 end
 
-fprintf('%d total ROIs, err %4.4f, thresh %4.4f \n', icell, err(iter), Th)
+fprintf('%d total ROIs, err %4.4f, thresh %4.4f \n', icell, err(end), Th)
 
 mLam = mLam(:, 1:icell);
 mLam0 = mLam0(:, 1:icell);
