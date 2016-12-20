@@ -21,6 +21,13 @@ if ~iscell(db.mouse_name)
             ops.fsroot{j}(k).name = fullfile(ops.RootDir, ops.SubDirs{j}, ops.fsroot{j}(k).name);
         end
     end
+    
+    if isfield(db, 'expred') && ~isempty(db.expred)
+        ops.fsred = dir(fullfile(ops.RootDir, num2str(db.expred), '*.tif'));
+        for k = 1:length(ops.fsroot{j})
+            ops.fsred{j}(k).name = fullfile(ops.RootDir, num2str(db.expred), ops.fsred(k).name);
+        end
+    end
 else
     % here we might have multiple sessions, which we want to be analyzed
     % together (exactly the same FOV)
@@ -74,6 +81,16 @@ try
     str = hh(strfind(hh, 'scanZoomFactor = '):end);
     ind = strfind(str, 'scanimage');
     ops.zoomMicro = str2double(str(18 : ind(1)-1));
+    
+    % get number of channels of red experiment
+    if isfield(db, 'expred') && ~isempty(db.expred)
+        [~, header] = loadFramesBuff(ops.fsred(1).name, 1, 1, 1);
+        hh=header{1};
+        str = hh(strfind(hh, 'channelsSave = '):end);
+        ind = strfind(str, 'scanimage');
+        ch = str2num(str(16 : ind(1)-1));
+        ops.nchannels_red = length(ch);        
+    end
 catch
 end
 

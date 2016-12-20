@@ -43,6 +43,8 @@ if processed==0
         disp('running rigid registration');
         ops1 = reg2P(ops);  % do registration
     end
+else
+    disp('already registered binary found \n');
 end
 
 %%

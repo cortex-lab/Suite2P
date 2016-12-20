@@ -25,7 +25,9 @@ fid = fopen(ops.RegFile, 'r');
 tic
 F        = zeros(Nk, sum(ops.Nframes), 'single');
 Fneu    = zeros(Nk, sum(ops.Nframes), 'single');
-Ntraces = zeros(Nbasis, sum(ops.Nframes), 'single');
+if ops.saveNeuropil
+    Ntraces = zeros(nBasis, sum(ops.Nframes), 'single');
+end
 % S    = bsxfun(@times, S, maskNeu(:));
 
 [Ly Lx] = size(ops.mimg1);
