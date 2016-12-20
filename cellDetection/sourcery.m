@@ -1,6 +1,7 @@
 function [ops, stat, model] = sourcery(ops, U, model)
 
-ops.fig = getOr(ops, 'fig', 1);
+ops.fig         = getOr(ops, 'fig', 1);
+ops.ThScaling   = getOr(ops, 'ThScaling', 1);
 
 U0 =  reshape(U, [], size(U,ndims(U)))';
 
@@ -80,7 +81,7 @@ while 1
         
         % threshold is the mean peak, times a potential scaling factor
         pks = V(ix);
-        Th  = median(pks(pks>1e-4));
+        Th  = ops.ThScaling * median(pks(pks>1e-4));
         
         if ops.fig
             figure(1)
