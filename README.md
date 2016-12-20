@@ -61,7 +61,7 @@ dat.cl.dcell{i}.kernel is the estimated kernel
 showTargetRegistration --- whether to show an image of the target frame immediately after it is computed. 
 PhaseCorrelation --- whether to use phase correlation (the alternative is normal cross-correlation).
 SubPixel --- accuracy level of subpixel registration (10 = 0.1 pixel accuracy)
-          - this is now computed using kernel regression with a gaussian kernel of width 1 onto a grid of 1/SubPixel
+kriging --- compute shifts using kernel regression with a gaussian kernel of width 1 onto a grid of 1/SubPixel
 NimgFirstRegistration --- number of randomly sampled images to do the target computation from
 NiterPrealign --- number of iterations for the target computation (iterative re-alignment of subset of frames)
 smooth_time_space --- convolves raw movie with a Gaussian of specified size in specified dimensions;
