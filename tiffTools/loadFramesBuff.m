@@ -45,7 +45,7 @@ else
     loadHeaders = false;
 end
 
-if nargin <=4  %if the file was not copied locally use Tiff library
+if true %nargin <=4  %if the file was not copied locally use Tiff library
     w = tiff.getTag('ImageWidth');
     h = tiff.getTag('ImageLength');
     dataClass = class(read(tiff));
