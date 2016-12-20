@@ -24,19 +24,34 @@ fs = ops.fsroot;
 %% find the mean frame after aligning a random subset
 if ops.doRegistration
     [IMG] = GetRandFrames(fs, ops);    
-    [Ly, Lx, np, nf] = size(IMG);
+    [Ly, Lx, ~, ~] = size(IMG);
     ops.Ly = Ly;
     ops.Lx = Lx;
+    ops = MakeBlocks(ops);
+    
+    % compute phase shifts from bidirectional scanning
+    BiDiPhase = BiDiPhaseOffsets(IMG);
+    fprintf('bi-directional scanning offset = %d pixels\n', BiDiPhase);
+    if BiDiPhase
+        yrange = 2:2:Ly;
+        if BiDiPhase>0
+            IMG(yrange,(1+BiDiPhase):Lx,:,:) = IMG(yrange, 1:(Lx-BiDiPhase),:,:);
+        else
+            IMG(yrange,1:Lx+BiDiPhase,:,:)   = IMG(yrange, 1-BiDiPhase:Lx,:,:);
+        end
+    end
+    
     for i = 1:numPlanes
         ops1{i} = blockAlignIterative(squeeze(IMG(:,:,ops.planesToProcess(i),:)), ops);
     end
+else
+    ops = MakeBlocks(ops);
 end
 if ops.showTargetRegistration
     PlotRegMean(ops1,ops);
 end
 clear IMG
 
-ops = MakeBlocks(ops);
 
 %% prepare individual options files and open binaries
 for i = 1:numPlanes
@@ -87,7 +102,7 @@ for k = 1:length(fs)
         
         if ops.doRegistration
             % get the registration offsets
-            [dsall, ops1] = GetBlockOffsets(data, iplane0, ops, ops1);
+            [dsall, ops1] = GetBlockOffsets(data, j, iplane0, ops, ops1);
                     
             % if aligning by the red channel, data needs to be reloaded as the
             % green channel

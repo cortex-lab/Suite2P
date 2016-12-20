@@ -12,7 +12,6 @@ dsold = zeros(size(data,3), 2, numBlocks);
 err = zeros(ops.NiterPrealign, 1);
 %%
 tempSubPixel = ops.SubPixel;
-ops.SubPixel = Inf;
 for i = 1:ops.NiterPrealign    
     dsnew = zeros(size(data,3), 2, numBlocks,'double');
     Corr = zeros(size(data,3), numBlocks,'double');
