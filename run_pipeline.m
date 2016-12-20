@@ -12,6 +12,7 @@ ops0.getSVDcomps                    = getOr(ops0, {'getSVDcomps'}, 0);   % wheth
 ops0.nSVD                           = getOr(ops0, {'nSVD'}, 1000);   % how many SVD components to save to disk
 ops0.numBlocks                      = getOr(ops0, 'numBlocks', 1);   
 ops0.blockP                         = getOr(ops0, 'blockP', 128);  
+ops0.kriging                        = getOr(ops0, 'kriging', 1);  
 
 ops                                 = build_ops3(db, ops0);
 
