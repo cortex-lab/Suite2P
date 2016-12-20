@@ -67,10 +67,12 @@ NiterPrealign --- number of iterations for the target computation (iterative re-
 smooth_time_space --- convolves raw movie with a Gaussian of specified size in specified dimensions;
                       [t]: convolve in time with gauss. of std t, [t s]: convolve in time and space,
                       [t x y]: convolve in time, and in space with an ellipse rather than circle
+                      
 ++ Block Registration (for high zoom/npixels - assumes scanning is in Y direction) ++
 numBlocks --- number of blocks dividing y-dimension of image
 blockPixels --- number of pixels per block (to allow for overlapping blocks to increase accuracy)
              - minimum size for good estimation is around 100 pixels
+             
 ++ Bidirectional scanning issues (frilly cells) taken care of automatically ++
 
 ### V. Options for cell detection ###
