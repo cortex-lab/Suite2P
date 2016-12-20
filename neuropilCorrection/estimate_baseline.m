@@ -1,4 +1,4 @@
-function [caf, baselines] = estimate_baseline(caCorrected, ops)
+function [caf, baselines, sn] = estimate_baseline(caCorrected, ops)
 
 fs  = ops.fs;
 trange = getOr(ops, 'trange', 60); % range of timepoints in seconds

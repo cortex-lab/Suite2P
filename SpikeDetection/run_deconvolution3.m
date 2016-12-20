@@ -1,32 +1,21 @@
-function [dcell, isroi] = run_deconvolution3(ops, dat)
+function stat = run_deconvolution3(ops, dat)
 % outputs a cell array of deconvolved spike times and amplitudes.
 % Optionally output this in matrix form Ffr (very sparse).
 
 % load the initialization of the kernel    
 % load(fullfile(ops.toolbox_path, 'SpikeDetection\kernel.mat'));
 
+% copy existing information
+stat = dat.stat;
+
 % construct Ff and Fneu
 Ff = [];
 Fneu = [];
-if isfield(dat, 'F')
-    for j = 1:numel(dat.F.Fcell)
-        Ff   = cat(1, Ff, dat.F.Fcell{j}(isroi, :)');
-        Fneu = cat(1,Fneu, dat.F.FcellNeu{j}(isroi, :)');
-    end
-    flag = mean(sign(dat.F.FcellNeu{1}(:)))<0;
-else
-    for j = 1:numel(dat.Fcell)
-        Ff   = cat(1, Ff, dat.Fcell{j}(isroi, :)');
-        Fneu = cat(1,Fneu, dat.FcellNeu{j}(isroi, :)');
-    end
-    flag = mean(sign(dat.FcellNeu{1}(:)))<0;
+for j = 1:numel(dat.Fcell)
+    Ff   = cat(1, Ff, dat.Fcell{j}');
+    Fneu = cat(1,Fneu, dat.FcellNeu{j}');
 end
 
-if flag
-    % then it means this was processed with old "model" option
-    Fneu = -Fneu;
-    Ff   = Ff + Fneu;
-end
 
 % the basis functions should depend on timescale of sensor and imaging rate
 mtau             = ops.imageRate * ops.sensorTau/ops.nplanes; 
@@ -47,7 +36,7 @@ ops.fs            = getOr(ops, 'fs', ops.imageRate/ops.nplanes);
 Ff = Ff - bsxfun(@times, Fneu, coefNeu(:)');
 
 % determine and subtract the running baseline
-[F1, ~] = estimate_baseline(Ff, ops);
+[F1, ~, sn] = estimate_baseline(Ff, ops);
 
 if ops.recomputeKernel
     [kernel, mtau] = get1Dkernel(F1, ops.fs);
@@ -61,19 +50,21 @@ kernel = normc(kernel(:));
 kernelS   = repmat(kernel, 1, NN);
 dcell = cell(NN,1);
 
-
 % run the deconvolution to get fs etc\
 parfor icell = 1:size(Ff,2)
     [F1(:,icell),dcell{icell}] = ...
         single_step_single_cell(F1(:,icell), Params, kernelS(:,icell), NT, npad,dcell{icell});
 end
 
-mean(F1(:)>0)
+fprintf('Percent bins with spikes %2.4f \n', 100*mean(F1(:)>0))
 
 % rescale baseline contribution
 for icell = 1:size(Ff,2)
-    dcell{icell}.c                      = dcell{icell}.c;    
-    dcell{icell}.neuropil_coefficient   = coefNeu(icell);
+    stat(icell).c                      = dcell{icell}.c;     % spike amplitudes
+    stat(icell).st                     = dcell{icell}.st; % spike times    
+    stat(icell).neuropilCoefficient    = coefNeu(icell); 
+    stat(icell).noiseLevel             = sn(icell);     % noise level
+    stat(icell).kernel                 = dcell{icell}.kernel;     % noise level
 end
 
 

@@ -4,6 +4,7 @@ addpath('D:\CODE\MariusBox\runSuite2P') % add the path to your make_db file
 
 % overwrite any of these default options in your make_db file for individual experiments
 make_db_example; % RUN YOUR OWN MAKE_DB SCRIPT TO RUN HERE
+make_db_MarioBench;
 
 ops0.toolbox_path = 'C:\CODE\GitHub\Suite2P';
 if exist(ops0.toolbox_path, 'dir')
@@ -58,7 +59,7 @@ for iexp = 1 %:length(db)
     run_pipeline(db(iexp), ops0);
     
     % deconvolved data into (dat.)cl.dcell, and neuropil subtraction coef
-    add_deconvolution(ops0, db0(iexp), clustrules);
+    add_deconvolution(ops0, db0(iexp));
     
     % add red channel information (if it exists)
     if isfield(db0,'expred') && ~isempty(db0(iexp).expred)
@@ -71,13 +72,13 @@ for iexp = 1 %:length(db)
     
 end
 %% STRUCTURE OF RESULTS FILE
-% 
 % cell traces are in dat.Fcell
 % neuropil traces are in dat.FcellNeu
-% neuropil subtraction coefficient is dat.cl.dcell{i}.B(3)
-% baseline is dat.cl.dcell{i}.B(2)
-% anatomical cell criterion is in dat.stat(k).iscell
-% manual overwritten cell labels are in dat.cl.iscell
-% dat.cl.dcell{i}.st are the deconvolved spike times (in frames)
-% dat.cl.dcell{i}.c  are the deconvolved amplitudes
-% dat.cl.dcell{i}.kernel is the estimated kernel
+% manual, GUI overwritten "iscell" labels are in dat.cl.iscell
+
+% stat(icell) contains all other information
+% autoamted iscell label, based on anatomy
+% neuropil subtraction coefficient 
+% st are the deconvolved spike times (in frames)
+% c  are the deconvolved amplitudes
+% kernel is the estimated kernel
