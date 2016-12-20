@@ -9,7 +9,9 @@ if ~iscell(db.mouse_name)
         ops.SubDirs{k}    = num2str(db.expts(k));
     end
     
-    ops.RootDir = fullfile(ops.RootStorage, ops.mouse_name, ops.date);
+    if ~isfield(ops, 'RootDir')
+        ops.RootDir = fullfile(ops.RootStorage, ops.mouse_name, ops.date);
+    end
     
     % build file list
     ops.fsroot = [];
@@ -44,7 +46,7 @@ else
         end
     end
     % this line to be backward compatible (just in case)
-    ops.RootDir = fullfile(ops.RootStorage, db.mouse_name{1}, db.date{1});
+    ops.RootDir = fullfile(ops.RootStorage, ops.mouse_name, ops.date);
 end
 
 try
