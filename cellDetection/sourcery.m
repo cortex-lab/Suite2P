@@ -168,7 +168,6 @@ while 1
     end
     
     err(iter) = mean(Ucell(:).^2);
-    fprintf('%d total ROIs %d new, err %4.4f, thresh %4.4f \n', icell, size(new_codes,2), err(iter), Th)
     
     Vnew = sq(sum(Ucell.^2,1));
     
@@ -188,6 +187,8 @@ while 1
         drawnow
     end
 end
+
+fprintf('%d total ROIs, err %4.4f, thresh %4.4f \n', icell, err(iter), Th)
 
 mLam = mLam(:, 1:icell);
 mLam0 = mLam0(:, 1:icell);

@@ -20,6 +20,7 @@ end
 % mex -largeArrayDims SpikeDetection/deconvL0.c (or .cpp) % MAKE SURE YOU COMPILE THIS FIRST FOR DECONVOLUTION
 
 ops0.useGPU                 = 1; % if you can use an Nvidia GPU in matlab this accelerates registration approx 3 times. You only need the Nvidia drivers installed (not CUDA).
+ops0.fig                    = 1; % turn off figure generation with 0
 
 % root paths for files and temporary storage (ideally an SSD drive. my SSD is C:/)
 ops0.RootStorage            = '//zserver4/Data/2P'; % Suite2P assumes a folder structure, check out README file
