@@ -12,6 +12,11 @@ else
     for j = 1:length(stat)
         stat(j).igood = 1;
     end
+    
+    % trim rogue pixels not in any compact subregion. Assign to Nk+1th cluster
+    [stat, res] = trimPixels(stat, res);           
+    
+    
 end
 
 
@@ -26,4 +31,5 @@ if isfield(ops, 'ResultsSavePath')
     
     save(sprintf('%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ...
         ops.mouse_name, ops.date, iplane, Nk),  'ops', 'res', 'stat', 'stat0', 'res0', 'clustrules')
+end
 end

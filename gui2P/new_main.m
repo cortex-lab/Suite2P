@@ -65,22 +65,23 @@ else
     h.dat.cl.npix     = [h.dat.stat.npix];
     h.dat.cl.Ly       = numel(h.dat.ops.yrange);
     h.dat.cl.Lx       = numel(h.dat.ops.xrange);
-    h.dat.cl.MeanM    = 2*mean(h.dat.res.M);
-    h.dat.cl.excluded_pixels  = zeros(h.dat.cl.Ly, h.dat.cl.Lx);
-    h.dat.cl.excluded_regions = zeros(h.dat.cl.Ly, h.dat.cl.Lx);
-    h.dat.cl.excl_pix_perc    = zeros(h.dat.cl.Ly, h.dat.cl.Lx);
-    h.dat.cl.topregion        = ones(h.dat.cl.Ly, h.dat.cl.Lx);
-    if isfield(h.dat.stat, 'parent')
-        h = get_parent_stats(h);
+    
+    % make up iclut here
+    try
+        [h.dat.res.iclust, h.dat.res.lambda] = getIclust(h.dat.stat, h.dat.cl);
+    catch
     end
-    
     h.dat.res.iclust = reshape(h.dat.res.iclust, h.dat.cl.Ly, h.dat.cl.Lx);
+    h.dat.res.lambda = reshape(h.dat.res.lambda, h.dat.cl.Ly, h.dat.cl.Lx);
     
-    Nk = h.dat.ops.Nk;
     h.dat.ops.Nk = numel(h.dat.stat);
     h.dat.cl.rands_orig   = .1 + .8 * rand(1, h.dat.ops.Nk);
     h.dat.cl.rands        = h.dat.cl.rands_orig;
     
+    if isfield(h.dat.ops, 'clustrules')
+       h.dat.clustrules = h.dat.ops.clustrules; 
+    end
+        
     if isfield(h.dat, 'clustrules')
          % ROI rules
          h.dat.res.Mrs_thresh_orig = h.dat.clustrules.Compact;
@@ -93,13 +94,6 @@ else
         h.dat.cl.npix_high_orig     = 500;
     end
 
-    % parent rules
-    h.dat.cl.mrs_parent_max = Inf;
-    h.dat.cl.npix_res_max   = Inf;
-    h.dat.cl.npix_par_max   = Inf;
-    h.dat.cl.nreg_max       = Inf;
-    h.dat.cl.VperPix_min    = 0;
-    
     h = setOriginalThresh(h);
     
     set(h.edit35,'String', num2str(h.dat.res.Mrs_thresh));
@@ -113,9 +107,11 @@ else
             set(h.(sprintf('Q%d%d', j,i)), 'BackgroundColor',[.92 .92 .92]);
         end
     end
-    % start with unit vector map
+    
+    % make up lambda here
     lam = h.dat.res.lambda;
-    h.dat.img0.V = max(0, min(1, .5 * reshape(lam, h.dat.cl.Ly, h.dat.cl.Lx)/mean(lam(lam>1e-10))));
+    h.dat.img0.V = max(0, min(1, .75 * ...
+        reshape(lam, h.dat.cl.Ly, h.dat.cl.Lx)/mean(lam(lam>1e-10))));
     
     h.dat.ylim = [0 h.dat.cl.Ly];
     h.dat.xlim = [0 h.dat.cl.Lx];    
@@ -126,12 +122,8 @@ else
     end
     h                = splitROIleftright(h);
     
-    icell = find(h.dat.cl.iscell);
-    if ~isempty(icell)
-        h.dat.F.ichosen = icell(1); %ceil(rand * numel(icell))
-    else
-        h.dat.F.ichosen = 1; %ceil(rand * numel(icell))
-    end
+   
+    h.dat.F.ichosen = 2; %ceil(rand * numel(icell))
     
     Sat = ones(h.dat.cl.Ly, h.dat.cl.Lx);
     Sat(h.dat.res.iclust==h.dat.F.ichosen) = 0;
@@ -143,48 +135,17 @@ else
     
     % loop through redcells and set h.dat.cl.rands(h.dat.F.ichosen) = 0
     for j = find(h.dat.cl.redcell)
-        h.dat.F.ichosen = j;
-        h.dat.cl.rands(h.dat.F.ichosen) = 0;
+        h.dat.cl.rands(j) = 0;
     end
-    if ~isempty(icell)
-        h.dat.F.ichosen = icell(1); %ceil(rand * numel(icell))
-    else
-        h.dat.F.ichosen = 1; %ceil(rand * numel(icell))
-    end
-    h = buildHue(h);
-    h = buildLambdaValue(h);
-    
+   
     % x and y limits on subquadrants
     h.dat.figure.x0all = round(linspace(0, 19/20*h.dat.cl.Lx, 4));
     h.dat.figure.y0all = round(linspace(0, 19/20*h.dat.cl.Ly, 4));
     h.dat.figure.x1all = round(linspace(1/20 * h.dat.cl.Lx, h.dat.cl.Lx, 4));
     h.dat.figure.y1all = round(linspace(1/20 * h.dat.cl.Ly, h.dat.cl.Ly, 4));
-    
-    h.dat.F.Fcell = h.dat.Fcell; h.dat.Fcell = [];    
-    
-    if isfield(h.dat, 'FcellNeu')
-        h.dat.F.FcellNeu = h.dat.FcellNeu; h.dat.FcellNeu = [];
-        if mean(sign(h.dat.F.FcellNeu{1}(:)))<0
-            for j = 1:length(h.dat.F.FcellNeu)
-                h.dat.F.FcellNeu{j} = - h.dat.F.FcellNeu{j};
-                h.dat.F.Fcell{j} = h.dat.F.Fcell{j} + h.dat.F.FcellNeu{j};
-            end
-        end    
-        
-%         if isfield(h.dat.cl, 'dcell')
-%             for k = 1:length(h.dat.cl.dcell)
-%                 for j = 1:length(h.dat.F.FcellNeu)
-%                     if isfield(h.dat.cl.dcell{k}, 'B')
-%                         c2 = h.dat.cl.dcell{k}.B(3);
-%                         c1 = h.dat.cl.dcell{k}.B(2);
-%                         h.dat.F.FcellNeu{j}(k+Nk, :) = c1 + c2 * h.dat.F.FcellNeu{j}(k+Nk, :);
-%                     end
-%                 end
-%             end
-%         end
-    end
 end
 
+% setup different views of GUI
 h.dat.maxmap = 1;
 ops = h.dat.ops;
 if isfield(ops, 'mimg1') && ~isempty(ops.mimg1)
@@ -199,7 +160,7 @@ if isfield(ops, 'mimgRED') && ~isempty(ops.mimgRED)
 end
 if isfield(ops, 'mimgREDcorrected') && ~isempty(ops.mimgREDcorrected)
     h.dat.maxmap = h.dat.maxmap + 1;
-    h.dat.mimg(:,:,h.dat.maxmap) = ops.mimgREDcorrected(ops.yrange, ops.xrange);
+    h.dat.mimg(:,:,h.dat.maxmap) = ops.mimgREDcorrected;
     h.dat.mimg_proc(:,:,h.dat.maxmap) = normalize_image(h.dat.mimg(:,:,h.dat.maxmap));
 end
 
@@ -207,19 +168,19 @@ h.dat.procmap = 0;
 
 h.dat.map = 1;
 h.dat.F.trace = [];
-for i = 1:length(h.dat.F.Fcell)
-    h.dat.F.trace = cat(2, h.dat.F.trace, h.dat.F.Fcell{i});
+for i = 1:length(h.dat.Fcell)
+    h.dat.F.trace = cat(2, h.dat.F.trace, h.dat.Fcell{i});
 end
-if isfield(h.dat.F, 'FcellNeu')
+if isfield(h.dat, 'FcellNeu')
     h.dat.F.neurop = [];
-    for i = 1:length(h.dat.F.FcellNeu)
-        h.dat.F.neurop = cat(2, h.dat.F.neurop, h.dat.F.FcellNeu{i});
+    for i = 1:length(h.dat.FcellNeu)
+        h.dat.F.neurop = cat(2, h.dat.F.neurop, h.dat.FcellNeu{i});
     end    
     
 else
    h.dat.F.neurop = zeros(size(h.dat.F.trace), 'single');
 end
-h.dat.plot_neu = 0;
+h.dat.plot_neu = 1;
 
 redraw_fluorescence(h);
 redraw_figure(h);
@@ -302,10 +263,16 @@ redraw_figure(h);
 function pushbutton4_Callback(hObject, eventdata, h)
 % randomize hue
 rng('shuffle') 
-h.dat.cl.rands     = rand(1, h.dat.ops.Nk);
+h.dat.cl.rands     = .1 + .8 * rand(1, h.dat.ops.Nk);
 h.dat.cl.rands(1)  = .15;
-h.dat.img1.H       = reshape(h.dat.cl.rands(h.dat.res.iclust), h.dat.cl.Ly, h.dat.cl.Lx);
-h.dat.img2.H       = reshape(h.dat.cl.rands(h.dat.res.iclust), h.dat.cl.Ly, h.dat.cl.Lx);
+
+
+iclust          = h.dat.res.iclust;
+H0              = zeros(h.dat.cl.Ly, h.dat.cl.Lx);
+H0(iclust>0)    = h.dat.cl.rands(iclust(iclust>0));
+
+h.dat.img1.H       = reshape(H0, h.dat.cl.Ly, h.dat.cl.Lx);
+h.dat.img2.H       = h.dat.img1.H;
 
 guidata(hObject,h);
 redraw_figure(h);
@@ -710,53 +677,50 @@ z = round(eventdata.Source.CurrentAxes.CurrentPoint(1,:));
 x = round(z(1));
 y  = round(z(2));
 
-% disp(eventdata.Source.SelectionType)
-% keyboard;
-% manual selection of units
-x = min(max(1, round(x)), h.dat.cl.Lx);
-y = min(max(1, round(y)), h.dat.cl.Ly);
-h.dat.F.ichosen = h.dat.res.iclust(y, x);
-
-switch eventdata.Source.SelectionType
-    case 'alt'
-        % flip currently selected unit
-        h.dat.cl.manual(h.dat.F.ichosen) = .5 - h.dat.cl.iscell(h.dat.F.ichosen);
-        h = splitROIleftright(h);
-        h = buildLambdaValue(h);
-    case 'open'
-        % unpin the manual selection on this cell
-        h.dat.cl.manual(h.dat.F.ichosen) = 0;
-        h = splitROIleftright(h);
-        h = buildLambdaValue(h);
-    case 'extend'
-         h.dat.cl.redcell(h.dat.F.ichosen) = 1 -  h.dat.cl.redcell(h.dat.F.ichosen);
-        
-        if h.dat.cl.redcell(h.dat.F.ichosen)==1
-            h.dat.cl.rands(h.dat.F.ichosen) = 0;
-        else
-             h.dat.cl.rands(h.dat.F.ichosen) = h.dat.cl.rands_orig(h.dat.F.ichosen);
-        end
-        h.dat.img1.H       = reshape(h.dat.cl.rands(h.dat.res.iclust), h.dat.cl.Ly, h.dat.cl.Lx);
-        h.dat.img2.H       = reshape(h.dat.cl.rands(h.dat.res.iclust), h.dat.cl.Ly, h.dat.cl.Lx);
-        
-        if h.dat.cl.redcell(h.dat.F.ichosen)
-           display('red') 
-        else
-            display('not red') 
-        end
+if x>=1 && y>=1 && x<=h.dat.cl.Lx && y<=h.dat.cl.Ly && h.dat.res.iclust(y,x)>0
+    h.dat.F.ichosen = h.dat.res.iclust(y, x);
+    
+    switch eventdata.Source.SelectionType
+        case 'alt'
+            % flip currently selected unit
+            h.dat.cl.manual(h.dat.F.ichosen) = .5 - h.dat.cl.iscell(h.dat.F.ichosen);
+            h = splitROIleftright(h);
+            h = buildLambdaValue(h);
+        case 'open'
+            % unpin the manual selection on this cell
+            h.dat.cl.manual(h.dat.F.ichosen) = 0;
+            h = splitROIleftright(h);
+            h = buildLambdaValue(h);
+        case 'extend'
+            h.dat.cl.redcell(h.dat.F.ichosen) = 1 -  h.dat.cl.redcell(h.dat.F.ichosen);
+            
+            if h.dat.cl.redcell(h.dat.F.ichosen)==1
+                h.dat.cl.rands(h.dat.F.ichosen) = 0;
+            else
+                h.dat.cl.rands(h.dat.F.ichosen) = h.dat.cl.rands_orig(h.dat.F.ichosen);
+            end
+            h.dat.img1.H       = reshape(h.dat.cl.rands(h.dat.res.iclust), h.dat.cl.Ly, h.dat.cl.Lx);
+            h.dat.img2.H       = reshape(h.dat.cl.rands(h.dat.res.iclust), h.dat.cl.Ly, h.dat.cl.Lx);
+            
+            if h.dat.cl.redcell(h.dat.F.ichosen)
+                display('red')
+            else
+                display('not red')
+            end
+    end
+    
+    redraw_fluorescence(h);
+    
+    Sat = ones(h.dat.cl.Ly, h.dat.cl.Lx);
+    Sat(h.dat.res.iclust==h.dat.F.ichosen) = 0;
+    h.dat.img1.Sat     = Sat;
+    h.dat.img2.Sat     = Sat;
+    h = buildLambdaValue(h);
+    
+    guidata(hObject,h);
+    redraw_figure(h);
+    
 end
-
-redraw_fluorescence(h);
-
-Sat = ones(h.dat.cl.Ly, h.dat.cl.Lx);
-Sat(h.dat.res.iclust==h.dat.F.ichosen) = 0;
-h.dat.img1.Sat     = Sat;
-h.dat.img2.Sat     = Sat;
-h = buildLambdaValue(h);
-
-guidata(hObject,h);
-redraw_figure(h);
-
 
 
 function edit45_Callback(hObject, eventdata, h)
