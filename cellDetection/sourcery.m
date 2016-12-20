@@ -173,7 +173,7 @@ while 1
     
     if ops.fig
         figure(1)
-        subplot(1,3, 5);
+        subplot(1,3, 3);
         imagesc(V, [Th 4*Th])
         axis off
         
