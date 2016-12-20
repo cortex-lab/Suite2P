@@ -81,6 +81,7 @@ while 1
         
         % threshold is the mean peak, times a potential scaling factor
         pks = V(ix);
+
         Th  = ops.ThScaling * median(pks(pks>1e-4));
         
         if ops.fig

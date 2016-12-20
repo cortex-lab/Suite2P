@@ -60,7 +60,7 @@ ops0.sameKernel             = 1; % whether the same kernel should be estimated f
 
 db0 = db;
 %% RUN THE PIPELINE HERE
-for iexp = [3:length(db) 1:2]
+for iexp = 1 %[3:length(db) 1:2]
     run_pipeline(db(iexp), ops0);
     
     % deconvolved data into (dat.)cl.dcell, and neuropil subtraction coef
