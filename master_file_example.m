@@ -2,7 +2,7 @@
 
 % UPDATE Christmas 2016: number of clusters determined automatically, but
 % do specify the "diameter" of an average cell for best results. You can do this with either
-% db(iexp).diameter, or ops(iexp).diameter
+% db(iexp).diameter, or ops0.diameter
 
 % check out the README file for detailed instructions (and extra options)
 addpath('D:\CODE\MariusBox\runSuite2P') % add the path to your make_db file
