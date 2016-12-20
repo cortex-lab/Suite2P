@@ -84,8 +84,8 @@ while 1
         
         if ops.fig
             figure(1)
-            my_subplot(1,3, 1, [.9 .9]);
-            imagesc(V, [0 2*Th])
+            subplot(1,3, 1);
+            imagesc(V, [0 4*Th])
         end
     end
     
@@ -173,11 +173,11 @@ while 1
     
     if ops.fig
         figure(1)
-        my_subplot(1,3, 3, [.9 .9]);
+        subplot(1,3, 5);
         imagesc(V, [Th 4*Th])
         axis off
         
-        my_subplot(1,3, 2, [.9 .9]);
+        subplot(1,3, 2);
         imagesc(V, [0 4*Th])
         axis off
         
@@ -188,7 +188,7 @@ while 1
     end
 end
 
-fprintf('%d total ROIs, err %4.4f, thresh %4.4f \n', icell, err(iter), Th)
+fprintf('%d total ROIs, err %4.4f, thresh %4.4f \n', icell, err(end), Th)
 
 mLam = mLam(:, 1:icell);
 mLam0 = mLam0(:, 1:icell);
