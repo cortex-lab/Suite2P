@@ -21,9 +21,9 @@ ops = build_ops3(db, ops0);
 
 clustModel     = getOr(ops, {'clustModel'}, 'standard');
 neuropilSub    = getOr(ops, {'neuropilSub'}, 'surround');
-splitBlocks    = getOr(ops, {'splitBlocks'}, 'none');
+numBlocks      = getOr(ops, {'numBlocks'}, 1);
 %
-if iscell(splitBlocks)
+if numBlocks > 1
     disp('running non-rigid registration');
     ops1         = blockReg2P(ops);  % do registration
 else
