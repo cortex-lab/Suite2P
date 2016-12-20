@@ -44,7 +44,7 @@ if processed==0
         ops1 = reg2P(ops);  % do registration
     end
 else
-    disp('already registered binary found \n');
+    disp('already registered binary found');
 end
 
 %%

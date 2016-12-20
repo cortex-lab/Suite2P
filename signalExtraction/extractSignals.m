@@ -1,5 +1,7 @@
 function [ops, stat, Fcell, FcellNeu]      = extractSignals(ops, m, stat)
 
+ops.saveNeuropil = getOr(ops, 'saveNeuropil', 0);
+
 Nk = numel(stat);
 
 S = reshape(m.S, [], size(m.S, ndims(m.S)));
