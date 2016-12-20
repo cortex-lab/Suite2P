@@ -1,6 +1,4 @@
-function [dreg, xyValid] = BlockRegMovie(data, ops, dsall, xyValid0)
-
-xyValid = xyValid0;
+function [dreg, xyValid] = BlockRegMovie(data, ops, dsall, xyValid)
 
 ix0 = 0;
 Nbatch = 1000;

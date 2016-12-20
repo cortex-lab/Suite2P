@@ -6,6 +6,11 @@ useGPU = getOr(ops, 'useGPU', false);
 phaseCorrelation = getOr(ops, {'phaseCorrelation' 'PhaseCorrelation'}, true);
 maxregshift = getOr(ops, 'maxregshift', 50);
 
+% if subpixel is still inf, threshold it for new method
+if ops.kriging
+    subpixel = min(10, subpixel);
+end
+
 [ly lx nFrames] = size(data);
 
 % return registered movie

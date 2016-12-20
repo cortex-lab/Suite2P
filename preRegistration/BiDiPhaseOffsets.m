@@ -21,7 +21,7 @@ cc = mean(mean(mean(cc,1),3),4);
 [cx, ix] = max(cc);
 ix       = ix - (floor(Lx/2) + 1);
 
-BiDiPhase = ix;
+BiDiPhase = -1 * ix;
 
 
 

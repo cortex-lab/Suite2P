@@ -1,6 +1,5 @@
-function [dsall,ops1] = GetBlockOffsets(data, j, iplane0, ops, ops2)
+function [dsall,ops1] = GetBlockOffsets(data, j, iplane0, ops, ops1)
             
-ops1 = ops2;
 numBlocks = ops.numBlocks;
 dsall = zeros(size(data,3), 2, ops.numBlocks);
 for i = 1:ops.numPlanes

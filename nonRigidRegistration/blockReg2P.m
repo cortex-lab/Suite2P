@@ -44,11 +44,11 @@ if ops.doRegistration
     for i = 1:numPlanes
         ops1{i} = blockAlignIterative(squeeze(IMG(:,:,ops.planesToProcess(i),:)), ops);
     end
+   if ops.showTargetRegistration
+       PlotRegMean(ops1,ops);
+   end
 else
     ops = MakeBlocks(ops);
-end
-if ops.showTargetRegistration
-    PlotRegMean(ops1,ops);
 end
 clear IMG
 

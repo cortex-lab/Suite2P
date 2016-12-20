@@ -80,7 +80,7 @@ while 1
         
         % threshold is the mean peak, times a potential scaling factor
         pks = V(ix);
-        Th  = median(pks(pks>1e-4));
+        Th  = 0.5 * median(pks(pks>1e-4));
         
         if ops.fig
             figure(1)
@@ -173,7 +173,7 @@ while 1
     
     if ops.fig
         figure(1)
-        subplot(1,3, 5);
+        subplot(1,3, 3);
         imagesc(V, [Th 4*Th])
         axis off
         

@@ -1,4 +1,4 @@
-function  run_pipeline(db, ops0)
+%function  run_pipeline(db, ops0)
 
 % ops0.TileFactor (or db(iexp).TileFactor) can be set to multiply the number of default tiles for the neuropil
 
@@ -16,15 +16,8 @@ ops                                 = build_ops3(db, ops0);
 ops.clustrules.diameter             = getOr(ops, 'diameter', 10);
 ops.clustrules                      = get_clustrules(ops.clustrules);
 
-<<<<<<< HEAD
-clustModel     = getOr(ops, {'clustModel'}, 'standard');
-neuropilSub    = getOr(ops, {'neuropilSub'}, 'surround');
-numBlocks      = getOr(ops, {'numBlocks'}, 1);
-=======
-splitBlocks    = getOr(ops, {'splitBlocks'}, 'none');
->>>>>>> master
 %
-if numBlocks > 1
+if ops.numBlocks > 1
     disp('running non-rigid registration');
     ops1         = blockReg2P(ops);  % do registration
 else
