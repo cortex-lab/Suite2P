@@ -31,6 +31,13 @@ db(i).date          = {'2015-07-30', '2015-07-30'};
 db(i).expts         = {[2010 2107], [1 2 3]};
 db(i).diameter      = 12;
 
+% example for datasets without folder structure
+db(i).mouse_name    = 'notImportant';
+db(i).date          = '2016';
+db(i).expts         = []; % leave empty, or specify subolders as numbers
+db(i).diameter      = 12;
+db(i).RootDir       = 'F:\DATA\neurofinder\neurofinder.01.00\images'; % specify full path to tiffs here
+
 % example extra entries
 % db(i).AlignToRedChannel= 1;
 % db(i).BiDiPhase        = 0; % adjust the relative phase of consecutive lines

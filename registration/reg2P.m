@@ -101,15 +101,11 @@ for k = 1:length(fs)
         
         iplane0 = mod(iplane0-1, numPlanes) + 1;
         if red_align
-            %                 ichanset = [nchannels*(iplane0-1)+rchannel; nFr; nchannels];
             ichanset = [rchannel; nFr; nchannels];
         else
-            % using NaN instead of nFrames, we want to ask for nFrames
-            % after copying the file locally (way faster)
             ichanset = [ichannel; nFr; nchannels];
         end
         data = loadFramesBuff(fs{k}(j).name, ichanset(1), ichanset(2), ichanset(3), ops.temp_tiff);
-%         nFr = size(data, 3)*nchannels;
         
         if BiDiPhase
             yrange = 2:2:Ly;
@@ -132,11 +128,6 @@ for k = 1:length(fs)
                     fprintf('  WARNING: number of frames in tiff (%d) is NOT a multiple of number of channels!\n', j);
                 end
                 ichanset = [ichannel; nFr; nchannels];
-%                 data = img.loadFrames(fs{k}(j).name, ichanset(1), ichanset(2), ichanset(3));           
-                % providing the last argument ops.temp_tiff to let the
-                % function know that this is already a local file (will load faster)
-%                 data = loadFramesBuff(ops.temp_tiff, ichanset(1), ichanset(2), ichanset(3), ops.temp_tiff);               
-                
                 data = loadFramesBuff(ops.temp_tiff, ichanset(1), ichanset(2), ichanset(3), ops.temp_tiff);               
             end
             

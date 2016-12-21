@@ -1,5 +1,8 @@
 function ops = build_ops3(db, ops)
 
+ops.nplanes = getOr(ops, 'nplanes', 1);
+ops.nchannels = getOr(ops, 'nchannels', 1);
+
 % ops = db;
 if ~iscell(db.mouse_name) 
     % this is the usual case where we have a simple single session recording
@@ -7,6 +10,9 @@ if ~iscell(db.mouse_name)
     
     for k = 1:length(db.expts)
         ops.SubDirs{k}    = num2str(db.expts(k));
+    end
+    if isempty(db.expts)
+        ops.SubDirs{1} = [];
     end
     
     if ~isfield(ops, 'RootDir')
@@ -17,15 +23,18 @@ if ~iscell(db.mouse_name)
     ops.fsroot = [];
     for j = 1:length(ops.SubDirs)
         ops.fsroot{j} = dir(fullfile(ops.RootDir, ops.SubDirs{j}, '*.tif'));
+        ops.fsroot{j} = cat(1, ops.fsroot{j}, ...
+            dir(fullfile(ops.RootDir, ops.SubDirs{j}, '*.tiff')));
         for k = 1:length(ops.fsroot{j})
             ops.fsroot{j}(k).name = fullfile(ops.RootDir, ops.SubDirs{j}, ops.fsroot{j}(k).name);
         end
     end
     
-    if isfield(db, 'expred') && ~isempty(db.expred)
+    if isfield(db, 'expred') && ~isempty(db.expred) && ...
+            (~isfield(db, 'nchannels_red') || isempty(db.nchannels_red))            
         ops.fsred = dir(fullfile(ops.RootDir, num2str(db.expred), '*.tif'));
         for k = 1:length(ops.fsroot{j})
-            ops.fsred{j}(k).name = fullfile(ops.RootDir, num2str(db.expred), ops.fsred(k).name);
+            ops.fsred(k).name = fullfile(ops.RootDir, num2str(db.expred), ops.fsred(k).name);
         end
     end
 else
@@ -83,13 +92,14 @@ try
     ops.zoomMicro = str2double(str(18 : ind(1)-1));
     
     % get number of channels of red experiment
-    if isfield(db, 'expred') && ~isempty(db.expred)
+    if isfield(db, 'expred') && ~isempty(db.expred) && ...
+            (~isfield(db, 'nchannels_red') || isempty(db.nchannels_red))
         [~, header] = loadFramesBuff(ops.fsred(1).name, 1, 1, 1);
         hh=header{1};
         str = hh(strfind(hh, 'channelsSave = '):end);
         ind = strfind(str, 'scanimage');
         ch = str2num(str(16 : ind(1)-1));
-        ops.nchannels_red = length(ch);        
+        ops.nchannels_red = length(ch);
     end
 catch
 end

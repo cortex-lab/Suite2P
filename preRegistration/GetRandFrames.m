@@ -7,7 +7,7 @@ rchannel           = getOr(ops, {'rchannel'}, 2);
 red_align          = getOr(ops, {'AlignToRedChannel'}, 0);
 
 ntifs = sum(cellfun(@(x) numel(x), fs));
-nfmax = floor(ops.NimgFirstRegistration/ntifs);
+nfmax = max(1, round(ops.NimgFirstRegistration/ntifs));
 if nfmax>=2000
     nfmax = 1999;
 end
@@ -29,16 +29,23 @@ for k = 1:length(ops.SubDirs)
             nbytes = fs{k}(j).bytes;
             nFr = nFrames(fs{k}(j).name);
         end
-        if nFr<(nchannels*nplanes*nfmax + nchannels*nplanes)
+        if j==1
+            offset = nchannels*nplanes;
+        else
+            offset = 0;
+        end
+        
+        if nFr<(nchannels*nplanes*nfmax+offset)
             continue;
         end
         
         iplane0 = mod(iplane0-1, nplanes) + 1;
+        
         if red_align
-            ichanset = [nchannels*nplanes + nchannels*(iplane0-1) + [rchannel;...
+            ichanset = [offset + nchannels*(iplane0-1) + [rchannel;...
                 nchannels*nplanes*nfmax]; nchannels];
         else
-            ichanset = [nchannels*nplanes + nchannels*(iplane0-1) + [ichannel;...
+            ichanset = [offset + nchannels*(iplane0-1) + [ichannel;...
                 nchannels*nplanes*nfmax]; nchannels];
         end
         iplane0 = iplane0 - nFr/nchannels;
@@ -47,7 +54,14 @@ for k = 1:length(ops.SubDirs)
         
         IMG(:,:,:,indx+(1:size(data,4))) = data;
         indx = indx + size(data,4);
-        
+       
+        if indx>ops.NimgFirstRegistration
+           break; 
+        end
+    end
+    
+    if indx>ops.NimgFirstRegistration
+           break; 
     end
 end
 IMG =  IMG(:,:,:,1:indx);
