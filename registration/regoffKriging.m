@@ -92,7 +92,7 @@ end
 
 nBatches = ceil(nFrames/batchSize);
 for bi = 1:nBatches
-    fi = (bi - 1)*batchSize + 1:min(bi*batchSize, nFrames);
+    fi = ((bi - 1)*batchSize + 1):min(bi*batchSize, nFrames);
     
     if useGPU
         batchData = gpuArray(single(data(:,:,fi)));
@@ -110,7 +110,7 @@ for bi = 1:nBatches
     
     % compute correlation matrix
     corrClip = real(ifft2(corrMap));
-    corrClip = fftshift(corrClip);
+    corrClip = fftshift(fftshift(corrClip, 1), 2);
     corrClipSmooth = my_conv2(corrClip, 1, [1 2]);
     
     %% subpixel registration
@@ -123,7 +123,7 @@ for bi = 1:nBatches
         
         [iy, ix] = ind2sub((2*lcorr+1) * [1 1], ii);
         
-        dl = gpuArray(single(-lpad:1:lpad));
+        dl   = gpuArray(single(-lpad:1:lpad));
         ccmat = gpuArray.zeros(numel(dl), numel(dl), numel(fi), 'single');        
         mxpt        = [iy(:)+floor(ly/2) ix(:)+floor(lx/2)] - lcorr;
         for j = 1:numel(fi)
@@ -145,7 +145,7 @@ for bi = 1:nBatches
         else
             yshift      = xt(1,:) * ccmat;
             xshift      = xt(2,:) * ccmat;
-            dv0         = bsxxfun(@rdivide, [yshift xshift], sum(ccmat, 1)') + mxpt - ...
+            dv0         = bsxxfun(@rdivide, [yshift' xshift'], sum(ccmat, 1)') + mxpt - ...
                 [floor(ly/2) floor(lx/2)] - 1;
             
             if isfinite(subpixel)
