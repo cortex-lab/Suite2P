@@ -184,6 +184,8 @@ if ops.fig
     subplot(1,2, 2);
     imagesc(V, [0 Th])
     axis off    
+    
+    drawnow
 end
 
 fprintf('%d total ROIs, err %4.4f, thresh %4.4f \n', icell, err(end), Th)

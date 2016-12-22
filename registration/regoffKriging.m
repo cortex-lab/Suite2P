@@ -119,25 +119,18 @@ for bi = 1:nBatches
         % allow only +/- lcorr shifts
         cc0         = corrClipSmooth(floor(ly/2)+1+[-lcorr:lcorr],...
             floor(lx/2)+1+[-lcorr:lcorr],:);
-        [cmax,iy]   = max(cc0,[],1);
-        [cx,  ix]   = max(cmax,[],2);
-        iy          = reshape(iy(sub2ind([size(iy,2) size(iy,3)], ix(:), ...
-            (1:size(iy,3))')), 1, 1, []);
-        %
-        dl = gpuArray(single(-lpad:1:lpad));
+        [cmax,ii]   = max(reshape(cc0, [], numel(fi)),[],1);
         
-        ccmat = gpuArray.zeros(numel(dl), numel(dl), numel(fi), 'single');
-        mxpt  = gpuArray.zeros(numel(fi), 2, 'single');
+        [iy, ix] = ind2sub((2*lcorr+1) * [1 1], ii);
+        
+        dl = gpuArray(single(-lpad:1:lpad));
+        ccmat = gpuArray.zeros(numel(dl), numel(dl), numel(fi), 'single');        
+        mxpt        = [iy(:)+floor(ly/2) ix(:)+floor(lx/2)] - lcorr;
         for j = 1:numel(fi)
-%             [~,ix]      = max(cc0(:));
-%             [ix1,ix2]   = ind2sub(size(cc0),ix);
-            % max point within +/- lcorr wrt whole matrix
-            mxpt(j,:)        = [iy(j)+floor(ly/2) ix(j)+floor(lx/2)] - lcorr;
-            
             % matrix +/- lpad surrounding max point
             ccmat(:, :, j) = corrClip(mxpt(j,1)+dl, mxpt(j,2)+dl, j);
         end
-        %%
+        %
         ccmat = reshape(ccmat,[], numel(fi));
         if ops.kriging
             % regress onto subsampled grid
