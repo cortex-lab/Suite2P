@@ -84,7 +84,8 @@ while 1
 
         Th  = ops.ThScaling * median(pks(pks>1e-4));
         
-        if ops.fig
+        V0 = V;
+        if 0 %ops.fig
             figure(1)
             subplot(1,3, 1);
             imagesc(V, [0 4*Th])
@@ -177,13 +178,12 @@ end
 if ops.fig
     figure(1)
     subplot(1,2, 1);
-    imagesc(V, [Th 4*Th])
+    imagesc(V0, [0 4*Th])
     axis off
     
     subplot(1,2, 2);
-    imagesc(V, [0 4*Th])
-    axis off
-    
+    imagesc(V, [0 Th])
+    axis off    
 end
 
 fprintf('%d total ROIs, err %4.4f, thresh %4.4f \n', icell, err(end), Th)

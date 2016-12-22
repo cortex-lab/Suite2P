@@ -115,7 +115,7 @@ for bi = 1:nBatches
     
     %% subpixel registration
     if subpixel > 1
-        %% kriging subpixel
+        % kriging subpixel
         % allow only +/- lcorr shifts
         cc0         = corrClipSmooth(floor(ly/2)+1+[-lcorr:lcorr],...
             floor(lx/2)+1+[-lcorr:lcorr],:);
@@ -123,7 +123,7 @@ for bi = 1:nBatches
         [cx,  ix]   = max(cmax,[],2);
         iy          = reshape(iy(sub2ind([size(iy,2) size(iy,3)], ix(:), ...
             (1:size(iy,3))')), 1, 1, []);
-        %%
+        %
         dl = gpuArray(single(-lpad:1:lpad));
         
         ccmat = gpuArray.zeros(numel(dl), numel(dl), numel(fi), 'single');
@@ -145,8 +145,8 @@ for bi = 1:nBatches
             
             % find max of grid
             [cx,ix]     = max(ccb, [], 1);
-            [ix11,ix21] = ind2sub(numel(dl)*[1 1],ix);
-            mdpt        = floor(numel(dl)/2)+1;
+            [ix11,ix21] = ind2sub(numel(linds)*[1 1],ix);
+            mdpt        = floor(numel(linds)/2)+1;
             dv0         = bsxfun(@minus, ([ix11' ix21'] - mdpt)/subpixel + mxpt, ...
                 [floor(ly/2) floor(lx/2)]) - 1;
         else
