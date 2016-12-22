@@ -173,21 +173,17 @@ while 1
     
     Vnew = sq(sum(Ucell.^2,1));
     
-    if ops.fig
-        figure(1)
-        subplot(1,3, 3);
-        imagesc(V, [Th 4*Th])
-        axis off
-        
-        subplot(1,3, 2);
-        imagesc(V, [0 4*Th])
-        axis off
-        
-        figure(2)
-        [r] = drawClusters(ops, r, mPix, mLam0, Ly, Lx);
-        
-        drawnow
-    end
+end
+if ops.fig
+    figure(1)
+    subplot(1,2, 1);
+    imagesc(V, [Th 4*Th])
+    axis off
+    
+    subplot(1,2, 2);
+    imagesc(V, [0 4*Th])
+    axis off
+    
 end
 
 fprintf('%d total ROIs, err %4.4f, thresh %4.4f \n', icell, err(end), Th)

@@ -26,6 +26,9 @@ while 1
     data = single(data);
     data = reshape(data, Ly, Lx, []);
     
+    badi = ops.badframes(ix + [1:size(data,3)]);
+    data(:,:, badi) = [];
+    
     %     data = data(:,:,1:30:end);
     % subtract off the mean of this batch
     if nargin==1

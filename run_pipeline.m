@@ -16,7 +16,12 @@ ops0.kriging                        = getOr(ops0, 'kriging', 1);
 
 ops                                 = build_ops3(db, ops0);
 
-ops.clustrules.diameter             = getOr(ops, 'diameter', 10);
+if ~isfield(ops, 'diameter') || isempty(ops.diameter)
+    warning('you have not specified mean diameter of your ROIs')
+    warning('for best performance, please set db(iexp).diameter for each experiment')
+end
+ops.diameter                        = getOr(ops, 'diameter', 10);
+ops.clustrules.diameter             = ops.diameter;
 ops.clustrules                      = get_clustrules(ops.clustrules);
 
 % this loads ops1 and checks if processed binary files exist
@@ -37,10 +42,8 @@ end
 % do registration if the processed binaries do not exist
 if processed==0
     if ops.numBlocks > 1
-        disp('running non-rigid registration');
         ops1 = blockReg2P(ops);  % do registration
     else
-        disp('running rigid registration');
         ops1 = reg2P(ops);  % do registration
     end
 else

@@ -1,5 +1,11 @@
 function ops1 = blockReg2P(ops)
 %%
+if ops.DoRegistration
+    disp('running non-rigid registration');
+else
+    disp('skipping registration, but assembling binary file');
+end
+
 % iplane = ops.iplane;
 % bitspersamp = 16;
 numBlocks      = getOr(ops, {'numBlocks'}, 1);
@@ -20,6 +26,12 @@ ops.RegFileTiffLocation = getOr(ops, {'RegFileTiffLocation'}, []);
 
 
 fs = ops.fsroot;
+
+try
+   IMG = loadFramesBuff(fs{1}(1).name, 1, 1, 1); 
+catch
+    error('could not find any tif or tiff, check your path');
+end
 
 %% find the mean frame after aligning a random subset
 if ops.doRegistration
@@ -48,7 +60,13 @@ if ops.doRegistration
        PlotRegMean(ops1,ops);
    end
 else
-    ops = MakeBlocks(ops);
+    [Ly, Lx] = size(IMG);
+    for i = 1:numPlanes
+        ops1{i} = ops;
+        ops1{i}.mimg = zeros(Ly, Lx);
+        ops1{i}.Ly   = Ly;
+        ops1{i}.Lx   = Lx;
+    end
 end
 clear IMG
 

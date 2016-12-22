@@ -1,5 +1,11 @@
 function ops1 = reg2P(ops)
 %%
+if getOr(ops, 'doRegistration', 1)
+    disp('running rigid registration');
+else
+    disp('skipping registration, but assembling binary file');
+end
+
 numPlanes = length(ops.planesToProcess);
 
 chunk_align        = getOr(ops, {'chunk_align'}, 1);
@@ -7,7 +13,7 @@ nplanes            = getOr(ops, {'nplanes'}, 1);
 nchannels          = getOr(ops, {'nchannels'}, 1);
 ichannel           = getOr(ops, {'gchannel'}, 1);
 rchannel           = getOr(ops, {'rchannel'}, 2);
-red_align   = getOr(ops, {'AlignToRedChannel'}, 0);
+red_align          = getOr(ops, {'AlignToRedChannel'}, 0);
 BiDiPhase          = getOr(ops, {'BiDiPhase'}, 0);
 LoadRegMean        = getOr(ops, {'LoadRegMean'}, 0);
 ops.RegFileBinLocation = getOr(ops, {'RegFileBinLocation'}, []);
@@ -20,12 +26,19 @@ fs = ops.fsroot;
 %% find the mean frame after aligning a random subset
 
 indx = 0;
+try
+   IMG = loadFramesBuff(fs{1}(1).name, 1, 1, 1); 
+catch
+    error('could not find any tif or tiff, check your path');
+end
+[Ly, Lx, ~, ~] = size(IMG);
+ops.Ly = Ly;
+ops.Lx = Lx;
+% split into subsets (for high scanning resolution recordings)
+[xFOVs, yFOVs] = get_xyFOVs(ops);
 
 if ops.doRegistration
-    [IMG] = GetRandFrames(fs, ops);    
-    [Ly, Lx, ~, ~] = size(IMG);
-    ops.Ly = Ly;
-    ops.Lx = Lx;
+    IMG = GetRandFrames(fs, ops);    
 
     % compute phase shifts from bidirectional scanning
     BiDiPhase = BiDiPhaseOffsets(IMG);
@@ -38,9 +51,6 @@ if ops.doRegistration
             IMG(yrange,1:Lx+BiDiPhase,:,:)   = IMG(yrange, 1-BiDiPhase:Lx,:,:);
         end
     end
-    
-    % split into subsets (for high scanning resolution recordings)
-    [xFOVs, yFOVs] = get_xyFOVs(ops);
     
     ops1 = cell(numPlanes, size(xFOVs,2));
     for i = 1:numPlanes
@@ -59,10 +69,9 @@ else
     for i = 1:numPlanes
         ops1{i} = ops;
         ops1{i}.mimg = zeros(Ly, Lx);
-        ops1{i}.Ly   = Ly;
-        ops1{i}.Lx   = Lx;
      end
 end
+
 %% open files for registration
 fid = cell(numPlanes, size(xFOVs,2));
 for i = 1:numPlanes
@@ -89,7 +98,8 @@ tic
 nbytes = 0;
 for k = 1:length(fs)
     for i = 1:numel(ops1)
-         ops1{i}.Nframes(k)  = 0;
+         ops1{i}.Nframes(k)     = 0;
+         ops1{i}.badframes(sum(ops1{i}.Nframes) + 1)   = true;
     end
     
     iplane0 = 1:1:ops.nplanes;
@@ -119,7 +129,7 @@ for k = 1:length(fs)
         if ops.doRegistration
             % get the registration offsets
             [dsall, ops1] = GetRegOffsets(data, j, iplane0, ops, ops1, yFOVs, xFOVs);
-
+            
             % if aligning by the red channel, data needs to be reloaded as the
             % green channel
             if red_align
@@ -155,11 +165,13 @@ for k = 1:length(fs)
         end
         
         iplane0 = iplane0 - nFr/nchannels;
-    end
-    
+    end    
 end
 for i = 1:numel(ops1)
     ops1{i}.mimg1 = ops1{i}.mimg1/sum(ops1{i}.Nframes);
+    
+    ops1{i}.badframes(1+sum(ops1{i}.Nframes)) = false;
+    ops1{i}.badframes(1+sum(ops1{i}.Nframes)) = [];
 end
 %%
 for i = 1:numPlanes    
@@ -199,8 +211,12 @@ end
 % compute xrange, yrange
 for i = 1:numel(ops1)
     if ops.doRegistration
-        minDs = min(ops1{i}.DS(2:end, [1 2]), [], 1);
-        maxDs = max(ops1{i}.DS(2:end, [1 2]), [], 1);
+        % determine bad frames
+        badi                    = getOutliers(ops1{i}); 
+        ops1{i}.badframes(badi) = true;
+        
+        minDs = min(ops1{i}.DS(~ops1{i}.badframes, [1 2]), [], 1);
+        maxDs = max(ops1{i}.DS(~ops1{i}.badframes, [1 2]), [], 1);
         disp([minDs(1) maxDs(1) minDs(2) maxDs(2)])
         if BiDiPhase>0
             maxDs(2) = max(1+BiDiPhase, maxDs(2));

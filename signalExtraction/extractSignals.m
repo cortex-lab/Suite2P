@@ -76,6 +76,13 @@ while 1
 end
 fclose(fid);
 %% get activity stats
+indNoNaN    = find(~ops.badframes);
+ix          = cumsum(~ops.badframes) + 1;
+ix          = ix(ops.badframes);
+ix(ix>numel(indNoNaN)) = numel(indNoNaN);
+
+F(:, ops.badframes)     = F(:, indNoNaN(ix));
+Fneu(:, ops.badframes)  = Fneu(:, indNoNaN(ix));
 
 sd = std(F, [], 2);
 

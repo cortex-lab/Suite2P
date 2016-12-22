@@ -22,4 +22,15 @@ for i = 1:numel(ops.planesToProcess)
         ops1{i,l}.DS          = cat(1, ops1{i,l}.DS, ds);
         ops1{i,l}.CorrFrame   = cat(1, ops1{i,l}.CorrFrame, Corr);
     end
+    
+    1;
+    % check if there was a sharp drop in fluorescence
+%     lbright = sq(mean(data(:,:,indframes),2));
+%     mlbright = mean(ops1{i}.mimg, 2);
+%     
+%     lbright = bsxfun(@rdivide, lbright, mlbright);
+%     badi = max(abs(lbright(1:end-4,:) - lbright(5:end,:)), [], 1) > .5;
+%     badi = find(badi);
+%     
+%     ops1{i}.badframes(sum(ops1{i}.Nframes) + badi) = true;    
 end

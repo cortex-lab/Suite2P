@@ -5,6 +5,10 @@ subpixel = getOr(ops, {'subPixel' 'SubPixel'}, 10); % subpixel factor
 useGPU = getOr(ops, 'useGPU', false);
 phaseCorrelation = getOr(ops, {'phaseCorrelation' 'PhaseCorrelation'}, true);
 maxregshift = getOr(ops, 'maxregshift', 50);
+maskSlope   = 1.2; % slope on taper mask preapplied to image. was 2, then 1.2
+% SD pixels of gaussian smoothing applied to correlation map (MOM likes .6)
+smoothSigma = 1.15;
+
 
 % if subpixel is still inf, threshold it for new method
 if ops.kriging
@@ -22,19 +26,36 @@ else
     translate = false;
 end
 
-eps0          = single(1e-20);
+% Taper mask
+[ys, xs] = ndgrid(1:ly, 1:lx);
+ys = abs(ys - mean(ys(:)));
+xs = abs(xs - mean(xs(:)));
+mY      = max(ys(:)) - 4;
+mX      = max(xs(:)) - 4;
+maskMul = single(1./(1 + exp((ys - mY)/maskSlope)) ./(1 + exp((xs - mX)/maskSlope)));
+maskOffset = mean(refImg(:))*(1 - maskMul);
+
+% Smoothing filter in frequency domain
+hgx = exp(-(((0:lx-1) - fix(lx/2))/smoothSigma).^2);
+hgy = exp(-(((0:ly-1) - fix(ly/2))/smoothSigma).^2);
+hg = hgy'*hgx;
+fhg = real(fftn(ifftshift(single(hg/sum(hg(:))))));
+
+% fft of reference image
+eps0          = single(1e-10);
+cfRefImg = conj(fftn(refImg));
+if phaseCorrelation
+    cfRefImg = cfRefImg./(eps0 + abs(cfRefImg)) .* fhg;
+end
+
 if useGPU
     batchSize = getBatchSize(ly*lx);
     eps0      = gpuArray(eps0);
-    refImg    = gpuArray(single(refImg));
+    cfRefImg    = gpuArray(cfRefImg);
+    maskMul = gpuArray(maskMul);
+    maskOffset = gpuArray(maskOffset);    
 else
     batchSize = 1000;
-end
-
-% fft of reference image
-m2 = fftn(refImg);
-if phaseCorrelation
-    m2 = m2./(eps0 + abs(m2));
 end
 
 % allow max shifts +/- lcorr
@@ -79,64 +100,71 @@ for bi = 1:nBatches
         batchData = single(data(:,:,fi));
     end
     
-    m1 = fft(fft(batchData,[],1),[],2);
+    corrMap = fft2(bsxfun(@plus, maskOffset, bsxfun(@times, maskMul, batchData)));
+    
     if phaseCorrelation
-        m1 = m1./(eps0 + abs(m1));
+        corrMap = bsxfun(@times, corrMap./(eps0 + abs(corrMap)), cfRefImg);
+    else
+        corrMap = bsxfun(@times, corrMap, cfRefImg);
     end
     
     % compute correlation matrix
-    cc = real(ifft(ifft(bsxfun(@times,m1,conj(m2)),[],1),[],2));
-    cc = fftshift(fftshift(cc,1),2);
-        
+    corrClip = real(ifft2(corrMap));
+    corrClip = fftshift(corrClip);
+    corrClipSmooth = my_conv2(corrClip, 1, [1 2]);
+    
     %% subpixel registration
     if subpixel > 1
-        % kriging subpixel
+        %% kriging subpixel
+        % allow only +/- lcorr shifts
+        cc0         = corrClipSmooth(floor(ly/2)+1+[-lcorr:lcorr],...
+            floor(lx/2)+1+[-lcorr:lcorr],:);
+        [cmax,iy]   = max(cc0,[],1);
+        [cx,  ix]   = max(cmax,[],2);
+        iy          = reshape(iy(sub2ind([size(iy,2) size(iy,3)], ix(:), ...
+            (1:size(iy,3))')), 1, 1, []);
+        %%
+        dl = gpuArray(single(-lpad:1:lpad));
+        
+        ccmat = gpuArray.zeros(numel(dl), numel(dl), numel(fi), 'single');
+        mxpt  = gpuArray.zeros(numel(fi), 2, 'single');
         for j = 1:numel(fi)
-            % allow only +/- lcorr shifts
-            cc0     = cc(floor(ly/2)+1+[-lcorr:lcorr],floor(lx/2)+1+[-lcorr:lcorr],j);
-            [~,ix] = max(cc0(:));
-            [ix1,ix2] = ind2sub(size(cc0),ix);
+%             [~,ix]      = max(cc0(:));
+%             [ix1,ix2]   = ind2sub(size(cc0),ix);
             % max point within +/- lcorr wrt whole matrix
-            mxpt    = [ix1+floor(ly/2) ix2+floor(lx/2)]-lcorr;
+            mxpt(j,:)        = [iy(j)+floor(ly/2) ix(j)+floor(lx/2)] - lcorr;
             
             % matrix +/- lpad surrounding max point
-            ypad    = max(1, mxpt(1)-lpad) : min(ly, mxpt(1)+lpad);
-            iy0     = min(0, mxpt(1)-lpad-1);
-            xpad    = max(1, mxpt(2)-lpad) : min(lx, mxpt(2)+lpad);
-            ix0     = min(0, mxpt(2)-lpad-1);
-            if useGPU
-                ccmat   = gpuArray.zeros(2*lpad+1,2*lpad+1,'single');
-            else
-                ccmat   = zeros(2*lpad+1,2*lpad+1,'single');
-            end
-            ccmat(iy0+[1:numel(ypad)], ix0+[1:numel(xpad)])   = cc(ypad,xpad,j);
-            
-            if ops.kriging
-                % regress onto subsampled grid
-                ccb    = Kmat * ccmat(:);
-                
-                % find max of grid
-                [cx,ix] = max(ccb(:));
-                [ix11,ix21] = ind2sub(numel(linds)*[1 1],ix);
-                mdpt    = floor(numel(linds)/2)+1;
-                dv0   = ([ix11 ix21] - mdpt)/subpixel + mxpt - [floor(ly/2) floor(lx/2)] - 1;
-            else
-                yshift = xt(1,:) * ccmat(:);
-                xshift = xt(2,:) * ccmat(:);
-                dv0    = [yshift xshift]/sum(ccmat(:)) + mxpt - [floor(ly/2) floor(lx/2)] - 1;
-                if isfinite(subpixel)
-                    dv0 = round(dv0 * subpixel) / subpixel;
-                end
-                cx     = max(ccmat(:));
-            end
-            dv(fi(j),:) = gather_try(dv0);
-            corr(fi(j))  = gather_try(cx);
-            
+            ccmat(:, :, j) = corrClip(mxpt(j,1)+dl, mxpt(j,2)+dl, j);
         end
-        
+        %%
+        ccmat = reshape(ccmat,[], numel(fi));
+        if ops.kriging
+            % regress onto subsampled grid
+            ccb         = Kmat * ccmat;
+            
+            % find max of grid
+            [cx,ix]     = max(ccb, [], 1);
+            [ix11,ix21] = ind2sub(numel(dl)*[1 1],ix);
+            mdpt        = floor(numel(dl)/2)+1;
+            dv0         = bsxfun(@minus, ([ix11' ix21'] - mdpt)/subpixel + mxpt, ...
+                [floor(ly/2) floor(lx/2)]) - 1;
+        else
+            yshift      = xt(1,:) * ccmat;
+            xshift      = xt(2,:) * ccmat;
+            dv0         = bsxxfun(@rdivide, [yshift xshift], sum(ccmat, 1)') + mxpt - ...
+                [floor(ly/2) floor(lx/2)] - 1;
+            
+            if isfinite(subpixel)
+                dv0 = round(dv0 * subpixel) / subpixel;
+            end
+            cx     = max(ccmat, [], 1);
+        end
+        dv(fi,:) = gather_try(dv0);
+        corr(fi)  = gather_try(cx);
     % otherwise just take peak of matrix
     else
-        cc0     = cc(floor(ly/2)+1+[-lcorr:lcorr],floor(lx/2)+1+[-lcorr:lcorr],:);
+        cc0     = corrClipSmooth(floor(ly/2)+1+[-lcorr:lcorr],floor(lx/2)+1+[-lcorr:lcorr],:);
         [cmax,iy]  = max(cc0,[],1);
         [cx, ix]   = max(cmax,[],2);
         iy = reshape(iy(sub2ind([size(iy,2) size(iy,3)], ix(:), (1:size(iy,3))')),...

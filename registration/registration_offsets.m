@@ -6,7 +6,7 @@ refImg = ops.mimg;
 
 subpixel = getOr(ops, {'subPixel' 'SubPixel'}, 1); % subpixel factor
 usFac = getOr(ops, 'registrationUpsample', 1); % factor to upsample
-phaseCorrelation = getOr(ops, {'phaseCorrelation' 'PhaseCorrelation'}, false); 
+phaseCorrelation = getOr(ops, {'phaseCorrelation' 'PhaseCorrelation'}, false);
 useGPU = getOr(ops, 'useGPU', false);
 
 maskSlope   = 1.2; % slope on taper mask preapplied to image. was 2, then 1.2
@@ -14,11 +14,11 @@ maskSlope   = 1.2; % slope on taper mask preapplied to image. was 2, then 1.2
 smoothSigma = 1.15/sqrt(usFac);
 
 if nargout > 2 % translation required
-  translate = true;
-  fy = ifftshift((-fix(ly/2):ceil(ly/2) - 1)/ly)';% freq along first dimension
-  fx = ifftshift((-fix(lx/2):ceil(lx/2) - 1)/lx); % freq along second dimension
+    translate = true;
+    fy = ifftshift((-fix(ly/2):ceil(ly/2) - 1)/ly)';% freq along first dimension
+    fx = ifftshift((-fix(lx/2):ceil(lx/2) - 1)/lx); % freq along second dimension
 else
-  translate = false;
+    translate = false;
 end
 %% Prepare common arrays
 lyus = usFac*ly;
@@ -52,96 +52,96 @@ fhg = real(fftn(ifftshift(single(hg/sum(hg(:))))));
 cfRefImg = conj(fftn(refImg));
 eps0 = single(1e-20);
 if phaseCorrelation
-  cfRefImg = cfRefImg./(eps0 + abs(cfRefImg)).*fhg;
+    cfRefImg = cfRefImg./(eps0 + abs(cfRefImg)).*fhg;
 end
 if useGPU
-  batchSize = getBatchSize(lyus*lxus);
-  maskMul = gpuArray(maskMul);
-  maskOffset = gpuArray(maskOffset);
-  cfRefImg = gpuArray(cfRefImg);
-  eps0 = gpuArray(eps0);
-  corrUps = zeros(lyus, lxus, batchSize, 'single', 'gpuArray');
-  if nargout > 2
-    fx = gpuArray(fx);
-    fy = gpuArray(fy);
-  end
+    batchSize = getBatchSize(lyus*lxus);
+    maskMul = gpuArray(maskMul);
+    maskOffset = gpuArray(maskOffset);
+    cfRefImg = gpuArray(cfRefImg);
+    eps0 = gpuArray(eps0);
+    corrUps = zeros(lyus, lxus, batchSize, 'single', 'gpuArray');
+    if nargout > 2
+        fx = gpuArray(fx);
+        fy = gpuArray(fy);
+    end
 else
-  batchSize = 3;
-  corrUps = zeros(lyus, lxus, batchSize, 'single');
+    batchSize = 3;
+    corrUps = zeros(lyus, lxus, batchSize, 'single');
 end
 %% Work through data in batches
 dv = zeros(nFrames, 2);
 corr = zeros(nFrames, 1);
 if translate
-  regdata = zeros(ly, lx, nFrames, 'single');
+    regdata = zeros(ly, lx, nFrames, 'single');
 end
 nBatches = ceil(nFrames/batchSize);
 for bi = 1:nBatches
-  fi = (bi - 1)*batchSize + 1:min(bi*batchSize, nFrames);
-  if bi == nBatches
-    % the last batch will usually have less frames
-    corrUps = corrUps(:,:,1:numel(fi));
-  end
-  if useGPU
-    batchData = gpuArray(single(data(:,:,fi)));
-  else
-    batchData = single(data(:,:,fi));
-  end
-  corrMap = fft2(bsxfun(@plus, maskOffset, bsxfun(@times, maskMul, batchData)));
-  if phaseCorrelation
-    corrMap = bsxfun(@times, corrMap./(eps0 + abs(corrMap)), cfRefImg);
-  else
-    corrMap = bsxfun(@times, corrMap, cfRefImg);
-  end
-  % embed in a larger array and compute 2D inverse fft to get correlation map
-  corrUps(yEmbedRef,xEmbedRef,:) = corrMap; 
-  corrUps = real(ifft2(corrUps));
-  corrClip = corrUps(yCorrRef,xCorrRef,:);
-  
-  % added by Marius 20.07.2016, smooth the correlation maps
-  corrClipSmooth = my_conv2(corrClip, 1, [1 2]);
-  
-  % find peak
-  [dmax, iy] = max(corrClipSmooth, [], 1);
-  iy = gather_try(iy);
-  dmax = gather_try(dmax);
-  [dmax, ix] = max(dmax, [], 2);
-  iy = reshape(...
-    iy(sub2ind([size(iy,2) size(iy,3)], ix(:), (1:size(iy,3))')),...
-    1, 1, []);
-  if subpixel > 1
-    iy = min(max(iy, 3), 2*lCorr - 1);
-    ix = min(max(ix, 3), 2*lCorr - 1);
-    clipX = bsxfun(@plus, xClipRef', ix);
-    clipY = bsxfun(@plus, yClipRef, iy);
-    clipF = reshape(repmat(1:size(clipX, 3), nClipPixels, 1), [], 1);
-    cczoom = reshape(...
-      gather_try(corrClip(sub2ind(size(corrClip), clipY(:), clipX(:), clipF))),...
-      nClipPixels, 1, []);
-    bcorr = sum(cczoom, 1);
-    cczoom = bsxfun(@rdivide, cczoom, bcorr);
-    ix = ix + sum(bsxfun(@times, xClipRef, cczoom), 1);
-    iy = iy + sum(bsxfun(@times, yClipRef, cczoom), 1);
-  else
-    bcorr = dmax;
-  end
-  ix = (ix - lCorr - 1)/usFac;
-  iy = (iy - lCorr - 1)/usFac;
-  if isfinite(subpixel)
-    ix = round(subpixel*ix)./subpixel;
-    iy = round(subpixel*iy)./subpixel;
-  end
-  if translate % do translation using registration offsets in fourier domain
-    phaseShift = bsxfun(@times,...
-      exp(1j*2*pi*bsxfun(@times, fy, iy)),... y rotation
-      exp(1j*2*pi*bsxfun(@times, fx, ix))); % x rotation
-    res = real(ifft2(fft2(batchData).*phaseShift));
-    regdata(:,:,fi) = gather_try(res);
-  end
-  dv(fi,:) = [iy(:) ix(:)];
-  corr(fi) = squeeze(bcorr);
+    fi = (bi - 1)*batchSize + 1:min(bi*batchSize, nFrames);
+    if bi == nBatches
+        % the last batch will usually have less frames
+        corrUps = corrUps(:,:,1:numel(fi));
+    end
+    if useGPU
+        batchData = gpuArray(single(data(:,:,fi)));
+    else
+        batchData = single(data(:,:,fi));
+    end
+    corrMap = fft2(bsxfun(@plus, maskOffset, bsxfun(@times, maskMul, batchData)));
+    if phaseCorrelation
+        corrMap = bsxfun(@times, corrMap./(eps0 + abs(corrMap)), cfRefImg);
+    else
+        corrMap = bsxfun(@times, corrMap, cfRefImg);
+    end
+    % embed in a larger array and compute 2D inverse fft to get correlation map
+    corrUps(yEmbedRef,xEmbedRef,:) = corrMap;
+    corrUps = real(ifft2(corrUps));
+    corrClip = corrUps(yCorrRef,xCorrRef,:);
+    
+    % added by Marius 20.07.2016, smooth the correlation maps
+    corrClipSmooth = my_conv2(corrClip, 1, [1 2]);
+    
+    % find peak
+    [dmax, iy] = max(corrClipSmooth, [], 1);
+    iy = gather_try(iy);
+    dmax = gather_try(dmax);
+    [dmax, ix] = max(dmax, [], 2);
+    iy = reshape(...
+        iy(sub2ind([size(iy,2) size(iy,3)], ix(:), (1:size(iy,3))')),...
+        1, 1, []);
+    if subpixel > 1
+        iy = min(max(iy, 3), 2*lCorr - 1);
+        ix = min(max(ix, 3), 2*lCorr - 1);
+        clipX = bsxfun(@plus, xClipRef', ix);
+        clipY = bsxfun(@plus, yClipRef, iy);
+        clipF = reshape(repmat(1:size(clipX, 3), nClipPixels, 1), [], 1);
+        cczoom = reshape(...
+            gather_try(corrClip(sub2ind(size(corrClip), clipY(:), clipX(:), clipF))),...
+            nClipPixels, 1, []);
+        bcorr = sum(cczoom, 1);
+        cczoom = bsxfun(@rdivide, cczoom, bcorr);
+        ix = ix + sum(bsxfun(@times, xClipRef, cczoom), 1);
+        iy = iy + sum(bsxfun(@times, yClipRef, cczoom), 1);
+    else
+        bcorr = dmax;
+    end
+    ix = (ix - lCorr - 1)/usFac;
+    iy = (iy - lCorr - 1)/usFac;
+    if isfinite(subpixel)
+        ix = round(subpixel*ix)./subpixel;
+        iy = round(subpixel*iy)./subpixel;
+    end
+    if translate % do translation using registration offsets in fourier domain
+        phaseShift = bsxfun(@times,...
+            exp(1j*2*pi*bsxfun(@times, fy, iy)),... y rotation
+            exp(1j*2*pi*bsxfun(@times, fx, ix))); % x rotation
+        res = real(ifft2(fft2(batchData).*phaseShift));
+        regdata(:,:,fi) = gather_try(res);
+    end
+    dv(fi,:) = [iy(:) ix(:)];
+    corr(fi) = squeeze(bcorr);
 end
 %% Post-processing
 if nargin > 2 && removeMean
-  dv = bsxfun(@minus, dv, mean(dv,1));
+    dv = bsxfun(@minus, dv, mean(dv,1));
 end
