@@ -115,7 +115,8 @@ for k = 1:length(fs)
         else
             ichanset = [ichannel; nFr; nchannels];
         end
-        data = loadFramesBuff(fs{k}(j).name, ichanset(1), ichanset(2), ichanset(3), ops.temp_tiff);
+        data = loadFramesBuff(fs{k}(j).name, ichanset(1), ichanset(2), ...
+            ichanset(3), ops.temp_tiff);
         
         if BiDiPhase
             yrange = 2:2:Ly;
@@ -141,9 +142,7 @@ for k = 1:length(fs)
                 data = loadFramesBuff(ops.temp_tiff, ichanset(1), ichanset(2), ichanset(3), ops.temp_tiff);               
             end
             
-            [dreg] = RegMovie(data, ops1, dsall, yFOVs, xFOVs);
-          
-           
+            dreg = RegMovie(data, ops1, dsall, yFOVs, xFOVs);
         else
             dreg = data;
         end

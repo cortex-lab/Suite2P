@@ -15,7 +15,7 @@ Ireg = diag([ones(Nk,1); zeros(nBasis,1)]);
 covL = [m.LtL m.LtS; m.LtS' m.StS];
 
 covLinv = inv(covL + 1e-4 * Ireg);
-covLinv = covLinv ./ repmat(diag(covLinv), 1, size(covLinv,2));
+% covLinv = covLinv ./ repmat(diag(covLinv), 1, size(covLinv,2));
 %% get signals  
 
 nimgbatch = 2000;
