@@ -13,7 +13,7 @@ Lx = numel(ops.xrange);
 U0 = reshape(U0, nSVD, Ly, Lx);
 
 ops.TileFactor = 4;
-S = getNeuropilBasis(ops, Ly, Lx, 'Fourier'); % 'raisedcosyne', 'Fourier'
+S = getNeuropilBasis(ops, Ly, Lx, 'raisedcosyne'); % 'raisedcosyne', 'Fourier'
 S = normc(S);
 nBasis = size(S,2);
 

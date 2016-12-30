@@ -26,7 +26,6 @@ for i = 1:length(ops.planesToProcess)
         dat = dat.dat; % just in case...
     end
     
-    
     % overwrite fields of ops with those saved to file
     ops = addfields(ops, dat.ops);
     

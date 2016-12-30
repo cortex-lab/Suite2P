@@ -7,7 +7,7 @@ phaseCorrelation = getOr(ops, {'phaseCorrelation' 'PhaseCorrelation'}, true);
 maxregshift = getOr(ops, 'maxregshift', 50);
 maskSlope   = 2; % slope on taper mask preapplied to image. was 2, then 1.2
 % SD pixels of gaussian smoothing applied to correlation map (MOM likes .6)
-smoothSigma = 1;
+smoothSigma = 1.15;
 
 
 % if subpixel is still inf, threshold it for new method
