@@ -1,15 +1,13 @@
 function ops1 = blockReg2P(ops)
 %%
-if ops.DoRegistration
+if ops.doRegistration
     disp('running non-rigid registration');
 else
     disp('skipping registration, but assembling binary file');
 end
 
-% iplane = ops.iplane;
-% bitspersamp = 16;
-numBlocks      = getOr(ops, {'numBlocks'}, 1);
-
+% default is 6 blocks of 102 pixels each
+numBlocks          = getOr(ops, {'numBlocks'}, 6);
 numPlanes = length(ops.planesToProcess);
 ops.numPlanes = numPlanes;
 chunk_align        = getOr(ops, {'chunk_align'}, 1);
@@ -40,7 +38,9 @@ if ops.doRegistration
     ops.Ly = Ly;
     ops.Lx = Lx;
     ops = MakeBlocks(ops);
-    
+    fprintf('--- using %d blocks in Y\n', numBlocks);
+    fprintf('--- %d pixels/block; avg pixel overlap = %d pixels\n', round(ops.blockFrac*Ly), round(ops.pixoverlap));
+
     % compute phase shifts from bidirectional scanning
     BiDiPhase = BiDiPhaseOffsets(IMG);
     fprintf('bi-directional scanning offset = %d pixels\n', BiDiPhase);
@@ -135,6 +135,7 @@ for k = 1:length(fs)
             
             % register frames
             [dreg, xyValid] = BlockRegMovie(data, ops, dsall, xyValid);
+       
         else
             dreg = data;
         end

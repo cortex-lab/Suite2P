@@ -66,7 +66,7 @@ if useGPU
         fy = gpuArray(fy);
     end
 else
-    batchSize = 3;
+    batchSize = 100;
     corrUps = zeros(lyus, lxus, batchSize, 'single');
 end
 %% Work through data in batches

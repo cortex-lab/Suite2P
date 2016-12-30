@@ -11,7 +11,10 @@ ops0.getROIs                        = getOr(ops0, {'getROIs'}, 1);   % whether t
 ops0.getSVDcomps                    = getOr(ops0, {'getSVDcomps'}, 0);   % whether to save SVD components to disk for later processing
 ops0.nSVD                           = getOr(ops0, {'nSVD'}, 1000);   % how many SVD components to save to disk
 ops0.numBlocks                      = getOr(ops0, 'numBlocks', 1);   
-ops0.blockP                         = getOr(ops0, 'blockP', 128);  
+if ops0.numBlocks > 1
+    ops0.nonrigid                   = 1;
+end
+ops0.nonrigid                       = getOr(ops0, 'nonrigid', 0);   
 ops0.kriging                        = getOr(ops0, 'kriging', 1);  
 
 ops                                 = build_ops3(db, ops0);
@@ -23,7 +26,7 @@ end
 ops.diameter                        = getOr(ops, 'diameter', 10);
 ops.clustrules.diameter             = ops.diameter;
 ops.clustrules                      = get_clustrules(ops.clustrules);
-
+%%
 % this loads ops1 and checks if processed binary files exist
 opath = sprintf('%s/regops_%s_%s.mat', ops.ResultsSavePath, ops.mouse_name, ops.date);
 processed = 1;
@@ -38,11 +41,11 @@ if exist(opath, 'file')
 else
     processed = 0;
 end
-
+%%
 % do registration if the processed binaries do not exist
 if processed==0
-    if ops.numBlocks > 1
-        ops1 = blockReg2P(ops);  % do registration
+    if ops.nonrigid
+        ops1 = blockReg2P(ops);  % do non-rigid registration
     else
         ops1 = reg2P(ops);  % do registration
     end

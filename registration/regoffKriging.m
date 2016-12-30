@@ -5,9 +5,9 @@ subpixel = getOr(ops, {'subPixel' 'SubPixel'}, 10); % subpixel factor
 useGPU = getOr(ops, 'useGPU', false);
 phaseCorrelation = getOr(ops, {'phaseCorrelation' 'PhaseCorrelation'}, true);
 maxregshift = getOr(ops, 'maxregshift', 50);
-maskSlope   = 1.2; % slope on taper mask preapplied to image. was 2, then 1.2
+maskSlope   = 2; % slope on taper mask preapplied to image. was 2, then 1.2
 % SD pixels of gaussian smoothing applied to correlation map (MOM likes .6)
-smoothSigma = 1.15;
+smoothSigma = 1;
 
 
 % if subpixel is still inf, threshold it for new method
@@ -45,7 +45,8 @@ fhg = real(fftn(ifftshift(single(hg/sum(hg(:))))));
 eps0          = single(1e-10);
 cfRefImg = conj(fftn(refImg));
 if phaseCorrelation
-    cfRefImg = cfRefImg./(eps0 + abs(cfRefImg)) .* fhg;
+    absRef   = abs(cfRefImg);
+    cfRefImg = cfRefImg./(eps0 + absRef) .* fhg;
 end
 
 if useGPU
@@ -71,7 +72,7 @@ end
     
 if ops.kriging
     % compute kernels for regression
-    sigL     = 0.75; % kernel width in pixels
+    sigL     = .75; % kernel width in pixels
     Kx = kernelD(xt,xt,sigL*[1;1]);
     linds = [-lpad:1/subpixel:lpad];
     [x1,x2] = ndgrid(linds);
@@ -102,6 +103,7 @@ for bi = 1:nBatches
     
     corrMap = fft2(bsxfun(@plus, maskOffset, bsxfun(@times, maskMul, batchData)));
     
+    %keyboard;
     if phaseCorrelation
         corrMap = bsxfun(@times, corrMap./(eps0 + abs(corrMap)), cfRefImg);
     else
@@ -111,7 +113,7 @@ for bi = 1:nBatches
     % compute correlation matrix
     corrClip = real(ifft2(corrMap));
     corrClip = fftshift(fftshift(corrClip, 1), 2);
-    corrClipSmooth = my_conv2(corrClip, 1, [1 2]);
+    corrClipSmooth = corrClip;
     
     %% subpixel registration
     if subpixel > 1
@@ -145,9 +147,8 @@ for bi = 1:nBatches
         else
             yshift      = xt(1,:) * ccmat;
             xshift      = xt(2,:) * ccmat;
-            dv0         = bsxxfun(@rdivide, [yshift' xshift'], sum(ccmat, 1)') + mxpt - ...
-                [floor(ly/2) floor(lx/2)] - 1;
-            
+            dv0         = bsxfun(@rdivide, [yshift' xshift'], sum(ccmat, 1)') + mxpt;
+            dv0         = bsxfun(@minus, dv0, [floor(ly/2) floor(lx/2)] + 1);
             if isfinite(subpixel)
                 dv0 = round(dv0 * subpixel) / subpixel;
             end
