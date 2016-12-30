@@ -81,11 +81,16 @@ smooth_time_space --- convolves raw movie with a Gaussian of specified size in s
                       
 ++ Block Registration (for high zoom/npixels - assumes scanning is in Y direction) ++
 
-numBlocks --- number of blocks dividing y-dimension of image
+nonrigid --- set to 1 for non-rigid registration (or set numBlocks > 1)
 
-blockPixels --- number of pixels per block (to allow for overlapping blocks to increase accuracy)
-             - minimum size for good estimation is around 100 pixels
+numBlocks --- number of blocks dividing y-dimension of image (default is 6)
+
+blockFrac --- percent of image to use per block (default is 1/(numBlocks-1))
              
+quadBlocks --- interpolate block shifts to single line shifts (6 blocks -> 512 lines) by fitting a quadratic function (default is 1)
+
+smoothBlocks --- if quadBlocks = 0, then smoothBlocks is the standard deviation of the gaussian smoothing kernel
+
 ++ Bidirectional scanning issues (frilly cells) taken care of automatically ++
 
 ### V. Options for cell detection ###
