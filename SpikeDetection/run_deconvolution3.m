@@ -25,7 +25,7 @@ coefDefault = .9; % initialize neuropil subtraction coef with 0.8
 Params = [1 1 .5 2e4]; %type of deconvolution, Th, Thi(nner loop), max Nspikes
 
 % f0 = (mtau/2); % resample the initialization of the kernel to the right number of samples
-kernel = exp([-1:ceil(5*mtau)]'/mtau);
+kernel = exp(-[1:ceil(5*mtau)]'/mtau);
 %
 npad = 250;
 [NT, NN] = size(Ff);

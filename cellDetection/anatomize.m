@@ -42,6 +42,8 @@ for j = 1:size(mPix,2)
     
     dd = d2p0(1:sum(gpix), 1:sum(gpix));
     stat(j).mrs0(1) = mean(dd(:))/di;    
+    
+    stat(j).cmpct = stat(j).mrs(1)/stat(j).mrs0(1);
 %     stat(j).mrs0(2) = mean(rgridsort(1:sum(gpix)))/di;    
 end
 

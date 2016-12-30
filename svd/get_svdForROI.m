@@ -67,9 +67,14 @@ if nargin==1 || ~strcmp(clustModel, 'CNMF')
     
     mov             = reshape(mov, [], size(mov,3));
     sdmov           = mean(mov.^2,2).^.5;
-    mov             = bsxfun(@rdivide, mov, sdmov);
+    sdmov           = reshape(sdmov, numel(ops.yrange), numel(ops.xrange));
+    ops.sdmov       = sdmov;
     
-    model.sdmov     = reshape(sdmov, numel(ops.yrange), numel(ops.xrange));
+    % smooth the variance over space
+%     sdmov           = my_conv2(sdmov.^2, ops.diameter, [1 2]).^.5;
+    mov             = bsxfun(@rdivide, mov, sdmov(:));    
+    model.sdmov     = sdmov;
+    
     
     if ops.useGPU
         COV             = gpuBlockXtX(mov)/size(mov,1);

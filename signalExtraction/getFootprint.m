@@ -17,12 +17,12 @@ for j = 1:size(mPix,2)
     ipos = find(mPix(:,j)>0 & mLam(:,j)>1e-10);
     ipix = mPix(ipos,j);
     
-    stat(j).ipix = ipix;
-    stat(j).xpix = ceil(ipix/Ly);
-    stat(j).ypix = rem(ipix-1, Ly)+1;
-    stat(j).lam    = mLam(ipos,j);
-    stat(j).lambda = mLam0(ipos,j);
-    stat(j).npix   = numel(ipix);
+    stat(j).ipix    = ipix;
+    stat(j).xpix    = ceil(ipix/Ly);
+    stat(j).ypix    = rem(ipix-1, Ly)+1;
+    stat(j).lam     = mLam(ipos,j);
+    stat(j).lambda  = mLam0(ipos,j);
+    stat(j).npix    = numel(ipix);
     stat(j).med     = [median(stat(j).ypix) median(stat(j).xpix)];
     
     % compute "footprint" length of ROI
@@ -34,7 +34,15 @@ for j = 1:size(mPix,2)
     ipix = (y0+dy(ivalid)) + (x0 + dx(ivalid)-1) * Ly;
     proj = codes(j,:) * Ucell(:, ipix);
     
-    stat(j).Foot = mean(rs(ivalid(proj>max(proj) * frac))) /ops.diameter;
+    stat(j).footprint = mean(rs(ivalid(proj>max(proj) * frac))) /ops.diameter;
     
+end
+
+mfoot = median([stat.footprint]);
+
+for j = 1:size(mPix,2)
+    stat(j).footprint = stat(j).footprint/mfoot;
     
+%     stat(j).negFoot = max(0, 1 - stat(j).footprint/mfoot);
+%     stat(j).posFoot = max(0, stat(j).footprint/mfoot -1);
 end

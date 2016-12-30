@@ -34,6 +34,7 @@ end
 
 [Ly Lx] = size(ops.mimg1);
 
+mimg1 = ops.mimg1(ops.yrange, ops.xrange);
 % find indices of good clusters 
 while 1
     data = fread(fid,  Ly*Lx*nimgbatch, '*int16');
@@ -43,9 +44,10 @@ while 1
     data = reshape(data, Ly, Lx, []);
     data = data(ops.yrange, ops.xrange, :);
     data = single(data);
-    NT= size(data,3);
+    NT   = size(data,3);
     
     % process the data
+    data = bsxfun(@minus, data, mimg1);
     data = my_conv2(data, ops.sig, [1 2]);
     data = bsxfun(@rdivide, data, m.sdmov);    
     data = single(reshape(data, [], NT));
@@ -84,15 +86,20 @@ ix(ix>numel(indNoNaN)) = numel(indNoNaN);
 F(:, ops.badframes)     = F(:, indNoNaN(ix));
 Fneu(:, ops.badframes)  = Fneu(:, indNoNaN(ix));
 
-sd = std(F, [], 2);
+dF = F - Fneu;
+sd = std(dF, [], 2);
 
-sk(:, 1) = skewness(F, [], 2);
+sk(:, 1) = skewness(dF, [], 2);
 sk(:, 2) = sd/mean(sd); 
-sk(:, 3) = (max(F, [], 2)-median(F, 2))./sd;
-sk(:, 4) = (prctile(F, 95, 2)-median(F, 2))./sd;
+sk(:, 3) = (max(dF, [], 2)-median(dF, 2))./sd;
+sk(:, 4) = (prctile(dF, 95, 2)-median(dF, 2))./sd;
 
 for j = 1:numel(stat)
-   stat(j).dFstat = sk(j,:); 
+   stat(j).dFstat           = sk(j,:); 
+   stat(j).skew         = sk(j,1);
+   stat(j).std              = sk(j,2);
+   stat(j).maxMinusMed      = sk(j,3);
+   stat(j).top5pcMinusMed   = sk(j,4);
 end
 
 %%

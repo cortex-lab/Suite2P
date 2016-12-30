@@ -1,7 +1,7 @@
 function S = getNeuropilBasis(ops, Ly, Lx, type)
 
 TileFactor = getOr(ops, {'TileFactor'}, 1); % this option can be overwritten by the user
-nTiles = ceil(TileFactor * (Ly+Lx)/2 / (10 * ops.diameter)); % neuropil is modelled as nTiles by nTiles
+nTiles = ceil(TileFactor * (Ly+Lx)/2 / (3 * ops.diameter)); % neuropil is modelled as nTiles by nTiles
 
 S = zeros(Ly, Lx, nTiles, nTiles, 'single');
 

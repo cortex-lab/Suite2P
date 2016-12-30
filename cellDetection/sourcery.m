@@ -12,7 +12,6 @@ Lx = numel(ops.xrange);
 
 U0 = reshape(U0, nSVD, Ly, Lx);
 
-ops.TileFactor = 4;
 S = getNeuropilBasis(ops, Ly, Lx, 'raisedcosyne'); % 'raisedcosyne', 'Fourier'
 S = normc(S);
 nBasis = size(S,2);
@@ -28,15 +27,13 @@ sig = ceil(d0/4);
 dx = repmat([-d0:d0], 2*d0+1, 1);
 dy = dx';
 
-rs = dx.^2 + dy.^2;
-dx = dx(rs<=d0^2);
-dy = dy(rs<=d0^2);
-
+rs = dx.^2 + dy.^2 - d0^2;
+dx = dx(rs<=0);
+dy = dy(rs<=0);
 
 mPix    = zeros(numel(dx), 1e4);
 mLam    = zeros(numel(dx), 1e4);
 mLam0   = zeros(numel(dx), 1e4);
-
 
 iter = 0;
 icell = 0;
@@ -85,11 +82,7 @@ while 1
         Th  = ops.ThScaling * median(pks(pks>1e-4));
         
         V0 = V;
-        if 0 %ops.fig
-            figure(1)
-            subplot(1,3, 1);
-            imagesc(V, [0 4*Th])
-        end
+        ops.Vcorr = V0;
     end
     
     % find local maxima in a +- d neighborhood
@@ -129,6 +122,10 @@ while 1
         mPix(ipos,icell) = ipix;
         mLam(ipos,icell) = lam;
         
+        % extract biggest connected region of lam only
+        mLam(:,icell)   = getConnected(mLam(:,icell), rs);
+        lam             = mLam(ipos,icell) ;
+        
         L(ipix,icell) = lam;
         
         LtU(icell, :) = U0(:,ipix) * lam;
@@ -145,6 +142,7 @@ while 1
     % subtract off everything
     Ucell = U0 - reshape(neu' * S', size(U0)) - reshape(double(codes') * L', size(U0));    
     
+    % re-estimate masks
     L   = sparse(Ly*Lx, icell);
     for j = 1:icell        
         ipos = find(mPix(:,j)>0);
@@ -156,12 +154,16 @@ while 1
         % threshold pixels
         lam(lam<max(lam)/5) = 0;
         
-        
-        mLam0(ipos,j) = normc(lam(:) .* model.sdmov(ipix));
-        
         lam = normc(lam(:));
         mLam(ipos,j) = lam;
+
+        % extract biggest connected region of lam only
+        mLam(:,j) = getConnected(mLam(:,j), rs);
+        lam = mLam(ipos,j);
         
+        % normalize and multiply by movie SD for display purposes
+        mLam0(ipos,j) = lam .* model.sdmov(ipix);
+
         L(ipix,j) = lam;
         
         LtU(j, :) = U0(:,ipix) * lam;
@@ -174,9 +176,10 @@ while 1
     
     Vnew = sq(sum(Ucell.^2,1));
     
+    fprintf('%d total ROIs, err %4.4f, thresh %4.4f \n', icell, err(iter), Th)
 end
 if ops.fig
-    figure(1)
+    figure
     subplot(1,2, 1);
     imagesc(V0, [0 4*Th])
     axis off
@@ -202,13 +205,15 @@ Ucell = U0 - reshape(neu' * S', size(U0));
 
 stat = getFootprint(ops, codes, Ucell, mPix, mLam, mLam0, stat);
 
+figure
 [~, iclust, lam] = drawClusters(ops, r, mPix, mLam, Ly, Lx);
 
-model.L = L;
-model.S = S;
-model.LtS = LtS;
-model.LtL = LtL;
-model.StS = StS;
+model.L     = L;
+model.S     = S;
+model.LtS   = LtS;
+model.LtL   = LtL;
+model.StS   = StS;
 
-
+% get anatomical projection weights
+stat = weightsMeanImage(ops, stat, model);
 

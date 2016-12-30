@@ -18,7 +18,7 @@ end
 r = cat(1, r, rand(icell+1-numel(r), 1));
 
 if ops.fig
-    figure(2)
+%     figure(2)
     clf
     Sat = ones(Ly, Lx);
     H = zeros(Ly, Lx);
@@ -31,3 +31,5 @@ if ops.fig
     imagesc(rgb_image)
     axis off
 end
+
+drawnow

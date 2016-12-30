@@ -83,7 +83,6 @@ for i = 1:numel(ops1)
         save(sprintf('%s/F_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
             ops.mouse_name, ops.date, ops.iplane),  'ops',  'stat',...
             'Fcell', 'FcellNeu', '-v7.3')
-        
     end
 
     

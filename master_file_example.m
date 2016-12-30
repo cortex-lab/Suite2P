@@ -24,7 +24,7 @@ ops0.fig                    = 1; % turn off figure generation with 0
 
 % root paths for files and temporary storage (ideally an SSD drive. my SSD is C:/)
 ops0.RootStorage            = '//zserver4/Data/2P'; % Suite2P assumes a folder structure, check out README file
-ops0.temp_tiff              = 'C:/DATA/temp.tif'; % copy each remote tiff locally first, into this file
+ops0.temp_tiff              = 'C:/DATA/temp.tif'; % copies each remote tiff locally first, into this file
 ops0.RegFileRoot            = 'C:/DATA/';  % location for binary file
 ops0.DeleteBin              = 1; % set to 1 for batch processing on a limited hard drive
 ops0.ResultsSavePath        = 'D:/DATA/F'; % a folder structure is created inside
@@ -44,13 +44,6 @@ ops0.sig                    = 0.5;  % spatial smoothing length in pixels; encour
 ops0.nSVDforROI             = 1000; % how many SVD components for cell clustering
 ops0.NavgFramesSVD          = 5000; % how many (binned) timepoints to do the SVD based on
 
-% red channel options
-% redratio = red pixels inside / red pixels outside
-% redcell = redratio > mean(redratio) + redthres*std(redratio)
-% notred = redratio < mean(redratio) + redmax*std(redratio)
-ops0.redthres               = 1.5; % the higher the thres the less red cells
-ops0.redmax                 = 1; % the higher the max the more NON-red cells
-
 % spike deconvolution options
 ops0.imageRate              = 30;   % imaging rate (cumulative over planes!). Approximate, for initialization of deconvolution kernel.
 ops0.sensorTau              = 2; % decay half-life (or timescale). Approximate, for initialization of deconvolution kernel.
@@ -58,8 +51,16 @@ ops0.maxNeurop              = Inf; % for the neuropil contamination to be less t
 ops0.recomputeKernel        = 1; % whether to re-estimate kernel during optimization (default kernel is "reasonable", if you give good timescales)
 ops0.sameKernel             = 1; % whether the same kernel should be estimated for all neurons (robust, only set to 0 if SNR is high and recordings are long)
 
-db0 = db;
+% red channel options
+% redratio = red pixels inside / red pixels outside
+% redcell = redratio > mean(redratio) + redthres*std(redratio)
+% notred = redratio < mean(redratio) + redmax*std(redratio)
+ops0.redthres               = 1.5; % the higher the thres the less red cells
+ops0.redmax                 = 1; % the higher the max the more NON-red cells
+
 %% RUN THE PIPELINE HERE
+db0 = db;
+
 for iexp = 1 %[3:length(db) 1:2]
     run_pipeline(db(iexp), ops0);
     

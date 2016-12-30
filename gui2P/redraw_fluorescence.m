@@ -12,5 +12,7 @@ if h.dat.plot_neu
     end
 end
 
+box off
+set(gca, 'xcolor', 'w')
 % plot([0 NT], [0 0], 'k', 'Linewidth', 2)
 % axis off

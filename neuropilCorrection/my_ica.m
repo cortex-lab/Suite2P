@@ -1,5 +1,5 @@
 function [w_out inomax]= my_ica(ca, neu, fs, w_default)
-
+%%
 ca = double(ca);
 neu = double(neu);
 
@@ -23,7 +23,7 @@ end
 
 % find all the local maxima
 pks = sk(:, 2:end-1)> sk(:, 1:end-2) & sk(:, 2:end-1)> sk(:, 3:end);
-pks = bsxfun(@rdivide, pks , (1 + abs(1-ws(2:end-1))));
+pks = bsxfun(@rdivide, pks , (1 + abs(ws(2:end-1))));
 [Mmax, imax] = max(pks, [], 2);
 inomax = Mmax<1e-10; 
 
