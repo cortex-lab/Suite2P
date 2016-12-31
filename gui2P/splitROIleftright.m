@@ -1,7 +1,7 @@
 function h = splitROIleftright(h)
 h.dat.cl.iscell = [h.dat.stat.iscell];
 
-h.dat.cl.iscell = double(h.dat.cl.iscell);
+% h.dat.cl.iscell = double(h.dat.cl.iscell);
 
 % overwrite manual selections
 % h.dat.cl.iscell(h.dat.cl.manual>1e-3) = 1;

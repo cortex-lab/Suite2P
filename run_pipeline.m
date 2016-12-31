@@ -10,10 +10,11 @@ ops0.registrationUpsample           = getOr(ops0, {'registrationUpsample'}, 1); 
 ops0.getROIs                        = getOr(ops0, {'getROIs'}, 1);   % whether to run the optimization
 ops0.getSVDcomps                    = getOr(ops0, {'getSVDcomps'}, 0);   % whether to save SVD components to disk for later processing
 ops0.nSVD                           = getOr(ops0, {'nSVD'}, 1000);   % how many SVD components to save to disk
-ops0.numBlocks                      = getOr(ops0, 'numBlocks', 1);   
-if ops0.numBlocks > 1
+if isfield(ops0, 'numBlocks') && ~isempty(ops0.numBlocks) && ops0.numBlocks> 1
     ops0.nonrigid                   = 1;
 end
+ops0.numBlocks                      = getOr(ops0, 'numBlocks', 1);   
+
 ops0.nonrigid                       = getOr(ops0, 'nonrigid', 0);   
 ops0.kriging                        = getOr(ops0, 'kriging', 1);  
 
@@ -32,9 +33,8 @@ opath = sprintf('%s/regops_%s_%s.mat', ops.ResultsSavePath, ops.mouse_name, ops.
 processed = 1;
 if exist(opath, 'file')
     load(opath);
-    for j = 1:numel(ops1)
-       % check if the registered binary file exists
-       if ~exist(ops1{j}.RegFile, 'file')
+    for j = 1:numel(ops1)       
+       if ~exist(ops1{j}.RegFile, 'file') % check if the registered binary file exists
           processed = 0; 
        end
     end

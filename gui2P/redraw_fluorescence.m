@@ -1,15 +1,21 @@
 function redraw_fluorescence(h)
 axes(h.axes4)
 hold off
-[NN NT] = size(h.dat.F.trace);
-plot(my_conv_local(medfilt1(double(h.dat.F.trace(h.dat.F.ichosen,:)), 3), 3))
+
+ichosen = h.dat.F.ichosen;
+F = [];
+Fneu = [];
+for j = 1:numel(h.dat.Fcell)
+    F    = cat(2, F, h.dat.Fcell{j}(ichosen, :));
+    Fneu = cat(2, Fneu, h.dat.FcellNeu{j}(ichosen, :));
+end
+
+plot(my_conv_local(medfilt1(double(F), 3), 3))
 axis tight
 hold on
 
-if h.dat.plot_neu
-    if isfield(h.dat.F, 'neurop')
-        plot(my_conv_local(medfilt1(double(h.dat.F.neurop(h.dat.F.ichosen,:)), 3), 3))
-    end
+if isfield(h.dat, 'FcellNeu')
+    plot(my_conv_local(medfilt1(double(Fneu), 3), 3))
 end
 
 box off

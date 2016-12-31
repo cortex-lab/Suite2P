@@ -95,11 +95,13 @@ sk(:, 3) = (max(dF, [], 2)-median(dF, 2))./sd;
 sk(:, 4) = (prctile(dF, 95, 2)-median(dF, 2))./sd;
 
 for j = 1:numel(stat)
-   stat(j).dFstat           = sk(j,:); 
-   stat(j).skew         = sk(j,1);
-   stat(j).std              = sk(j,2);
-   stat(j).maxMinusMed      = sk(j,3);
-   stat(j).top5pcMinusMed   = sk(j,4);
+    stat(j).dFstat           = sk(j,:);
+    stat(j).skew             = sk(j,1);
+    stat(j).std              = sk(j,2);
+    stat(j).maxMinusMed      = sk(j,3);
+    stat(j).top5pcMinusMed   = sk(j,4);
+    stat(j).blockstarts      = [0 cumsum(ops.Nframes)];
+    stat(j).iplane           = ops.iplane;
 end
 
 %%

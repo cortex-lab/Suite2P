@@ -5,15 +5,23 @@ redcells = [];
 for i = 1:length(ops.planesToProcess)
     iplane  = ops.planesToProcess(i);
     try
-        fname = sprintf('%s/F_%s_%s_plane%d_Nk%d_proc.mat', ops.ResultsSavePath, ops.mouse_name, ops.date, iplane, ops.Nk);
-        dat = load(fname);
-        while isfield('dat', 'dat')
-            dat = dat.dat;
+        try
+            fname = sprintf('%s/F_%s_%s_plane%d.mat', ops.ResultsSavePath, ops.mouse_name, ops.date, iplane);
+            dat = load(fname);
+            while isfield(dat, 'dat')
+                dat = dat.dat;
+            end
+        catch
+            fname = sprintf('%s/F_%s_%s_plane%d_Nk%d_proc.mat', ops.ResultsSavePath, ops.mouse_name, ops.date, iplane, ops.Nk);
+            dat = load(fname);
+            while isfield(dat, 'dat')
+                dat = dat.dat;
+            end
         end
     catch
         fname = sprintf('%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ops.mouse_name, ops.date, iplane, ops.Nk);
         dat = load(fname);
-        while isfield('dat', 'dat')
+        while isfield(dat, 'dat')
             dat = dat.dat;
         end
     end
@@ -79,15 +87,13 @@ for i = 1:length(ops.planesToProcess)
     mimgR0 = normalize_image(mimgR0);
     %%%%% compute overlap with pixel map
     % (exclude pixels from other cells (cellpix))
-    if ~isfield(dat.cl,'redcell')
-        dat.cl.redcell = zeros(length(dat.stat), 1);
-    end
+   
     redpix = zeros(length(dat.stat),2);
     [xx,yy] = meshgrid([1:size(mimgR0,1)],[1:size(mimgR0,2)]);
     xx=xx(:); yy=yy(:);
     xy2 = xx.^2+yy.^2;
     
-    for j = find(dat.cl.isroi)
+    for j = 1:numel(stat)
         ipix                 = dat.stat(j).ipix;
         imgpix               = false(size(mimgR0));
         imgpix(ipix)         = 1;
@@ -103,7 +109,7 @@ for i = 1:length(ops.planesToProcess)
         redpix(j,:)          = [mean(rpix) mean(ext_rpix)];
     end
     redpix = redpix - min(redpix(:));
-    redpix(~dat.cl.isroi,:) = NaN;
+%     redpix(~dat.cl.isroi,:) = NaN;
     
     % set threshold for redpix
     if isfield(ops,'redthres')
@@ -122,9 +128,14 @@ for i = 1:length(ops.planesToProcess)
     
     fprintf('plane %d  reds %d\n',iplane,sum(redcell(:)&iscell(:)));
     
-    dat.cl.redcell = redcell(:);
-    dat.cl.notred  = notred(:);
-    
+%     dat.cl.redcell = redcell(:);
+%     dat.cl.notred  = notred(:);
+
+    for j = 1:length(dat.stat)
+        dat.stat(j).redcell = redcell(j);
+        dat.stat(j).redprob = rrat(j);
+    end
+
     save(fname, '-struct', 'dat')
 end
 
