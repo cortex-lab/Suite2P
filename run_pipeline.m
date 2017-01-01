@@ -13,8 +13,6 @@ ops0.nSVD                           = getOr(ops0, {'nSVD'}, 1000);   % how many 
 if isfield(ops0, 'numBlocks') && ~isempty(ops0.numBlocks) && ops0.numBlocks> 1
     ops0.nonrigid                   = 1;
 end
-ops0.numBlocks                      = getOr(ops0, 'numBlocks', 1);   
-
 ops0.nonrigid                       = getOr(ops0, 'nonrigid', 0);   
 ops0.kriging                        = getOr(ops0, 'kriging', 1);  
 

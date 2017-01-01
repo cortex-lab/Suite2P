@@ -7,7 +7,8 @@ else
 end
 
 % default is 6 blocks of 102 pixels each
-numBlocks          = getOr(ops, {'numBlocks'}, 6);
+ops.numBlocks      = getOr(ops, {'numBlocks'}, 6);
+numBlocks          = ops.numBlocks;
 numPlanes = length(ops.planesToProcess);
 ops.numPlanes = numPlanes;
 chunk_align        = getOr(ops, {'chunk_align'}, 1);
