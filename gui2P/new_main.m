@@ -446,6 +446,8 @@ end
 function set_maskCcolor(h, ih)
 pb = [98 95 96 102 99 100 104]; 
  
+set_Bcolor(h, 1)
+
 for j = 1:length(pb)
     if j==ih
         set(h.(sprintf('pushbutton%d', pb(ih))), 'BackgroundColor', [1 0 0]); 
@@ -488,6 +490,7 @@ guidata(hObject,h);
 
 function pushbutton98_Callback(hObject, eventdata, h)
 h.dat.cl.rands   = .1 + .8 * rand(1, h.dat.ops.Nk);
+h.dat.cl.rands(logical([h.dat.stat.redcell])) = 0;
 h.dat.cl.rands_orig = h.dat.cl.rands;
 redraw_figure(h);
 set_maskCcolor(h, 1);
@@ -632,6 +635,7 @@ if FileName
     
     guidata(hObject,h);
 else
+    warndlg('you did not create a new classifier file');
     error('you did not create a new classifier file')
 end
 

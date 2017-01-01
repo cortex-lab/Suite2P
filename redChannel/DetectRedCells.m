@@ -93,7 +93,7 @@ for i = 1:length(ops.planesToProcess)
     xx=xx(:); yy=yy(:);
     xy2 = xx.^2+yy.^2;
     
-    for j = 1:numel(stat)
+    for j = 1:numel(dat.stat)
         ipix                 = dat.stat(j).ipix;
         imgpix               = false(size(mimgR0));
         imgpix(ipix)         = 1;

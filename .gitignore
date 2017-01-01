@@ -19,6 +19,8 @@ $RECYCLE.BIN/
 
 # My ignored files
 *.asv
+*.mat
+!prior_default.mat
 
 # =========================
 # Operating System Files

@@ -23,13 +23,19 @@ for k = 1:length(fsRED)
     fsRED(k).name = fullfile(ops.RootDir, subDirsRed{1}, fsRED(k).name);
 end
 
-ops1 = cell(ops.nplanes, 1);
-for j = 1:ops.nplanes
-    root = ops.ResultsSavePath;
-    fname = sprintf('regops_%s_%s_plane%d.mat', ops.mouse_name, ops.date, j);
-    dat = load(fullfile(root, fname));
-    ops1{j} = dat.ops;
-    ops1{j}.useGPU = ops.useGPU;
+root = ops.ResultsSavePath;
+fregops =  sprintf('regops_%s_%s.mat', ops.mouse_name, ops.date);
+if exist(fullfile(root, fregops), 'file')
+    load(fullfile(root, fregops))
+else
+    ops1 = cell(ops.nplanes, 1);
+    for j = 1:ops.nplanes
+        
+        fname = sprintf('regops_%s_%s_plane%d.mat', ops.mouse_name, ops.date, j);
+        dat = load(fullfile(root, fname));
+        ops1{j} = dat.ops;
+        ops1{j}.useGPU = ops.useGPU;
+    end
 end
 
 %
