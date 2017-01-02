@@ -3,12 +3,9 @@ function ops = MakeBlocks(ops)
 Lx = ops.Lx;
 Ly = ops.Ly;
 numBlocks = ops.numBlocks;
-bfrac     = 1/(numBlocks-1);
+bfrac     = 1/max(2,(numBlocks-3));
 ops.blockFrac = getOr(ops, {'blockFrac'}, bfrac);
 bpix      = round(ops.blockFrac * Ly);
-sT = floor((numBlocks * bpix - Ly) / (numBlocks - 1));
-ops.smoothBlocks = getOr(ops, {'smoothBlocks'}, sT);
-sT = ops.smoothBlocks;
 
 yB        = linspace(0, Ly, numBlocks+1);
 yB        = round((yB(1:end-1) + yB(2:end)) / 2);
@@ -26,19 +23,19 @@ for iy = 1:numBlocks
     
     pixoverlap(ops.yBL{iy}) = pixoverlap(ops.yBL{iy}) + 1; 
 end
-
 pixoverlap = 2*sum(pixoverlap > 1) / numBlocks;
 ops.pixoverlap = pixoverlap;
 
-xyMask = zeros(Ly, Lx, numBlocks, 'single');
-for i = 1:numBlocks
-    msk = zeros(Ly, Lx, 'single');
-    msk(ops.yBL{i},ops.xBL{i}) = 1;
-    sT = max(10, sT);
-    msk = my_conv(my_conv(msk, sT)',sT)'; 
-    xyMask(:,:,i) = msk;
-end
+sT        = mean(diff(yB)) * 2/3;
+ops.smoothBlocks = getOr(ops, {'smoothBlocks'}, sT);
+ops.smoothBlocks = max(10, ops.smoothBlocks);
+sT        = ops.smoothBlocks;
 
+xyMask = zeros(Ly, Lx, numBlocks, 'single');
+for iy = 1:numBlocks
+    gaus = exp(-([1:Ly]' - yB(iy)).^2 / (2*sT^2));
+    xyMask(:,:,iy) = repmat(gaus, 1, Lx);
+end
 xyMask = xyMask./repmat(sum(xyMask, 3), 1, 1, size(xyMask, 3));
 xyMask = reshape(xyMask, Ly*Lx, size(xyMask, 3));
 
