@@ -3,7 +3,7 @@ function ops = MakeBlocks(ops)
 Lx = ops.Lx;
 Ly = ops.Ly;
 numBlocks = ops.numBlocks;
-bfrac     = 1/(numBlocks-1);
+bfrac     = 1/max(2,(numBlocks-3));
 ops.blockFrac = getOr(ops, {'blockFrac'}, bfrac);
 bpix      = round(ops.blockFrac * Ly);
 

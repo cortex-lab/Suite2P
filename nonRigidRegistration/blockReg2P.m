@@ -6,8 +6,8 @@ else
     disp('skipping registration, but assembling binary file');
 end
 
-% default is 6 blocks of 102 pixels each
-ops.numBlocks      = getOr(ops, {'numBlocks'}, 6);
+% default is 8 blocks of 100 pixels each
+ops.numBlocks      = getOr(ops, {'numBlocks'}, 8);
 numBlocks          = ops.numBlocks;
 numPlanes = length(ops.planesToProcess);
 ops.numPlanes = numPlanes;
