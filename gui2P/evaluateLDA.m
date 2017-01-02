@@ -10,7 +10,7 @@ for i = 1:ntypes
 end
 
 %% optimize the mixing probabilities
-ps = ones(1,3)/3; %model.p;
+ps = ones(1,ntypes)/ntypes; %model.p;
 for i = 1:10
    L    = bsxfun(@plus, logps, log(ps));
    L    = bsxfun(@minus, L, max(L, [], 2));

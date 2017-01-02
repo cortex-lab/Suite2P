@@ -54,7 +54,7 @@ try
     else
         root = 'D:\DATA\F\';
     end
-    [filename1,filepath1]=uigetfile(root, 'Select Data File');
+    [filename1,filepath1]=uigetfile(fullfile(root, 'F*.mat'), 'Select Data File');
     set(h.figure1, 'Name', filename1);
     
     % construct dat. Everything is loaded except F and Fneu.
@@ -97,10 +97,6 @@ else
     h.dat.cl.threshold  = 0.5;
     h                   = identify_classifier(h);    
     h                   = classROI(h);
-
-    
-%     set(h.edit35,'String', num2str(h.dat.res.Mrs_thresh));
-%     set(h.edit40,'String', num2str(h.dat.cl.npix_low));
     
     % set all quadrants as not visited
     h.quadvalue = zeros(3);
@@ -190,7 +186,7 @@ end
 
 function pushbutton2_Callback(hObject, eventdata, h)
 % variance explained mask
-h.dat.cl.vmap = 'var';
+h.dat.cl.vmap = 'unit';
 set_maskBcolor(h, 1)
 
 redraw_figure(h);
@@ -209,7 +205,7 @@ end
 
 function pushbutton1_Callback(hObject, eventdata, h)
 % unit vector mask
-h.dat.cl.vmap = 'unit';
+h.dat.cl.vmap = 'var';
 set_maskBcolor(h, 2)
 
 redraw_figure(h);
@@ -223,10 +219,10 @@ save([h.dat.filename(1:end-4) '_proc.mat'], 'dat')
 %
 h.st0(:,1) = double([h.dat.stat.iscell]);
 %
-statLabels = [{'labels'} h.statLabels];
-prior = h.prior;
-
-st = cat(1, h.st, h.st0);save(h.dat.cl.fpath, 'st', 'statLabels', 'prior')
+statLabels  = h.statLabels;
+prior       = h.prior;
+st          = cat(1, h.st, h.st0);
+save(h.dat.cl.fpath, 'st', 'statLabels', 'prior')
 
 
 function figure1_ResizeFcn(hObject, eventdata, h)
@@ -403,7 +399,7 @@ if x>=1 && y>=1 && x<=h.dat.cl.Lx && y<=h.dat.cl.Ly && h.dat.res.iclust(y,x)>0
     guidata(hObject,h);
     
     str = [];
-    labels = [h.statLabels, {'redcell'}];
+    labels = [h.statLabels(2:end), {'iscell'}, {'redcell'}];
     for j =1:length(labels)
        if isfield(h.dat.stat, labels{j})
            sl = eval(sprintf('h.dat.stat(ichosen).%s', labels{j}));
@@ -498,7 +494,7 @@ guidata(hObject,h);
 
 function pushbutton99_Callback(hObject, eventdata, h)
 hval = max(0, [h.dat.stat.cmpct]-1);
-h.dat.cl.rands   = .1 + .8 * min(1, hval/mean(hval));
+h.dat.cl.rands   = .1 + .8 * min(1, .5 * hval/mean(hval));
 h.dat.cl.rands_orig = h.dat.cl.rands;
 redraw_figure(h);
 set_maskCcolor(h, 5);
@@ -506,7 +502,7 @@ guidata(hObject,h);
 
 function pushbutton100_Callback(hObject, eventdata, h)
 hval = [h.dat.stat.footprint];
-h.dat.cl.rands   = .1 + .8 * min(1, hval/mean(hval));
+h.dat.cl.rands   = .1 + .8 * min(1, .5 * hval/mean(hval));
 h.dat.cl.rands_orig = h.dat.cl.rands;
 redraw_figure(h);
 set_maskCcolor(h, 6);
@@ -561,7 +557,7 @@ end
 rootS2p = fileparts(rootS2p);
 rootS2p = fullfile(rootS2p, 'configFiles');
 
-[filename1,filepath1]   = uigetfile(rootS2p, 'Select classifier file');
+[filename1,filepath1]   = uigetfile(fullfile(rootS2p, '*.mat'), 'Select classifier file');
 if filename1
     h.dat.cl.fpath          = fullfile(filepath1, filename1);
     h              = classROI(h);
@@ -609,7 +605,7 @@ rootS2p = fullfile(rootS2p, 'configFiles');
 
 def_name = fullfile(rootS2p, 'cl_new.mat');
 
-[filename1,filepath1]   = uigetfile(fullfile(rootS2p, 'priors'), ...
+[filename1,filepath1]   = uigetfile(fullfile(rootS2p, 'priors', '*.mat'), ...
         'Select priors file, will be used to seed the new classifier');
 if filename1
     prior_file = fullfile(filepath1, filename1);
@@ -664,10 +660,10 @@ msg{3} = ['Selection determines the color/hue for each ROI, between 0.1 and 0.9.
 msg{5} = ['Reds are reserved to indicate labels made on the red/secondary color channel (middle mouse-click on an ROI to switch ON/OFF).'];
 msg{7} = ['RANDOM: color chosen randomly'];
 msg{9} = ['CLASSIFIER: probability assigned by classifier'];
-msg{11} = ['SKEW: skewness of fluorescence timecourse, after neuropil correction and some smoothing'];
+msg{11} = ['SKEW: skewness of activity, after neuropil correction and some smoothing'];
 msg{13} = ['MEANIMG: weighting of activity mask onto mean image'];
 msg{15} = ['CMPCT: compactness of ROI pixels. Smallest is 1, for disks.'];
-msg{17} = ['FOOT: "footprint" of ROI ~ number of neighboring pixels correlated with ROI'];
+msg{17} = ['FOOT: "footprint" of ROI; ~ number of correlated neighboring pixels'];
 msg{19} = ['RED: probability of being a red-tagged cell, assigned by algorithm'];
 msg{21} = ['hint: the letters in paranthesis are keyboard shortcuts.'];
 
@@ -706,5 +702,7 @@ msgbox(msg, 'Classifier instructions');
 
 function pushbutton111_Callback(hObject, eventdata, handles)
 msg{1} = ['Zoom in on portion of the image. Quadrants have 10% overlap.'];
+
+msg{3} = ['Buttons become dark grey after visiting a quadrant.'];
 
 msgbox(msg, 'ZOOM panel instructions');
