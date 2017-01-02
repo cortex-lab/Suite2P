@@ -55,9 +55,9 @@ for j = 1:numel(stat)
     
     switch vmap
         case 'var'
-            L0      = stat(j).lam(inew);
+            L0      = stat(j).lambda(inew);
         case 'unit'
-            L0      = stat(j).lambda(inew);    
+            L0      = stat(j).lam(inew);    
     end
     if stat(j).iscell
         V1(ipix(inew))      = L0;
