@@ -72,7 +72,7 @@ end
     
 if ops.kriging
     % compute kernels for regression
-    sigL     = .75; % kernel width in pixels
+    sigL     = .85; % kernel width in pixels
     Kx = kernelD(xt,xt,sigL*[1;1]);
     linds = [-lpad:1/subpixel:lpad];
     [x1,x2] = ndgrid(linds);
