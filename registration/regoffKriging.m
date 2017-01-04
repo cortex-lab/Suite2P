@@ -126,7 +126,7 @@ for bi = 1:nBatches
         [iy, ix] = ind2sub((2*lcorr+1) * [1 1], ii);
         
         dl       = single(-lpad:1:lpad);
-        if isGPU
+        if useGPU
             dl   = gpuArray(dl);
             ccmat = gpuArray.zeros(numel(dl), numel(dl), numel(fi), 'single');
         else
