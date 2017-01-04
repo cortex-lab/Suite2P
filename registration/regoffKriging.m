@@ -125,8 +125,13 @@ for bi = 1:nBatches
         
         [iy, ix] = ind2sub((2*lcorr+1) * [1 1], ii);
         
-        dl   = gpuArray(single(-lpad:1:lpad));
-        ccmat = gpuArray.zeros(numel(dl), numel(dl), numel(fi), 'single');        
+        dl       = single(-lpad:1:lpad);
+        if isGPU
+            dl   = gpuArray(dl);
+            ccmat = gpuArray.zeros(numel(dl), numel(dl), numel(fi), 'single');
+        else
+            ccmat = zeros(numel(dl), numel(dl), numel(fi), 'single');
+        end
         mxpt        = [iy(:)+floor(ly/2) ix(:)+floor(lx/2)] - lcorr;
         for j = 1:numel(fi)
             % matrix +/- lpad surrounding max point
