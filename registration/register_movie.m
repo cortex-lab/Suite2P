@@ -3,7 +3,11 @@ function dreg = register_movie(data, ops, ds)
 orig_class = class(data);
 
 [h, w, nFrames] = size(data);
-nFramesPerBatch = getBatchSize(w*h);
+if getOr(ops, 'useGPU', 0)
+    nFramesPerBatch = getBatchSize(w*h);
+else
+    nFramesPerBatch = 1000; % if not on GPU, should have plenty of RAM available
+end
 nBatches = ceil(nFrames/nFramesPerBatch);
 startFrame = 1:nFramesPerBatch:nFrames;
 endFrame = min(startFrame+nFramesPerBatch-1, nFrames);
