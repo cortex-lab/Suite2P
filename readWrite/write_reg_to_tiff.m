@@ -1,7 +1,7 @@
 function ops = write_reg_to_tiff(fid, ops, iplane)
 
 Ly = ops.Ly;
-Lx = ops.Ly;
+Lx = ops.Lx;
 bitspersamp = 16;
 
 frewind(fid);
@@ -13,7 +13,7 @@ for k = 1:length(ops.SubDirs)
     while nframesleft>0
          ix = ix + 1;
         nfrtoread = min(nframesleft, 2000);
-        data = fread(fid,  Ly*Lx*nfrtoread, '*int16');                
+        data = fread(fid,  Ly*Lx*nfrtoread, '*uint16');                
         nframesleft = nframesleft - nfrtoread;
         data = reshape(data, Ly, Lx, []);        
 
