@@ -1,7 +1,7 @@
-function [dreg, Valid, ds]= blockRegisterMovieSmooth(data, ops, ds)
+function [dreg, Valid, ds0]= blockRegisterMovieSmooth(data, ops, ds)
 
 ops.regSmooth  = getOr(ops, {'regSmooth'}, 0);
-ops.quadBlocks = getOr(ops, {'quadBlocks'}, 1);
+ops.quadBlocks = getOr(ops, {'quadBlocks'}, 0);
 
 
 orig_class = class(data);
@@ -43,20 +43,14 @@ if ops.quadBlocks
     end
     clear dxg xt;
 else
-    dx1 = xyMask(:,1:numBlocks) * squeeze(ds(:,2,:))';
-    dy1 = xyMask(:,1:numBlocks) * squeeze(ds(:,1,:))';
+    dx = xyMask(:,1:numBlocks) * squeeze(ds(:,2,:))';
+    dy = xyMask(:,1:numBlocks) * squeeze(ds(:,1,:))';
     
-    dx1 = reshape(dx1, Ly, Lx, []);
-    dy1 = reshape(dy1, Ly, Lx, []);
-    dx = dx1;
-    dy = dy1;
 end
-ds = [dy(:,1,:) dx(:,1,:)];
+ds0 = gather_try([dy(:,:) dx(:,:)]);
 
 dx = round(dx);
 dy = round(dy);
-
-
 
 idy = repmat([1:Ly]', 1, Lx);
 idx = repmat([1:Lx],  Ly, 1);
@@ -66,8 +60,8 @@ Valid = true(Ly, Lx);
 for i = 1:NT
     Im = data(:,:,i);    
     
-    DX = dx(:,:,i) + idx;
-    DY = dy(:,:,i) + idy;
+    DX = repmat(dx(:,i),1,Lx) + idx;
+    DY = repmat(dy(:,i),1,Lx) + idy;
     
     
     xyInvalid = DX<0 | DX>Lx-1 | DY<1 | DY>Ly;
@@ -82,7 +76,6 @@ for i = 1:NT
     ind = DY + DX * Ly;
     Im = Im(ind);
     dreg(:,:,i) = Im;
-    
     
 end
 

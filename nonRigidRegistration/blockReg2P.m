@@ -7,7 +7,7 @@ else
 end
 
 % default is 8 blocks of 100 pixels each
-ops.numBlocks      = getOr(ops, {'numBlocks'}, 8);
+ops.numBlocks      = getOr(ops, {'numBlocks'}, 10);
 numBlocks          = ops.numBlocks;
 numPlanes = length(ops.planesToProcess);
 ops.numPlanes = numPlanes;
@@ -53,7 +53,6 @@ if ops.doRegistration
             IMG(yrange,1:Lx+BiDiPhase,:,:)   = IMG(yrange, 1-BiDiPhase:Lx,:,:);
         end
     end
-    
     for i = 1:numPlanes
         ops1{i} = blockAlignIterative(squeeze(IMG(:,:,ops.planesToProcess(i),:)), ops);
     end
