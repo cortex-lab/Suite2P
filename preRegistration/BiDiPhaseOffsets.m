@@ -2,11 +2,9 @@ function BiDiPhase = BiDiPhaseOffsets(data)
 
 [Ly, Lx, nplanes, NT] = size(data);
 
-yrange = 2:2:Ly;
-
 %
-yr1 = 2:2:Ly;
-yr2 = 1:2:Ly;
+yr1 = 2:2:floor(Ly/2)*2;
+yr2 = 1:2:floor(Ly/2)*2;
 
 eps0 = single(1e-6);
 Nmax = min(50, NT);
