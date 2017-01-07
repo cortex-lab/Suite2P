@@ -1,14 +1,16 @@
+% this function registers data frames by shifts ds and
+% returns the registered frames as dreg and the valid
+% x-y limits as Valid
+
 function [dreg, Valid, ds0]= blockRegisterMovieSmooth(data, ops, ds)
 
-ops.regSmooth  = getOr(ops, {'regSmooth'}, 0);
+% whether or not to fit quadratic to ds across a frame
+% for interpolation from numBlocks -> Ly
+% set to 1 if in low SNR regime
 ops.quadBlocks = getOr(ops, {'quadBlocks'}, 0);
-
 
 orig_class = class(data);
 
-% if ops.useGPU
-%     data = gpuArray(single(data));
-% end
 [Ly, Lx, NT] = size(data);
 
 %%
@@ -26,8 +28,9 @@ if ops.useGPU
     xt = gpuArray(single(xt));
 end
     
+
+% within frame interpolation from numBlocks -> Ly
 if ops.quadBlocks    
-    % within frame smoothing
     xm  = xt - mean(xt);
     xm2 = sum(xm.^2);
     for j = 1:2
@@ -44,8 +47,7 @@ if ops.quadBlocks
     clear dxg xt;
 else
     dx = xyMask(:,1:numBlocks) * squeeze(ds(:,2,:))';
-    dy = xyMask(:,1:numBlocks) * squeeze(ds(:,1,:))';
-    
+    dy = xyMask(:,1:numBlocks) * squeeze(ds(:,1,:))';   
 end
 ds0 = gather_try([dy(:,:) dx(:,:)]);
 
@@ -55,6 +57,7 @@ dy = round(dy);
 idy = repmat([1:Ly]', 1, Lx);
 idx = repmat([1:Lx],  Ly, 1) ;
 
+% shift data by smoothed shifts
 dreg = zeros(size(data), orig_class);
 Valid = true(Ly, Lx);
 for i = 1:NT
@@ -62,7 +65,6 @@ for i = 1:NT
     
     DX = repmat(dx(:,i),1,Lx) + idx;
     DY = repmat(dy(:,i),1,Lx) + idy;
-    
     
     xyInvalid = DX<1 | DX>Lx | DY<1 | DY>Ly;
     Valid(xyInvalid) = false;
