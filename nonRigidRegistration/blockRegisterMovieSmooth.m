@@ -53,7 +53,7 @@ dx = round(dx);
 dy = round(dy);
 
 idy = repmat([1:Ly]', 1, Lx);
-idx = repmat([1:Lx],  Ly, 1);
+idx = repmat([1:Lx],  Ly, 1) ;
 
 dreg = zeros(size(data), orig_class);
 Valid = true(Ly, Lx);
@@ -64,16 +64,16 @@ for i = 1:NT
     DY = repmat(dy(:,i),1,Lx) + idy;
     
     
-    xyInvalid = DX<0 | DX>Lx-1 | DY<1 | DY>Ly;
+    xyInvalid = DX<1 | DX>Lx | DY<1 | DY>Ly;
     Valid(xyInvalid) = false;
     
     DX(xyInvalid) = 0;
-    DY(xyInvalid) = 1;
+    DY(xyInvalid) = 0;
     
 %     DX = mod(DX, Lx);
 %     DY = mod(DY-1, Ly) + 1;
 %     
-    ind = DY + DX * Ly;
+    ind = DY + (DX-1) * Ly;
     Im = Im(ind);
     dreg(:,:,i) = Im;
     
