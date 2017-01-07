@@ -67,8 +67,8 @@ for i = 1:NT
     xyInvalid = DX<1 | DX>Lx | DY<1 | DY>Ly;
     Valid(xyInvalid) = false;
     
-    DX(xyInvalid) = 0;
-    DY(xyInvalid) = 0;
+    DX(xyInvalid) = 1;
+    DY(xyInvalid) = 1;
     
 %     DX = mod(DX, Lx);
 %     DY = mod(DY-1, Ly) + 1;
