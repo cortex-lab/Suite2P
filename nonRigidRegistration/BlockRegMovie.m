@@ -1,3 +1,5 @@
+% registers data frames and returns dreg
+% loop over batch size
 function [dreg, xyValid] = BlockRegMovie(data, ops, dsall, xyValid)
 
 ix0 = 0;

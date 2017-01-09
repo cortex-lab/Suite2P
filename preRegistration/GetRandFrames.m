@@ -51,7 +51,7 @@ for k = 1:length(ops.SubDirs)
         iplane0 = iplane0 - nFr/nchannels;
         data = loadFramesBuff(fs{k}(j).name, ichanset(1),ichanset(2), ichanset(3));
         data = reshape(data, Ly, Lx, nplanes, []);
-        
+       
         IMG(:,:,:,indx+(1:size(data,4))) = data;
         indx = indx + size(data,4);
        

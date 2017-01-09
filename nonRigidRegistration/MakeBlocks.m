@@ -31,12 +31,11 @@ ops.smoothBlocks = getOr(ops, {'smoothBlocks'}, sT);
 ops.smoothBlocks = max(10, ops.smoothBlocks);
 sT        = ops.smoothBlocks;
 
-xyMask = zeros(Ly, Lx, numBlocks, 'single');
+xyMask = zeros(Ly, numBlocks, 'single');
 for iy = 1:numBlocks
     gaus = exp(-([1:Ly]' - yB(iy)).^2 / (2*sT^2));
-    xyMask(:,:,iy) = repmat(gaus, 1, Lx);
+    xyMask(:, iy) = gaus;
 end
-xyMask = xyMask./repmat(sum(xyMask, 3), 1, 1, size(xyMask, 3));
-xyMask = reshape(xyMask, Ly*Lx, size(xyMask, 3));
+xyMask = xyMask./repmat(sum(xyMask, 2), 1, size(xyMask, 2));
 
 ops.xyMask    = xyMask;
