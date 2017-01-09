@@ -1,4 +1,4 @@
-function [dv,corr,regdata] = regoffKriging(data, ops, removeMean)
+function [dv,corr] = regoffKriging(data, ops, removeMean)
 
 refImg = ops.mimg;
 subpixel = getOr(ops, {'subPixel' 'SubPixel'}, 10); % subpixel factor
@@ -16,15 +16,6 @@ if ops.kriging
 end
 
 [ly lx nFrames] = size(data);
-
-% return registered movie
-if nargout > 2 % translation required
-    translate = true;
-    fy = ifftshift((-fix(ly/2):ceil(ly/2) - 1)/ly)';% freq along first dimension
-    fx = ifftshift((-fix(lx/2):ceil(lx/2) - 1)/lx); % freq along second dimension
-else
-    translate = false;
-end
 
 % Taper mask
 [ys, xs] = ndgrid(1:ly, 1:lx);
@@ -87,9 +78,6 @@ end
 % loop over batches
 dv = zeros(nFrames, 2);
 corr = zeros(nFrames, 1);
-if translate
-    regdata = zeros(ly, lx, nFrames, 'single');
-end
 
 nBatches = ceil(nFrames/batchSize);
 for bi = 1:nBatches
@@ -173,16 +161,7 @@ for bi = 1:nBatches
         dv(fi,:)  = gather_try(dv0);
         corr(fi) = gather_try(cx(:));
     end
-    
-    % shift movie
-    if translate
-        phaseShift = bsxfun(@times,...
-            exp(1j*2*pi*bsxfun(@times, fy, dv0(:,1))),... y rotation
-            exp(1j*2*pi*bsxfun(@times, fx, dv0(:,2)))); % x rotation
-        res = real(ifft2(fft2(batchData).*phaseShift));
-        regdata(:,:,fi) = gather_try(res);
-    end
-    
+        
 end
 
 

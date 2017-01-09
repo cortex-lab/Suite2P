@@ -49,7 +49,9 @@ else
     dx = xyMask(:,1:numBlocks) * squeeze(ds(:,2,:))';
     dy = xyMask(:,1:numBlocks) * squeeze(ds(:,1,:))';   
 end
-ds0 = gather_try([dy(:,:) dx(:,:)]);
+
+ds0 = cat(3, gather_try(dy), gather_try(dx));
+ds0 = permute(ds0, [3 1 2]);
 
 dx = round(dx);
 dy = round(dy);
