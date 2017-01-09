@@ -46,7 +46,7 @@ if ops.doRegistration
     % compute phase shifts from bidirectional scanning
     BiDiPhase = BiDiPhaseOffsets(IMG);
     fprintf('bi-directional scanning offset = %d pixels\n', BiDiPhase);
-    if BiDiPhase
+    if abs(BiDiPhase) > 0
         yrange = 2:2:Ly;
         if BiDiPhase>0
             IMG(yrange,(1+BiDiPhase):Lx,:,:) = IMG(yrange, 1:(Lx-BiDiPhase),:,:);
@@ -110,7 +110,7 @@ for k = 1:length(fs)
         end
         data = loadFramesBuff(fs{k}(j).name, ichanset(1), ichanset(2), ichanset(3), ops.temp_tiff);
 
-        if BiDiPhase
+        if abs(BiDiPhase) > 0
             yrange = 2:2:Ly;
             if BiDiPhase>0
                 data(yrange, (1+BiDiPhase):Lx,:) = data(yrange, 1:(Lx-BiDiPhase),:);
