@@ -223,8 +223,8 @@ for i = 1:numel(ops1)
             minDs(2) = min(BiDiPhase, minDs(2));
         end
         
-        ops1{i}.yrange = ceil(1 + maxDs(1))) : floor(ops1{i}.Ly+minDs(1));
-        ops1{i}.xrange = ceil(1 + maxDs(2))) : floor(ops1{i}.Lx+minDs(2));
+        ops1{i}.yrange = ceil(1 + maxDs(1)) : floor(ops1{i}.Ly+minDs(1));
+        ops1{i}.xrange = ceil(1 + maxDs(2)) : floor(ops1{i}.Lx+minDs(2));
     else
         ops1{i}.yrange = 1:Ly;
         ops1{i}.xrange = 1:Lx;
