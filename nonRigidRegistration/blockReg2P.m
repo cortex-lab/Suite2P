@@ -1,3 +1,4 @@
+% registers frames using block registration in Y
 function ops1 = blockReg2P(ops)
 %%
 if ops.doRegistration
@@ -6,8 +7,8 @@ else
     disp('skipping registration, but assembling binary file');
 end
 
-% default is 8 blocks of 100 pixels each
-ops.numBlocks      = getOr(ops, {'numBlocks'}, 10);
+% default is 8 blocks of 1/6 pixels each
+ops.numBlocks      = getOr(ops, {'numBlocks'}, 8);
 numBlocks          = ops.numBlocks;
 numPlanes = length(ops.planesToProcess);
 ops.numPlanes = numPlanes;
@@ -161,7 +162,7 @@ for k = 1:length(fs)
     end    
 end
 
-%%
+%% write binary file to tiffs if ~isempty(ops.RegFileTiffLocation)
 for i = 1:numPlanes    
     fclose(fid{i});
     fid{i}           = fopen(ops1{i}.RegFile, 'r');
