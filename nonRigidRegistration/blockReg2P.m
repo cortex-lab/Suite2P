@@ -195,6 +195,10 @@ end
 % compute xrange, yrange
 for i = 1:numPlanes
     if ops.doRegistration
+%         badi                    = getOutliers(ops1{i}); 
+%         ops1{i}.badframes(badi) = true;
+        ops1{i}.badframes = false(sum(ops1{i}.Nframes), 1);
+        
         %         minDs = min(min(ops1{i}.DS(2:end, :,:), [], 3), [], 1);
         %         maxDs = max(max(ops1{i}.DS(2:end, :,:), [], 3), [], 1);
         ops1{i}.yrange  = find(xyValid(:, ceil(Lx/2)));
