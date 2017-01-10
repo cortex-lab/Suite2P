@@ -72,8 +72,8 @@ if FileName
     h.dat.cl.fpath          = fullfile(PathName, FileName);
     h                       = classROI(h);
     
-    h = splitROIleftright(h);
-    h = buildLambdaValue(h);
+%     h = splitROIleftright(h);
+%     h = buildLambdaValue(h);
     redraw_figure(h);
     
     hload = load(h.dat.cl.fpath);
