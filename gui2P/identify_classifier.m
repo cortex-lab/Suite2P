@@ -65,6 +65,10 @@ if FileName
     st = [];
     save(fullfile(PathName, FileName), 'st', 'prior', 'statLabels')
     
+    h.st = st;
+    h.prior = prior;
+    h.statLabels = statLabels;
+    
     h.dat.cl.fpath          = fullfile(PathName, FileName);
     h                       = classROI(h);
     
