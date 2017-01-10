@@ -560,7 +560,7 @@ rootS2p = fullfile(rootS2p, 'configFiles');
 [filename1,filepath1]   = uigetfile(fullfile(rootS2p, '*.mat'), 'Select classifier file');
 if filename1
     h.dat.cl.fpath          = fullfile(filepath1, filename1);
-    h              = classROI(h);
+    h                       = classROI(h);
     
     redraw_figure(h);
     

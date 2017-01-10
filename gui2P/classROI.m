@@ -3,13 +3,12 @@ function h = classROI(h)
 [~, filename1] = fileparts(h.dat.cl.fpath);
 set(h.text50,'String', [filename1 '.mat']);
 
-st = h.st;
-prior = h.prior;
-statLabels = h.statLabels;
-    
+% st = h.st;
+% prior = h.prior;
+% statLabels = h.statLabels;
+
+% this load st, prior and statLabels
 load(h.dat.cl.fpath);
-% st = h.dat.st;
-% statLabels = h.dat.statLabels;
 stat = h.dat.stat;
 
 ilbl = false(1, numel(statLabels));
