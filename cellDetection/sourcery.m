@@ -198,12 +198,14 @@ mLam0 = mLam0(:, 1:icell);
 mPix = mPix(:, 1:icell);
 %%
 
-stat = anatomize(ops, mPix, mLam);
-
 % subtract off neuropil only
 Ucell = U0 - reshape(neu' * S', size(U0));
 
-stat = getFootprint(ops, codes, Ucell, mPix, mLam, mLam0, stat);
+% populate stat with cell locations and footprint
+stat = getFootprint(ops, codes, Ucell, mPix, mLam, mLam0);
+
+% compute compactness of ROIs
+stat = anatomize(ops, mPix, mLam, stat);
 
 figure
 [~, iclust, lam] = drawClusters(ops, r, mPix, mLam, Ly, Lx);

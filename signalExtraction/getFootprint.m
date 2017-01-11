@@ -1,3 +1,4 @@
+% computes "footprint" of ROI and populates stat with cell locations
 function stat = getFootprint(ops, codes, Ucell, mPix, mLam, mLam0, stat)
 
 d0   = ceil(ops.diameter); % expected cell diameter

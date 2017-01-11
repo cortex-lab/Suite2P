@@ -1,3 +1,4 @@
+% computes compactness of ROIs and fits ellipses
 function stat = anatomize(ops, mPix, mLam, stat)
 
 di = ops.diameter;
@@ -26,6 +27,15 @@ d2p0 = d2p0(isort, isort);
 rd = zeros(size(mPix,2), 1);
 rd0 = zeros(size(mPix,2), 1);
 
+%% neighbors for obtaining exterior of ROIs
+Ly     = length(ops.yrange);
+Lx     = length(ops.xrange);
+ipts   = [1:Ly*Lx]';
+ineigh = [ipts-1 ipts+1 ipts-Ly ipts+Ly];
+ineigh(ineigh<1 | ineigh > Ly*Lx) = NaN;
+
+
+%%
 
 for j = 1:size(mPix,2)
     
@@ -34,17 +44,37 @@ for j = 1:size(mPix,2)
     gpix = lam>1e-3;
 
     dd = d2p(gpix, gpix);
-    stat(j).mrs(1) = mean(dd(:))/d0; %mean(ds(gpix));
+
     
-%     ds = ((dx(gpix) - median(dx(gpix))).^2 + ...
-%         (dy(gpix) - median(dy(gpix))).^2).^.5;
-%     stat(j).mrs(2) = mean(ds(:))/di; %mean(ds(gpix));
-    
+    stat(j).mrs(1) = mean(dd(:))/d0;     
     dd = d2p0(1:sum(gpix), 1:sum(gpix));
     stat(j).mrs0(1) = mean(dd(:))/di;    
     
     stat(j).cmpct = stat(j).mrs(1)/stat(j).mrs0(1);
-%     stat(j).mrs0(2) = mean(rgridsort(1:sum(gpix)))/di;    
+
+    % find extpts
+    ipix   = stat(j).ipix;
+    ipix(sum(ismember(ineigh(stat(j).ipix,:),stat(j).ipix),2)<2) = [];
+    nneigh = sum(ismember(ineigh(ipix,:),ipix) - isnan(ineigh(ipix,:)), 2);
+    extpts = nneigh < 4 & nneigh > 1;
+    extpts = ipix(extpts);
+    [iy, ix] = ind2sub([Ly Lx], extpts);
+    
+    % fit ellipse to external points
+    params   = FitEllipse(iy, ix);
+    %params2  = FitEllipseNonRobust(ix,iy);
+        
+    %clf
+    %plot(iy,ix,'ko','markerfacecolor','k');
+    %hold all;
+    %ellipse(params.rb,params.ra,pi-params.ang,params.yc,params.xc,[1 0 0],300);
+    %drawnow;
+    %pause;
+    
+    % save ellipse information
+    stat(j).aspect_ratio = max(params.ra, params.rb) / min(params.ra, params.rb);
+    stat(j).ellipse_params = [params.rb params.ra pi-params.ang params.yc params.xc];
+    
 end
 
 
