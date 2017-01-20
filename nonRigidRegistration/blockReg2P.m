@@ -23,7 +23,7 @@ LoadRegMean        = getOr(ops, {'LoadRegMean'}, 0);
 ops.RegFileBinLocation = getOr(ops, {'RegFileBinLocation'}, []);
 ops.splitFOV           = getOr(ops, {'splitFOV'}, [1 1]);
 ops.RegFileTiffLocation = getOr(ops, {'RegFileTiffLocation'}, []);
-
+ops.dobidi         = getOr(ops, {'dobidi'}, 1);
 
 fs = ops.fsroot;
 
@@ -44,8 +44,13 @@ if ops.doRegistration
     fprintf('--- %d pixels/block; avg pixel overlap = %d pixels\n', round(ops.blockFrac*Ly), round(ops.pixoverlap));
 
     % compute phase shifts from bidirectional scanning
-    BiDiPhase = BiDiPhaseOffsets(IMG);
+    if ops.dobidi
+        BiDiPhase = BiDiPhaseOffsets(IMG);
+    else
+        BiDiPhase = 0;
+    end
     fprintf('bi-directional scanning offset = %d pixels\n', BiDiPhase);
+   
     if abs(BiDiPhase) > 0
         yrange = 2:2:Ly;
         if BiDiPhase>0

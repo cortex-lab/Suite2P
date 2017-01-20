@@ -39,10 +39,14 @@ ops.Lx = Lx;
 
 if ops.doRegistration
     IMG = GetRandFrames(fs, ops);    
-
     % compute phase shifts from bidirectional scanning
-    BiDiPhase = BiDiPhaseOffsets(IMG);
+    if ops.dobidi
+        BiDiPhase = BiDiPhaseOffsets(IMG);
+    else
+        BiDiPhase = 0;
+    end
     fprintf('bi-directional scanning offset = %d pixels\n', BiDiPhase);
+   
     if abs(BiDiPhase) > 0
         yrange = 2:2:Ly;
         if BiDiPhase>0
