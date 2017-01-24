@@ -132,7 +132,7 @@ else
 end
 
 % activate all pushbuttons
-pb = [84 93 101 86 87 89 90 92 103 98 95 96 102 99 100 1 2 104];
+pb = [84 93 101 86 87 89 90 92 103 98 95 96 102 99 100 1 2 104 112];
 for j = 1:numel(pb)
     set(eval(sprintf('h.pushbutton%d', pb(j))),'Enable','on')
 end
@@ -345,6 +345,8 @@ switch eventdata.Key
         pushbutton95_Callback(hObject, eventdata, h);
     case 'd'
         pushbutton96_Callback(hObject, eventdata, h);
+    case 'g'
+        pushbutton112_Callback(hObject, eventdata, h);
     case 'z'
         pushbutton102_Callback(hObject, eventdata, h);
     case 'x'
@@ -440,7 +442,7 @@ for j = 1:length(pb)
 end
 
 function set_maskCcolor(h, ih)
-pb = [98 95 96 102 99 100 104]; 
+pb = [98 95 96 102 99 100 104 112]; 
  
 set_Bcolor(h, 1)
 
@@ -490,6 +492,15 @@ h.dat.cl.rands(logical([h.dat.stat.redcell])) = 0;
 h.dat.cl.rands_orig = h.dat.cl.rands;
 redraw_figure(h);
 set_maskCcolor(h, 1);
+guidata(hObject,h);
+
+% --- ellipse colormap
+function pushbutton112_Callback(hObject, eventdata, h)
+hval = [h.dat.stat.aspect_ratio];
+h.dat.cl.rands   = .1 + .8 * min(1, hval/mean(hval));
+h.dat.cl.rands_orig = h.dat.cl.rands;
+redraw_figure(h);
+set_maskCcolor(h, 8);
 guidata(hObject,h);
 
 function pushbutton99_Callback(hObject, eventdata, h)
@@ -706,3 +717,5 @@ msg{1} = ['Zoom in on portion of the image. Quadrants have 10% overlap.'];
 msg{3} = ['Buttons become dark grey after visiting a quadrant.'];
 
 msgbox(msg, 'ZOOM panel instructions');
+
+

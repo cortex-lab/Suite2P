@@ -23,6 +23,7 @@ end
 st0(isnan(st0)) = 2;
 ilbl(1) = false;
 
+keyboard;
 % model       = buildaLDA(prior, st, statLabels);
 % [Ypred, ps] = evaluateLDA(model, st0);
 model       = buildHist(prior, st, statLabels);

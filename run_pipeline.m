@@ -52,7 +52,7 @@ else
 end
 
 %%
-for i = 1:numel(ops1)
+for i = 1%:numel(ops1)
     ops         = ops1{i};    
     ops.iplane  = i;
     
@@ -63,7 +63,7 @@ for i = 1:numel(ops1)
     
     if getOr(ops, {'getSVDcomps'}, 0)
         % extract and write to disk SVD comps (raw data)
-        ops    = get_svdcomps(ops);
+        ops    = get_svdcomps (ops);
     end
     
     if ops.getROIs || getOr(ops, {'writeSVDroi'}, 0)
