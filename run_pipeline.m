@@ -52,7 +52,7 @@ else
 end
 
 %%
-for i = 1:numel(ops1)
+for i = numel(ops1)
     ops         = ops1{i};    
     ops.iplane  = i;
     
