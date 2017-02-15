@@ -29,10 +29,15 @@ D2 = [XY(:,1)-centroid(1), XY(:,2)-centroid(2), ones(size(XY,1),1)];
 S1 = D1'*D1;
 S2 = D1'*D2;
 S3 = D2'*D2;
-T = -inv(S3)*S2';
+T = -S3\(S2');
 M = S1 + S2*T;
 M = [M(3,:)./2; -M(2,:); M(1,:)./2];
+keyboard;
 [evec,eval] = eig(M);
+if sum(real(eval)<0) == 3
+    M=-1*M;
+    [evec,eval] = eig(M);
+end
 cond = 4*evec(1,:).*evec(3,:)-evec(2,:).^2;
 A1 = evec(:,find(cond>0));
 A = [A1; T*A1];

@@ -8,7 +8,7 @@ else
 end
 
 % default is 8 blocks of 1/6 pixels each
-ops.numBlocks      = getOr(ops, {'numBlocks'}, 8);
+ops.numBlocks      = getOr(ops, {'numBlocks'}, [8 1]);
 numBlocks          = ops.numBlocks;
 numPlanes = length(ops.planesToProcess);
 ops.numPlanes = numPlanes;

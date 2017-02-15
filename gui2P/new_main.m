@@ -214,6 +214,7 @@ guidata(hObject,h);
 function pushbutton84_Callback(hObject, eventdata, h)
 % save proc file and rules file
 h.dat.F.trace = [];
+h.dat.statLabels = h.statLabels;
 dat = h.dat;
 save([h.dat.filename(1:end-4) '_proc.mat'], 'dat')
 %
@@ -497,7 +498,7 @@ guidata(hObject,h);
 % --- ellipse colormap
 function pushbutton112_Callback(hObject, eventdata, h)
 hval = [h.dat.stat.aspect_ratio];
-h.dat.cl.rands   = .1 + .8 * min(1, hval/mean(hval));
+h.dat.cl.rands   = .1 + .8 * min(1, 0.5*hval/mean(hval));
 h.dat.cl.rands_orig = h.dat.cl.rands;
 redraw_figure(h);
 set_maskCcolor(h, 8);

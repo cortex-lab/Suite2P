@@ -1,6 +1,9 @@
-function  run_pipeline(db, ops0)
+%function  run_pipeline(db, ops0)
 
 % ops0.TileFactor (or db(iexp).TileFactor) can be set to multiply the number of default tiles for the neuropil
+
+ops                                 = build_ops3(db, ops0);
+ops0                                = ops;
 
 ops0.nimgbegend                     = getOr(ops0, {'nimgbegend'}, 0);
 ops0.splitROIs                      = getOr(ops0, {'splitROIs'}, 1);
@@ -10,13 +13,15 @@ ops0.registrationUpsample           = getOr(ops0, {'registrationUpsample'}, 1); 
 ops0.getROIs                        = getOr(ops0, {'getROIs'}, 1);   % whether to run the optimization
 ops0.getSVDcomps                    = getOr(ops0, {'getSVDcomps'}, 0);   % whether to save SVD components to disk for later processing
 ops0.nSVD                           = getOr(ops0, {'nSVD'}, 1000);   % how many SVD components to save to disk
-if isfield(ops0, 'numBlocks') && ~isempty(ops0.numBlocks) && ops0.numBlocks> 1
+if isfield(ops0, 'numBlocks') && ~isempty(ops0.numBlocks)
+    if numel(ops0.numBlocks) == 1
+        ops0.numBlocks = [ops0.numBlocks
     ops0.nonrigid                   = 1;
 end
 ops0.nonrigid                       = getOr(ops0, 'nonrigid', 0);   
 ops0.kriging                        = getOr(ops0, 'kriging', 1);  
 
-ops                                 = build_ops3(db, ops0);
+
 
 if ~isfield(ops, 'diameter') || isempty(ops.diameter)
     warning('you have not specified mean diameter of your ROIs')
@@ -52,7 +57,7 @@ else
 end
 
 %%
-for i = 1%:numel(ops1)
+for i = 1:numel(ops1)
     ops         = ops1{i};    
     ops.iplane  = i;
     

@@ -1,5 +1,6 @@
 function [mimgR,mimgG] = red_channel_mean3(ops)
 
+
 % numPlanes = length(ops.planesToProcess);
 
 % build file list with red channel
@@ -23,6 +24,7 @@ for k = 1:length(fsRED)
     fsRED(k).name = fullfile(ops.RootDir, subDirsRed{1}, fsRED(k).name);
 end
 
+fsRED
 root = ops.ResultsSavePath;
 fregops =  sprintf('regops_%s_%s.mat', ops.mouse_name, ops.date);
 if exist(fullfile(root, fregops), 'file')

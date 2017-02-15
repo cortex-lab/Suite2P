@@ -134,7 +134,7 @@ while 1
     %
     % ADD NEUROPIL INTO REGRESSION HERE    
     LtL     = full(L'*L);
-    codes = ([LtL LtS; LtS' StS]+ 0e-3 * eye(icell+nBasis))\[LtU; StU];
+    codes = ([LtL LtS; LtS' StS]+ 1e-4 * eye(icell+nBasis))\[LtU; StU];
     neu   = codes(icell+1:end,:);    
     codes = codes(1:icell,:);
 %     codes = (LtL+ 1e-3 * eye(icell))\LtU;    
@@ -203,6 +203,8 @@ Ucell = U0 - reshape(neu' * S', size(U0));
 
 % populate stat with cell locations and footprint
 stat = getFootprint(ops, codes, Ucell, mPix, mLam, mLam0);
+
+%keyboard;
 
 % compute compactness of ROIs
 stat = anatomize(ops, mPix, mLam, stat);
