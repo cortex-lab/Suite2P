@@ -1,3 +1,6 @@
+% takes NimgFirstRegistration mean image and aligns it to itself
+% returns mean image for registration
+
 function ops = align_iterative(data, ops)
 
 % uu = squeeze(sum(sum(data(:,:,:).^2,1),2));

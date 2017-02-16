@@ -149,21 +149,7 @@ for k = 1:length(fs)
             
             % register frames
             [dreg, xyValid] = BlockRegMovie(data, ops, dsall, xyValid);
-%        
-%             keyboard;
-%             %%
-%             for dd = 750:850%1:size(dreg,3)
-%                 clf;
-%                 subplot(1,2,1),
-%                 imagesc(data(:,:,dd),[0 8000]);
-%                 title(dd)
-%                 subplot(1,2,2),
-%                 imagesc(dreg(:,:,dd),[0 8000]);
-%                 
-%                 drawnow;
-%             end
-            
-            
+       
         else
             dreg = data;
         end

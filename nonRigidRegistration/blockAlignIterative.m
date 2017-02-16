@@ -1,4 +1,5 @@
-% takes NimgFirstRegistration mean image and aligns it 
+% takes NimgFirstRegistration mean image and aligns it to itself
+% returns mean image for registration
 
 function ops = blockAlignIterative(data, ops)
 
@@ -25,11 +26,7 @@ for i = 1:ops.NiterPrealign
             regoffKriging(data(ops.yBL{ib},ops.xBL{ib},:), ops, 1);
     end
     
-    %     [dsnew, Corr]  = registration_offsets(data, ops, 1);
-    
     dreg = blockRegisterMovie(data, ops.xyMask, dsnew);
-    
-%     dreg  = register_movie(data, ops, dsnew);
     
     [~, igood] = sort(mean(Corr,2), 'descend');
     if i<floor(ops.NiterPrealign/2)        

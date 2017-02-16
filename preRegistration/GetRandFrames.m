@@ -1,3 +1,5 @@
+% gets random frames (in total NimgFirstRegistration)
+% frames are used for initializing registration
 function IMG = GetRandFrames(fs, ops)
 
 nplanes            = getOr(ops, {'nplanes'}, 1);

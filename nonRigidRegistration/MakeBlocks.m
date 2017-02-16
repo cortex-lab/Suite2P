@@ -1,3 +1,4 @@
+% splits FOV in X and Y as specified by numBlocks and blockFrac
 function ops = MakeBlocks(ops)
 
 Lx = ops.Lx;
