@@ -1,16 +1,21 @@
 
 function mimg = pick_reg_init(data)
+%%
+dd = bsxfun(@minus, data, mean(mean(data,1),2));
 
-dd = data;
+% WHITENING???
+% for i = 1:size(data,3)
+%    d0 = dd(:,:,i); 
+%    fd0 = fft2(d0);
+%    dd(:,:,i) = real(ifft2(fd0./abs(fd0)));
+% end
 
-for i = 1:size(data,3)
-   d0 = dd(:,:,i); 
-   fd0 = fft2(d0);
-   dd(:,:,i) = real(ifft2(fd0./abs(fd0)));
-end
+dd = reshape(dd, [], size(dd,ndims(dd)));
 
-dd = reshape(dd, [], size(dd,3));
-CC = corrcoef(dd);
+CC = dd'*dd;
+CC = CC./(diag(CC) * diag(CC)').^.5;
+
+% CC = corrcoef(dd);
 
 [CCsort, isort] = sort(CC, 2, 'descend');
 
