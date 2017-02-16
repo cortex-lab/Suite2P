@@ -26,7 +26,7 @@ for i = 1:ops.NiterPrealign
     
     %     [dsnew, Corr]  = registration_offsets(data, ops, 1);
     
-    dreg = blockRegisterMovieSmooth(data, ops, dsnew);
+    dreg = blockRegisterMovie(data, ops.xyMask, dsnew);
     
 %     dreg  = register_movie(data, ops, dsnew);
     

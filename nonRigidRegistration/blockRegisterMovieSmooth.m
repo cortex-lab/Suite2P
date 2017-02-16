@@ -14,12 +14,12 @@ orig_class = class(data);
 [Ly, Lx, NT] = size(data);
 
 %%
-numBlocks = ops.numBlocks;
+numBlocks = ops.numBlocks(1);
 xyMask    = ops.xyMask;
 
 xg = [1:Ly]';
 xt = [];
-for ib = 1:numBlocks
+for ib = 1:numBlocks(1)
     xt(ib) = round(mean(ops.yBL{ib}));
 end
 xt = xt';
@@ -56,6 +56,9 @@ ds0 = permute(ds0, [3 1 2]);
 dx = round(dx);
 dy = round(dy);
 
+dx = reshape(dx, Ly, Lx, []);
+dy = reshape(dy, Ly, Lx, []);
+
 idy = repmat([1:Ly]', 1, Lx);
 idx = repmat([1:Lx],  Ly, 1) ;
 
@@ -65,8 +68,8 @@ Valid = true(Ly, Lx);
 for i = 1:NT
     Im = data(:,:,i);    
     
-    DX = repmat(dx(:,i),1,Lx) + idx;
-    DY = repmat(dy(:,i),1,Lx) + idy;
+    DX = reshape(dx(:,i),Ly,Lx) + idx;
+    DY = reshape(dy(:,i),Ly,Lx) + idy;
     
     xyInvalid = DX<1 | DX>Lx | DY<1 | DY>Ly;
     Valid(xyInvalid) = false;
