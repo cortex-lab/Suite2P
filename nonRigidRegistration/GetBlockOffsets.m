@@ -1,3 +1,5 @@
+% computes registration offsets for data split into blocks
+% loops over blocks and returns offsets dsall
 function [dsall,ops1] = GetBlockOffsets(data, j, iplane0, ops, ops1)
             
 nblocks = ops.numBlocks(1)*ops.numBlocks(2);

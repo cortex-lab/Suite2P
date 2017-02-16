@@ -1,7 +1,7 @@
 % this function registers data frames by shifts ds and
 % returns the registered frames as dreg and the valid
 % x-y limits as Valid
-
+% used only if 
 function [dreg, Valid, ds0]= blockRegisterMovieSmooth(data, ops, ds)
 
 % whether or not to fit quadratic to ds across a frame

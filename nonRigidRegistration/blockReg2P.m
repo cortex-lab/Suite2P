@@ -33,7 +33,7 @@ catch
     error('could not find any tif or tiff, check your path');
 end
 
-%% find the mean frame after aligning a random subset
+% find the mean frame after aligning a random subset
 if ops.doRegistration
     [IMG] = GetRandFrames(fs, ops);    
     [Ly, Lx, ~, ~] = size(IMG);
@@ -85,7 +85,7 @@ end
 clear IMG
 
 
-%% prepare individual options files and open binaries
+% prepare individual options files and open binaries
 for i = 1:numPlanes
     ops1{i}.RegFile = fullfile(ops.RegFileRoot, sprintf('tempreg_plane%d.bin',...
         ops.planesToProcess(i)));
@@ -105,7 +105,7 @@ end
 nbytes = fs{1}(1).bytes;
 nFr = nFramesTiff(fs{1}(1).name);
 
-%% compute registration offsets from mean img for each frame
+% compute registration offsets from mean img for each frame
 xyValid = true(Ly, Lx);
 tic
 for k = 1:length(fs)
@@ -150,20 +150,6 @@ for k = 1:length(fs)
             % register frames
             [dreg, xyValid] = BlockRegMovie(data, ops, dsall, xyValid);
        
-            keyboard;
-            %%
-            for dd = 750:850%1:size(dreg,3)
-                clf;
-                subplot(1,2,1),
-                imagesc(data(:,:,dd),[0 8000]);
-                title(dd)
-                subplot(1,2,2),
-                imagesc(dreg(:,:,dd),[0 8000]);
-                
-                drawnow;
-            end
-            
-            
         else
             dreg = data;
         end
