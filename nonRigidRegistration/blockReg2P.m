@@ -7,8 +7,8 @@ else
     disp('skipping registration, but assembling binary file');
 end
 
-% default is 8 blocks of 1/6 pixels each
-ops.numBlocks      = getOr(ops, {'numBlocks'}, 8);
+% default is 8 blocks in the Y direction (1/6 pixels each)
+ops.numBlocks      = getOr(ops, {'numBlocks'}, [8 1]);
 numBlocks          = ops.numBlocks;
 numPlanes = length(ops.planesToProcess);
 ops.numPlanes = numPlanes;
@@ -40,9 +40,17 @@ if ops.doRegistration
     ops.Ly = Ly;
     ops.Lx = Lx;
     ops = MakeBlocks(ops);
-    fprintf('--- using %d blocks in Y\n', numBlocks);
-    fprintf('--- %d pixels/block; avg pixel overlap = %d pixels\n', round(ops.blockFrac*Ly), round(ops.pixoverlap));
+    fprintf('--- using %d blocks in Y\n', numBlocks(1));
+    fprintf('--- %d pixels/block; avg pixel overlap = %d pixels\n', ...
+        round(ops.blockFrac(1)*Ly), ops.pixoverlap(1) );
 
+    if numBlocks(2) > 1
+        fprintf('--- using %d blocks in X\n', numBlocks(2));
+        fprintf('--- %d pixels/block; avg pixel overlap = %d pixels\n', ...
+            round(ops.blockFrac(2)*Lx),  ops.pixoverlap(2));
+    end
+
+    
     % compute phase shifts from bidirectional scanning
     if ops.dobidi
         BiDiPhase = BiDiPhaseOffsets(IMG);
@@ -89,8 +97,8 @@ for i = 1:numPlanes
     fid{i}             = fopen(ops1{i}.RegFile, 'w');
     ops1{i}.DS          = [];
     ops1{i}.CorrFrame   = [];
-    ops1{i}.mimg1       = zeros(Ly, Lx);
-    for ib = 1:numBlocks
+    ops1{i}.mimg1       = ops1{i}.mimg;
+    for ib = 1:numBlocks(1)*numBlocks(2)
         ops1{i}.mimgB{ib} = ops1{i}.mimg(ops1{i}.yBL{ib}, ops1{i}.xBL{ib});
     end
 end
@@ -142,6 +150,20 @@ for k = 1:length(fs)
             % register frames
             [dreg, xyValid] = BlockRegMovie(data, ops, dsall, xyValid);
        
+            keyboard;
+            %%
+            for dd = 750:850%1:size(dreg,3)
+                clf;
+                subplot(1,2,1),
+                imagesc(data(:,:,dd),[0 8000]);
+                title(dd)
+                subplot(1,2,2),
+                imagesc(dreg(:,:,dd),[0 8000]);
+                
+                drawnow;
+            end
+            
+            
         else
             dreg = data;
         end

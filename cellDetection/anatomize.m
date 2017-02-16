@@ -52,29 +52,13 @@ for j = 1:size(mPix,2)
     
     stat(j).cmpct = stat(j).mrs(1)/stat(j).mrs0(1);
 
-    % find extpts
-%     ipix   = stat(j).ipix;
-%     ipix(sum(ismember(ineigh(stat(j).ipix,:),stat(j).ipix),2)<2) = [];
-%     nneigh = sum(ismember(ineigh(ipix,:),ipix) - isnan(ineigh(ipix,:)), 2);
-%     extpts = nneigh < 4 & nneigh > 1;
-%     extpts = ipix(extpts);
-%     [iy, ix] = ind2sub([Ly Lx], extpts);
-%     
-%     % fit ellipse to external points
-%     params   = FitEllipse(iy, ix);
-%     %params2  = FitEllipseNonRobust(ix,iy);
-%         
-%     %clf
-%     %plot(iy,ix,'ko','markerfacecolor','k');
-%     %hold all;
-%     %ellipse(params.rb,params.ra,pi-params.ang,params.yc,params.xc,[1 0 0],300);
-%     %drawnow;
-%     %pause;
-%     
-%     % save ellipse information
-%     stat(j).aspect_ratio = max(params.ra, params.rb) / min(params.ra, params.rb);
-%     stat(j).ellipse_params = [params.rb params.ra pi-params.ang params.yc params.xc];
-%     
+   
+    params = FitMVGaus(stat(j).ypix,stat(j).xpix, stat(j).lam);
+    
+    % save ellipse information
+    stat(j).aspect_ratio = sqrt(max(params.eval) / min(params.eval));
+    stat(j).ellipse      = params.xy;
+    
 end
 
 
