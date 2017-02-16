@@ -1,3 +1,5 @@
+% takes NimgFirstRegistration mean image and aligns it 
+
 function ops = blockAlignIterative(data, ops)
 
 % uu = squeeze(sum(sum(data(:,:,:).^2,1),2));
@@ -15,7 +17,6 @@ tempSubPixel = ops.SubPixel;
 for i = 1:ops.NiterPrealign    
     dsnew = zeros(size(data,3), 2, numBlocks,'double');
     Corr = zeros(size(data,3), numBlocks,'double');
-    
     for ib = 1:numBlocks
         % collect ds
         ops.mimg = mimg(ops.yBL{ib},ops.xBL{ib});
@@ -39,7 +40,7 @@ for i = 1:ops.NiterPrealign
     mimg = mean(dreg(:,:,igood),3);
     
     err(i) = mean(mean(sum((dsold - dsnew).^2,2),3)).^.5;
-        
+    
     dsold = dsnew;
 end
 ops.mimg = mimg;
