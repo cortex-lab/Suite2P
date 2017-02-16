@@ -82,11 +82,13 @@ data = my_conv2(mimg1, ops.sig, [1 2]);
 data = bsxfun(@rdivide, data, m.sdmov);
 data = single(reshape(data, [], 1));
 
+scalefactors = nan(numel(stat),1);
 Ftemp = zeros(Nk, 1, 'single');
 for k = 1:Nk
     ipix = stat(k).ipix(:)';
     if ~isempty(ipix)
         Ftemp(k,:) = stat(k).lam(:)' * data(ipix,1);
+        scalefactors(k) = mean(m.sdmov(ipix));
     end
 end
 %
@@ -97,6 +99,10 @@ muS                     = m.LtS * Fdeconv(1+Nk:end, 1); % estimated neuropil
 
 Fneu     = bsxfun(@plus, Fneu, muS); % estimated neuropil
 F        = bsxfun(@plus, F,    muS+Fdeconv(1:Nk, 1));
+
+Fneu     = bsxfun(@times, Fneu, scalefactors); % estimated neuropil
+F        = bsxfun(@times, F,    scalefactors);
+
 %% get activity stats
 indNoNaN    = find(~ops.badframes);
 ix          = cumsum(~ops.badframes) + 1;
