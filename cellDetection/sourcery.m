@@ -96,7 +96,7 @@ while 1
        Nfirst = numel(ind); 
     end
     
-    if numel(ind)==0 || numel(ind)<Nfirst/20
+    if numel(ind)==0 || numel(ind)<Nfirst * getOr(ops, 'stopSourcery', 1/20)
         break;
     end
     
