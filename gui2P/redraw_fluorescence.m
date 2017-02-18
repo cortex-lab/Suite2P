@@ -14,8 +14,13 @@ plot(my_conv_local(medfilt1(double(F), 3), 3))
 axis tight
 hold on
 
+coefNeu = 0.7;
+if isfield(h.dat.stat, 'neuropilCoefficient')
+    coefNeu = h.dat.stat(ichosen).neuropilCoefficient;
+end
+
 if isfield(h.dat, 'FcellNeu')
-    plot(my_conv_local(medfilt1(double(Fneu), 3), 3))
+    plot(coefNeu * my_conv_local(medfilt1(double(Fneu), 3), 3))
 end
 
 box off

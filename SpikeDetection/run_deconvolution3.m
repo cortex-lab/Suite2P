@@ -31,7 +31,12 @@ npad = 250;
 [NT, NN] = size(Ff);
 
 ops.fs            = getOr(ops, 'fs', ops.imageRate/ops.nplanes);
-[coefNeu, inomax] = my_ica(Ff, Fneu, ops.fs, coefDefault);
+
+if ~isfield(stat, 'neuropilCoefficient')
+    [coefNeu, inomax] = my_ica(Ff, Fneu, ops.fs, coefDefault);
+else
+   coefNeu = [stat.neuropilCoefficient]; 
+end
 
 Ff = Ff - bsxfun(@times, Fneu, coefNeu(:)');
 
