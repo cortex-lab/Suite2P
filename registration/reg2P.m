@@ -183,9 +183,11 @@ for i = 1:numPlanes
     
     if ~isempty(ops.RegFileTiffLocation)
         ops1{i} = write_reg_to_tiff(fid{i}, ops1{i}, i);
+        frewind(fid{i});
     end    
     if ~isempty(ops.nimgbegend) && ops.nimgbegend>0
         ops1{i} = getBlockBegEnd(fid{i}, ops1{i}); % get mean of first and last frames in block (to check for drift)
+        frewind(fid{i});
     end
     if ~isempty(ops.RegFileBinLocation)
         str = sprintf('%d_',ops1{i}.expts);

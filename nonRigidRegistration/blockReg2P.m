@@ -182,6 +182,7 @@ for i = 1:numPlanes
     
     if ~isempty(ops.RegFileTiffLocation)
         ops1{i} = write_reg_to_tiff(fid{i}, ops1{i}, i);
+        frewind(fid{i});
     end    
     if ~isempty(ops.RegFileBinLocation)
         folder = fullfile(ops1{i}.RegFileBinLocation, ops1{i}.mouse_name, ...
