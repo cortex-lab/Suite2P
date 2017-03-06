@@ -11,6 +11,7 @@ end
 if bitspersamp==32
     tagstruct.BitsPerSample = 32;
 end
+tagstruct.SampleFormat = Tiff.SampleFormat.Int;
 tagstruct.SamplesPerPixel = 1;
 tagstruct.RowsPerStrip = 256;
 tagstruct.PlanarConfiguration = Tiff.PlanarConfiguration.Chunky;
