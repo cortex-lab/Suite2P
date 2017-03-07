@@ -144,7 +144,8 @@ for i = 1:numPlanes
                 mkdir(folder);
             end
             fidIntpol{i,j} = fopen(fullfile(folder, ...
-                sprintf('plane%d.bin',i + (j-1)*numPlanes)), 'w');
+                sprintf('%s_%s_%s_plane%d.bin', ops.mouse_name, ops.date, ...
+                ops.CharSubDirs, i + (j-1)*numPlanes)));
         end
     end
 end
@@ -260,14 +261,14 @@ for i = 1:numel(ops1)
         frewind(fid{i});
     end
     if ~isempty(ops.RegFileBinLocation)
-        str = sprintf('%d_',ops1{i}.expts);
-        str(end) = [];
         folder = fullfile(ops1{i}.RegFileBinLocation, ops1{i}.mouse_name, ...
-            ops1{i}.date, str);
+            ops1{i}.date, ops.CharSubDirs);
         if ~exist(folder, 'dir')
             mkdir(folder)
         end
-        fidCopy = fopen(fullfile(folder, sprintf('plane%d.bin', i)), 'w');
+        fidCopy = fopen(fullfile(folder, ...
+            sprintf('%s_%s_%s_plane%d.bin', ops.mouse_name, ops.date, ...
+            ops.CharSubDirs, i)), 'w');
         sz = ops1{i}.Lx * ops1{i}.Ly;
         parts = ceil(sum(ops1{i}.Nframes) / 2000);
         for p = 1:parts
@@ -284,9 +285,10 @@ for i = 1:numel(ops1)
         if ops.interpolateAcrossPlanes == 1 && ~isempty(RegFileBinLocation)
             fclose(fidIntpol{i});
             folder = fullfile(ops1{i}.RegFileBinLocation, ops1{i}.mouse_name, ...
-                ops1{i}.date, str, 'interpolated');
+                ops1{i}.date, ops.CharSubDirs, 'interpolated');
             filename = fullfile(folder, ...
-                sprintf('plane%d.bin',ops.planesToProcess(i)));
+                sprintf('%s_%s_%s_plane%d.bin', ops.mouse_name, ops.date, ...
+                ops.CharSubDirs, i));
             if ismember(i, planesToInterp)
                 fidCopy = fopen(ops1{i}.RegFile, 'w');
                 fidOrig = fopen(filename, 'r');
