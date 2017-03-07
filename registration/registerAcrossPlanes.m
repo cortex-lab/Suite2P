@@ -170,8 +170,9 @@ for i = 1:length(planesToInterpolate)
     subscripts = cat(3, repmat((1:T)',1,Dims), ...
         repmat(1:Dims,T,1), repmat((i + shifts)',1,Dims));
     subscripts = reshape(subscripts, [], 3);
-    subscripts(subscripts(:,3)<1 | ...
-        subscripts(:,3)>length(planesToInterpolate), 3) = i;
+    subscripts(subscripts(:,3)<1, 3) = 1;
+    subscripts(subscripts(:,3)>length(planesToInterpolate), 3) = ...
+        length(planesToInterpolate);
     linearInd = sub2ind(size(ds(:,:,:,1)), subscripts(:,1), subscripts(:,2), ...
         subscripts(:,3));
     
@@ -193,29 +194,27 @@ for i = 1:length(planesToInterpolate)
             ops1{planesToInterpolate(i),j}.planeInterpolated = 1;
             ops1{planesToInterpolate(i),j}.usedPlanes = up;
             ops1{planesToInterpolate(i),j}.basisPlanes = planesToInterpolate(i) - shifts';
-            ops1{planesToInterpolate(i),j}.alignedToPlanes = ...
-                planesToInterpolate(i);
             ops1{planesToInterpolate(i),j}.profiles = prof;
         else
             ops1{planesToInterpolate(i),j}.planeInterpolated = 0;
             up = false(size(ds,1), nplanes);
             up(:,planesToInterpolate(i)) = true;
             ops1{planesToInterpolate(i),j}.usedPlanes = up;
-            ap = planesToInterpolate(i) + shifts';
-            ap(ap<planesToInterpolate(1) | ap>planesToInterpolate(end)) = ...
-                planesToInterpolate(i);
-            ops1{planesToInterpolate(i),j}.alignedToPlanes = ap;
         end
+        ap = planesToInterpolate(i) + shifts';
+        ap(ap<planesToInterpolate(1)) = planesToInterpolate(1);
+        ap(ap>planesToInterpolate(end)) = planesToInterpolate(end);
+        ops1{planesToInterpolate(i),j}.alignedToPlanes = ap;
     end
 end
 
 % align frames and write movie
-iplane0 = 1:1:ops.nplanes;
 t2 = 0;
 % if two consecutive files have as many bytes, they have as many frames
 nbytes = 0;
 for k = 1:length(fs)
     dataPrev = zeros(ops.Ly, ops.Lx, nplanes, 'int16');
+    iplane0 = 1:1:ops.nplanes;
     t1 = 0;
     for j = 1:length(fs{k})
         % load frames of all planes
@@ -289,7 +288,7 @@ for k = 1:length(fs)
                                     end
                                     dataNext = register_movie(data, ops, ...
                                         dsall((t1+t2) + ceil(size(data,3)/nplanes)* ...
-                                        nplanes + 1:nplanes,:));
+                                        nplanes + (1:nplanes),:));
                                 end
                                 dwrite(:,:,end) = dwrite(:,:,end) + weight .*...
                                     double(dataNext(:,:,ind2(end)-size(dreg,3)));
@@ -305,6 +304,7 @@ for k = 1:length(fs)
         end
         dataPrev = dreg(:,:,end-nplanes+1:end);
         t1 = t1 + size(dreg,3);
+        iplane0 = iplane0 - nFr/ops.nchannels;
     end
     t2 = t2 + ceil(t1/nplanes)*nplanes;
 end
