@@ -1,10 +1,6 @@
-function redoRegistration(ops, ichannel)
+function redoRegistration(ops1, ichannel, iplanes)
 
 % Cannot be used with multiple FOVs, and ignores BiDiPhase
-
-alignAcrossPlanes  = getOr(ops, {'alignAcrossPlanes'}, false);
-interpolateAcrossPlanes = getOr(ops, {'interpolateAcrossPlanes'}, false);
-planesToInterpolate = getOr(ops, {'planesToInterpolate'}, 1:nplanes);
 
 if nargin < 2 || isempty(ichannel)
     if isfield(ops, 'gchannel') && ~isempty(ops.gchannel)
@@ -14,24 +10,25 @@ if nargin < 2 || isempty(ichannel)
     end
 end
 
-fs = ops.fsroot;
-nchannels = ops.nchannels;
+fs = ops1{1}.fsroot;
+nchannels = ops1{1}.nchannels;
+nplanes = ops1{1}.nplanes;
 
-regdir = fileparts(ops.RegFile);
+regdir = fileparts(ops1{1}.RegFile);
 if ~exist(regdir, 'dir')
     mkdir(regdir);
 end
 
-splitBlocks    = getOr(ops, {'splitBlocks'}, 'none');
-Ly = ops.Ly;
-Lx = ops.Lx;
+splitBlocks    = getOr(ops1{1}, {'splitBlocks'}, 'none');
+Ly = ops1{1}.Ly;
+Lx = ops1{1}.Lx;
 if iscell(splitBlocks)
-    numBlocks = length(ops.yBL);
+    numBlocks = length(ops1{1}.yBL);
     xyMask = zeros(Ly, Lx, numBlocks, 'single');
     for i = 1:numBlocks
         msk = zeros(Ly, Lx, 'single');
-        msk(ops.yBL{i},ops.xBL{i}) = 1;
-        sT = ops.splitTaper;
+        msk(ops1{1}.yBL{i},ops1{1}.xBL{i}) = 1;
+        sT = ops1{1}.splitTaper;
         msk = my_conv(my_conv(msk, sT)',sT)';
         xyMask(:,:,i) = msk;
     end
@@ -40,55 +37,28 @@ if iscell(splitBlocks)
 end
 
 % open bin file for writing
-fid = fopen(ops.RegFile, 'w');
+fid = cell(1, length(iplanes));
+for i = 1:length(iplanes)
+    fid{i} = fopen(ops1{iplanes(i)}.RegFile, 'w');
+end
 
-iplane = ops.iplane;
-dsall = ops.DS;
-T = size(dsAll,1);
-Dims = size(dsAll,2);
-usedPlanes = [];
-if isfield(ops, 'alignedToPlanes')
-    if ops.planeInterpolated == 0
-        subscripts = cat(3, repmat((1:T)',1,Dims), ...
-            repmat(1:Dims,T,1), repmat(ops.alignedToPlanes,1,Dims));
-        subscripts = reshape(subscripts, [], 3);
-        linearInd = sub2ind(size(dsall), subscripts(:,1), subscripts(:,2), ...
-            subscripts(:,3));
-        values = dsall(linearInd);
-        values = reshape(values, T, Dims);
-        dsall = values;
-    else
-        usedPlanes = find(sum(ops.usedPlanes,1) > 0);
-        shifts = iplane - ops.basisPlanes;
-        ds = NaN(T*usedPlanes, Dims);
-        for i = 1:length(usedPlanes)
-            subscripts = cat(3, repmat((1:T)',1,Dims), ...
-                repmat(1:Dims,T,1), repmat(usedPlanes(i) + shifts,1,Dims));
-            subscripts = reshape(subscripts, [], 3);
-            subscripts(subscripts(:,3)<planesToInterpolate(1), 3) = ...
-                planesToInterpolate(1);
-            subscripts(subscripts(:,3)>planesToInterpolate(end), 3) = ...
-                planesToInterpolate(end);
-            linearInd = sub2ind(size(dsall), subscripts(:,1), subscripts(:,2), ...
-                subscripts(:,3));
-            values = dsall(linearInd);
-            values = reshape(values, T, Dims);
-            indframes = i:length(usedPlanes):(T*length(usedPlanes));
-            ds(indframes,:) = values;
-        end
-        dsall = ds;
+dsall = NaN(size(ops1{1}.DS,1), 2, nplanes);
+for i = 1:nplanes
+    t = 0;
+    for k = 1:length(ops1{i}.Nframes)
+        dsall(t + (1:ops1{i}.Nframes(k)),:,i) = ...
+            ops1{i}.DS(sum(ops1{i}.Nframes(1:k-1)) + (1:ops1{i}.Nframes(k)),:);
+        t = t + ops1{1}.Nframes(k);
     end
 end
+dsall = reshape(permute(dsall, [3 1 2]), [], 2);
 
 t2 = 0;
 % if two consecutive files have as many bytes, they have as many frames
 nbytes = 0;
 for k = 1:length(fs)
-    ds = dsall(sum(ops.Nframes((1:length(fs))<k))*max(1,length(usedPlanes)) + ...
-        (1:ops.Nframes(k)),:);
-%     ds = ds(iplane0:ops.nplanes:end,:);
-    dataPrev = zeros(ops.Ly, ops.Lx, nplanes, 'int16');
-    iplane0 = 1:1:ops.nplanes;
+    dataPrev = zeros(Ly, Lx, nplanes, 'int16');
+    iplane0 = 1:1:nplanes;
     t1 = 0;
     for j = 1:length(fs{k})
         if abs(nbytes - fs{k}(j).bytes)>1e3
@@ -97,24 +67,10 @@ for k = 1:length(fs)
         end
         iplane0 = mod(iplane0-1, nplanes) + 1;
         
-        if isempty(usedPlanes)
-            ichanset = [iplane0(iplane); nFr; nchannels*ops.nplanes];
-        else
-            ichanset = [ichannel; nFr; nchannels];
-        end
+        ichanset = [ichannel; nFr; nchannels];
         data = loadFramesBuff(fs{k}(j).name, ichanset(1), ichanset(2), ...
             ichanset(3));
-        if ~isempty(usedPlanes)
-            [~,a] = sort(iplane0(usedPlanes));
-            planes = repmat(usedPlanes(a)', 1, ceil(size(data,3)/nplanes));
-            planes = planes(:);
-            ind = bsxfun(@plus, iplane0(usedPlanes), ...
-                (0:nplanes:ceil(size(data,3)/nplanes)));
-            ind = ind(:);
-            planes(ind>size(data,3)) = [];
-            ind(ind>size(data,3)) = [];
-            data = data(:,:,ind);
-        end
+        
         ix0 = 0;
         Nbatch = 1000;
         dreg = zeros(size(data), class(data));
@@ -123,62 +79,66 @@ for k = 1:length(fs)
             indxr(indxr>size(data,3)) = [];
             if iscell(splitBlocks)
                 dreg(:, :, indxr) = blockRegisterMovie(data(:, :, indxr), ...
-                    xyMask, ds(t1 + indxr,:,:));
+                    xyMask, dsall(t1+t2 + indxr,:,:));
             else
                 dreg(:, :, indxr)        = ...
-                    register_movie(data(:, :, indxr), ops, ds(t1 + indxr,:));
+                    register_movie(data(:, :, indxr), ops1{1}, dsall(t1+t2 + indxr,:));
             end
             ix0 = ix0 + Nbatch;
         end
-        if ~isempty(usedPlanes)
-            ind1 = find(planes == iplane);
-            bases = ops.basisPlanes(ceil((t2+t1)/length(usedPlanes) + ...
-                (1:length(ind1))));
-            uniqueBases = unique(bases);
-            dwrite = zeros(size(dreg,1), size(dreg,2), length(ind1));
-            dataNext = [];
-            for b = uniqueBases
-                planesInv = find(~isnan(ops.profiles(:,b)))';
-                diffs = planesInv - iplane;
-                for pl = 1:length(planesInv)
-                    ind2 = ind1 + diffs(pl);
-                    ind2(bases ~= b) = [];
-                    weight = ops.profiles(planesInv(pl),b);
-                    if ind2(1)<1 % frame is part of previously loaded tiff file (can happen if frames per tiff are not mupltiple of planes)
-                        dwrite(:,:,1) = dwrite(:,:,1) + ...
-                            weight .* double(dataPrev(:,:,end-ind2(1)));
-                        ind2(1) = [];
-                    end
-                    if ind2(end)>size(dreg,3) % frame is part of upcoming tiff file
-                        if j<length(fs{k})
-                            if isempty(dataNext) % load first few frames of next tiff and register them
-                                ichanset = [ichannel; nplanes; ops.nchannels];
-                                data = loadFramesBuff(fs{k}(j+1).name, ichanset(1), ichanset(2), ichanset(3));
-                                iplane1 = iplane0 - nFr/nchannels;
-                                iplane1 = mod(iplane1-1, nplanes) + 1;
-                                data = data(:,:,iplane1(usedPlanes));
-                                dataNext = register_movie(data, ops, ...
-                                    ds(t1+t2+length(planes)+ (1:length(usedPlanes)),:));
-                            end
-                            dwrite(:,:,end) = dwrite(:,:,end) + weight .*...
-                                double(dataNext(:,:,ind2(end)-size(dreg,3)));
+        
+        dataNext = [];
+        for i = 1:length(iplanes)
+            if isfield(ops1{iplanes(i)}, 'planeInterpolated') && ...
+                    ops1{iplanes(i)}.planeInterpolated == 1
+                ind1 = iplane0(iplanes(i)) : nplanes : size(data,3);
+                bases = ops1{iplanes(i)}.basisPlanes(ceil((t2+t1)/nplanes + ...
+                    (1:length(ind1))));
+                uniqueBases = unique(bases)';
+                dwrite = zeros(size(dreg,1), size(dreg,2), length(ind1));
+                for b = uniqueBases
+                    planesInv = find(~isnan(ops1{iplanes(i)}.profiles(:,b)) & ...
+                        ops1{iplanes(i)}.profiles(:,b)>0)';
+                    diffs = planesInv - iplanes(i);
+                    for pl = 1:length(planesInv)
+                        ind2 = ind1 + diffs(pl);
+                        ind2(bases ~= b) = [];
+                        weight = ops1{iplanes(i)}.profiles(planesInv(pl),b);
+                        if ind2(1)<1 % frame is part of previously loaded tiff file (can happen if frames per tiff are not mupltiple of planes)
+                            dwrite(:,:,1) = dwrite(:,:,1) + ...
+                                weight .* double(dataPrev(:,:,end-ind2(1)));
+                            ind2(1) = [];
                         end
-                        ind2(end) = [];
+                        if ind2(end)>size(dreg,3) % frame is part of upcoming tiff file
+                            if j<length(fs{k})
+                                if isempty(dataNext) % load first few frames of next tiff and register them
+                                    ichanset = [ichannel; nplanes; nchannels];
+                                    data = loadFramesBuff(fs{k}(j+1).name, ...
+                                        ichanset(1), ichanset(2), ichanset(3));
+                                    dataNext = register_movie(data, ops1{iplanes(i)}, ...
+                                        dsall(t1+t2+size(dreg,3)+ (1:nplanes),:));
+                                end
+                                dwrite(:,:,end) = dwrite(:,:,end) + weight .*...
+                                    double(dataNext(:,:,ind2(end)-size(dreg,3)));
+                            end
+                            ind2(end) = [];
+                        end
+                        dwrite(:,:,ceil(ind2/nplanes)) = dwrite(:,:,ceil(ind2/nplanes)) + ...
+                            weight .* double(dreg(:,:,ind2));
                     end
-                    dwrite(:,:,ceil(ind2/length(usedPlanes))) = dwrite(:,:,ceil(ind2/length(usedPlanes))) + ...
-                        weight .* double(dreg(:,:,ind2));
                 end
+                fwrite(fid{i}, dwrite, class(data));
+            else
+                fwrite(fid{i}, dreg, class(data));
             end
-            dataPrev = dreg(:,:,end-length(usedPlanes)+1:end);
-            fwrite(fid, dwrite, class(data));
-            t1 = t1 + length(planes);
-        else
-            fwrite(fid, dreg, class(data));
-            t1 = t1 + size(data,3);
         end
+        dataPrev = dreg(:,:,end-nplanes+1:end);
+        t1 = t1 + size(dreg,3);
         iplane0 = iplane0 - nFr/nchannels;
     end
-    t2 = t2 + ops.Nframes(k)*length(usedPlanes);
+    t2 = t2 + ceil(t1/nplanes)*nplanes;
 end
 
-fclose(fid);
+for i = 1:length(iplanes)
+    fclose(fid{i});
+end
