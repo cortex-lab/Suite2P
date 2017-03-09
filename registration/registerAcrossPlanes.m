@@ -189,6 +189,10 @@ for i = 1:length(planesToInterpolate)
         values = d(linearInd);
         values = reshape(values, T, Dims);
         dsall(indframes,:,j) = values;
+        ops1{planesToInterpolate(i),j}.DS_allPlanes = ...
+            ops1{planesToInterpolate(i),j}.DS;
+        values(isnan(values(:,1)),:) = [];
+        ops1{planesToInterpolate(i),j}.DS = values;
     
         if ismember(i, indInterpolate)
             ops1{planesToInterpolate(i),j}.planeInterpolated = 1;
@@ -217,7 +221,6 @@ for k = 1:length(fs)
     iplane0 = 1:1:ops.nplanes;
     t1 = 0;
     for j = 1:length(fs{k})
-        % load frames of all planes
         if abs(nbytes - fs{k}(j).bytes)>1e3
             nbytes = fs{k}(j).bytes;
             nFr = nFramesTiff(fs{k}(j).name);
@@ -227,6 +230,7 @@ for k = 1:length(fs)
         if mod(nFr, ops.nchannels) ~= 0
             fprintf('  WARNING: number of frames in tiff (%d) is NOT a multiple of number of channels!\n', j);
         end
+        % load frames of all planes
         ichanset = [ichannel; nFr; ops.nchannels];
         data = loadFramesBuff(fs{k}(j).name, ichanset(1), ichanset(2), ichanset(3));
         if BiDiPhase
@@ -277,7 +281,8 @@ for k = 1:length(fs)
                             if j<length(fs{k})
                                 if isempty(dataNext) % load first few frames of next tiff and register them
                                     ichanset = [ichannel; nplanes; ops.nchannels];
-                                    data = loadFramesBuff(fs{k}(j+1).name, ichanset(1), ichanset(2), ichanset(3));
+                                    data = loadFramesBuff(fs{k}(j+1).name, ...
+                                        ichanset(1), ichanset(2), ichanset(3));
                                     if BiDiPhase
                                         yrange = 2:2:Ly;
                                         if BiDiPhase>0
@@ -287,8 +292,8 @@ for k = 1:length(fs)
                                         end
                                     end
                                     dataNext = register_movie(data, ops, ...
-                                        dsall((t1+t2) + ceil(size(data,3)/nplanes)* ...
-                                        nplanes + (1:nplanes),:));
+                                        dsall((t1+t2) + size(dreg,3) ...
+                                        + (1:nplanes),:));
                                 end
                                 dwrite(:,:,end) = dwrite(:,:,end) + weight .*...
                                     double(dataNext(:,:,ind2(end)-size(dreg,3)));
