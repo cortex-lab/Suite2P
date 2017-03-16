@@ -42,7 +42,6 @@ end
 ntf0 = 0;
 numPlanes = ops.nplanes;
 %iplane0 = 1:1:ops.nplanes;
-BiDiPhase = ops.BiDiPhase;
 
 totFrames=0;
 for k = 1:length(fsRED)
@@ -72,6 +71,7 @@ for k = 1:length(fsRED)
         dataG0=data(:,:,planesG);
         dataR0=data(:,:,planesR);
         
+        BiDiPhase = ops1{iPlane}.BiDiPhase;
         if abs(BiDiPhase) > 0
             yrange = 2:2:Ly;
             if BiDiPhase>0
