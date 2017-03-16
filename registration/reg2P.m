@@ -17,7 +17,7 @@ red_align          = getOr(ops, {'AlignToRedChannel'}, 0);
 LoadRegMean        = getOr(ops, {'LoadRegMean'}, 0);
 ops.RegFileBinLocation = getOr(ops, {'RegFileBinLocation'}, []);
 ops.splitFOV           = getOr(ops, {'splitFOV'}, [1 1]);
-
+ops.dobidi         = getOr(ops, {'dobidi'}, 1);
 
 ops.smooth_time_space = getOr(ops, 'smooth_time_space', []);
 fs = ops.fsroot;
@@ -45,6 +45,7 @@ if ops.doRegistration
     else
         BiDiPhase = getOr(ops, {'BiDiPhase'}, 0);
     end
+    ops.BiDiPhase = BiDiPhase;
     fprintf('bi-directional scanning offset = %d pixels\n', BiDiPhase);
    
     if abs(BiDiPhase) > 0

@@ -88,6 +88,9 @@ end
 ntf0 = 0;
 numPlanes = ops.nplanes;
 iplane0 = 1:1:ops.nplanes;
+
+BiDiPhase = ops.BiDiPhase;
+
 for k = 1:length(fsRED)
     if nimgall(indx(k))>=median(nimgall(indx))        
         iplane0 = mod(iplane0-1, numPlanes) + 1;
@@ -101,6 +104,15 @@ for k = 1:length(fsRED)
         end
         data = reshape(data, Ly, Lx, ops.nplanes, ntifs);         
 
+        if abs(BiDiPhase) > 0
+            yrange = 2:2:Ly;
+            if BiDiPhase>0
+                data(yrange,(1+BiDiPhase):Lx,:,:) = data(yrange, 1:(Lx-BiDiPhase),:,:);
+            else
+                data(yrange,1:Lx+BiDiPhase,:,:)   = data(yrange, 1-BiDiPhase:Lx,:,:);
+            end
+        end
+        
         for j = 1:size(data,3)
             dsall = DS{j}(nimgFirst(indx(k), j)+1 + [1:size(data,4)], :);
             data(:, :, j,:)        = ...
