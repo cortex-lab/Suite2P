@@ -35,7 +35,7 @@ ops.Ly = Ly;
 ops.Lx = Lx;
 % split into subsets (for high scanning resolution recordings)
 [xFOVs, yFOVs] = get_xyFOVs(ops);
-
+   
 if ops.doRegistration
     IMG = GetRandFrames(fs, ops);    
     
@@ -135,7 +135,7 @@ for k = 1:length(fs)
         if ops.doRegistration
             % get the registration offsets
             [dsall, ops1] = GetRegOffsets(data, j, iplane0, ops, ops1, yFOVs, xFOVs);
-            
+
             % if aligning by the red channel, data needs to be reloaded as the
             % green channel
             if red_align
@@ -146,7 +146,6 @@ for k = 1:length(fs)
                 ichanset = [ichannel; nFr; nchannels];
                 data = loadFramesBuff(ops.temp_tiff, ichanset(1), ichanset(2), ichanset(3), ops.temp_tiff);               
             end
-            
             dreg = RegMovie(data, ops1, dsall, yFOVs, xFOVs);
         else
             dreg = data;
