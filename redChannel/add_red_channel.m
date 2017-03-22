@@ -22,7 +22,7 @@ for i = 1:length(ops.planesToProcess)
             if ~isempty(mimgG)
                 dat.ops.mimgGREEN = mimgG(:,:,iplane);
             end
-            save(fname, '-v7.3', 'dat')
+            save(fname, '-v7.3', '-struct', 'dat')
         catch
             fname = sprintf('%s/F_%s_%s_plane%d_Nk%d_proc.mat', ops.ResultsSavePath, ops.mouse_name, ops.date, iplane, ops.Nk);
             dat = load(fname);
@@ -33,7 +33,7 @@ for i = 1:length(ops.planesToProcess)
             if ~isempty(mimgG)
                 dat.ops.mimgGREEN = mimgG(:,:,iplane);
             end
-            save(fname, '-v7.3', 'dat')
+            save(fname, '-v7.3', '-struct', 'dat')
         end
     catch
         fname = sprintf('%s/F_%s_%s_plane%d_Nk%d.mat', ops.ResultsSavePath, ops.mouse_name, ops.date, iplane, ops.Nk);

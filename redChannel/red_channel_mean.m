@@ -96,7 +96,7 @@ for k = 1:length(fsRED)
          
         ichanset = [ops.nchannels_red*ops.nplanes + [ops.nchannels_red (ntifs*ops.nchannels_red*ops.nplanes)] ...
             ops.nchannels_red]; 
-        data = loadFrames(fsRED{k}, ichanset(1),ichanset(2), ichanset(3));        
+        data = loadFramesBuff(fsRED{k}, ichanset(1),ichanset(2), ichanset(3));        
         if ~exist('mimgR')
             [Ly, Lx, ~] = size(data);
             mimgR = zeros(Ly, Lx, ops.nplanes);
