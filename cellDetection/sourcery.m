@@ -134,7 +134,7 @@ while 1
     %
     % ADD NEUROPIL INTO REGRESSION HERE    
     LtL     = full(L'*L);
-    codes = ([LtL LtS; LtS' StS]+ 0e-3 * eye(icell+nBasis))\[LtU; StU];
+    codes = ([LtL LtS; LtS' StS]+ 1e-3 * eye(icell+nBasis))\[LtU; StU];
     neu   = codes(icell+1:end,:);    
     codes = codes(1:icell,:);
 %     codes = (LtL+ 1e-3 * eye(icell))\LtU;    
