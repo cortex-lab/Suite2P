@@ -1,7 +1,7 @@
 function ops = getBlockBegEnd(fid, ops)
 
 Ly = ops.Ly;
-Lx = ops.Ly;
+Lx = ops.Lx;
 bitspersamp = 16; %this is hard-coded for now, needs to change
 
 frewind(fid); % rewind the file just in case
