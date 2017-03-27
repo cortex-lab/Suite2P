@@ -17,7 +17,7 @@ red_align          = getOr(ops, {'AlignToRedChannel'}, 0);
 LoadRegMean        = getOr(ops, {'LoadRegMean'}, 0);
 ops.RegFileBinLocation = getOr(ops, {'RegFileBinLocation'}, []);
 ops.splitFOV           = getOr(ops, {'splitFOV'}, [1 1]);
-
+ops.dobidi         = getOr(ops, {'dobidi'}, 1);
 
 ops.smooth_time_space = getOr(ops, 'smooth_time_space', []);
 fs = ops.fsroot;
@@ -35,7 +35,7 @@ ops.Ly = Ly;
 ops.Lx = Lx;
 % split into subsets (for high scanning resolution recordings)
 [xFOVs, yFOVs] = get_xyFOVs(ops);
-
+   
 if ops.doRegistration
     IMG = GetRandFrames(fs, ops);    
     
@@ -45,6 +45,7 @@ if ops.doRegistration
     else
         BiDiPhase = getOr(ops, {'BiDiPhase'}, 0);
     end
+    ops.BiDiPhase = BiDiPhase;
     fprintf('bi-directional scanning offset = %d pixels\n', BiDiPhase);
    
     if abs(BiDiPhase) > 0
@@ -134,7 +135,7 @@ for k = 1:length(fs)
         if ops.doRegistration
             % get the registration offsets
             [dsall, ops1] = GetRegOffsets(data, j, iplane0, ops, ops1, yFOVs, xFOVs);
-            
+
             % if aligning by the red channel, data needs to be reloaded as the
             % green channel
             if red_align
@@ -145,7 +146,6 @@ for k = 1:length(fs)
                 ichanset = [ichannel; nFr; nchannels];
                 data = loadFramesBuff(ops.temp_tiff, ichanset(1), ichanset(2), ichanset(3), ops.temp_tiff);               
             end
-            
             dreg = RegMovie(data, ops1, dsall, yFOVs, xFOVs);
         else
             dreg = data;
@@ -183,9 +183,11 @@ for i = 1:numPlanes
     
     if ~isempty(ops.RegFileTiffLocation)
         ops1{i} = write_reg_to_tiff(fid{i}, ops1{i}, i);
+        frewind(fid{i});
     end    
     if ~isempty(ops.nimgbegend) && ops.nimgbegend>0
         ops1{i} = getBlockBegEnd(fid{i}, ops1{i}); % get mean of first and last frames in block (to check for drift)
+        frewind(fid{i});
     end
     if ~isempty(ops.RegFileBinLocation)
         str = sprintf('%d_',ops1{i}.expts);

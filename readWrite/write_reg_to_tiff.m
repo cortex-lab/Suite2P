@@ -13,7 +13,7 @@ for k = 1:length(ops.SubDirs)
     while nframesleft>0
          ix = ix + 1;
         nfrtoread = min(nframesleft, 2000);
-        data = fread(fid,  Ly*Lx*nfrtoread, '*uint16');                
+        data = fread(fid,  Ly*Lx*nfrtoread, 'int16');                
         nframesleft = nframesleft - nfrtoread;
         data = reshape(data, Ly, Lx, []);        
 
@@ -39,6 +39,6 @@ for k = 1:length(ops.SubDirs)
             ops.mouse_name, iplane, ix);
         fname = fullfile(foldr, partname);
         
-        TiffWriter(uint16(data),fname,bitspersamp);
+        TiffWriter(int16(data),fname,bitspersamp);
     end
 end

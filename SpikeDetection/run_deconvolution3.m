@@ -2,10 +2,6 @@ function stat = run_deconvolution3(ops, dat)
 % outputs a cell array of deconvolved spike times and amplitudes.
 % Optionally output this in matrix form Ffr (very sparse).
 
-% load the initialization of the kernel    
-% load(fullfile(ops.toolbox_path, 'SpikeDetection\kernel.mat'));
-
-% copy existing information
 stat = dat.stat;
 
 % construct Ff and Fneu
@@ -31,12 +27,16 @@ npad = 250;
 [NT, NN] = size(Ff);
 
 ops.fs            = getOr(ops, 'fs', ops.imageRate/ops.nplanes);
+<<<<<<< HEAD
 
 if ~isfield(stat, 'neuropilCoefficient')
     [coefNeu, inomax] = my_ica(Ff, Fneu, ops.fs, coefDefault);
 else
    coefNeu = [stat.neuropilCoefficient]; 
 end
+=======
+[coefNeu, inomax] = my_ica(Ff, Fneu, ops.fs, coefDefault, ops.maxNeurop);
+>>>>>>> 7d51b82d5c14567988249374cd71ab0282449cab
 
 Ff = Ff - bsxfun(@times, Fneu, coefNeu(:)');
 
