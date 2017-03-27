@@ -21,7 +21,6 @@ alignTargetImages  = getOr(ops, {'alignTargetImages'}, false); % if true, align 
 interpolateAcrossPlanes = getOr(ops, {'interpolateAcrossPlanes'}, false); %if true, similar looking planes will be averaged together to generate final movie
 planesToInterpolate = getOr(ops, {'planesToInterpolate'}, 1:nplanes); % these planes will be considered for interpolation
 alignAcrossPlanes  = getOr(ops, {'alignAcrossPlanes'}, false); % at each time point, frame will be aligned to best matching target image (from different planes)
-ops.interpolateAcrossPlanes = getOr(ops, 'interpolateAcrossPlanes', 0);
 
 ops.splitFOV           = getOr(ops, {'splitFOV'}, [1 1]);
 ops.smooth_time_space  = getOr(ops, 'smooth_time_space', []);

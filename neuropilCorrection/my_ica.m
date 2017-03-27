@@ -1,5 +1,8 @@
 function [w_out inomax]= my_ica(ca, neu, fs, w_default, w_max)
 %%
+if nargin<4; w_default = .7; end
+if nargin<5; w_max = 1.4; end
+    
 ca = double(ca);
 neu = double(neu);
 
