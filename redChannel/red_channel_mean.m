@@ -81,7 +81,7 @@ try
     load(fullfile(root, fname))
     for j = 1:ops.nplanes
         DS{j} = ops1{j}.DS;
-        ops.BiDiPhase(j) = ops1{j}.BiDiPhase;
+        ops.BiDiPhase = ops1{j}.BiDiPhase;
     end
 catch       
 end
@@ -102,15 +102,15 @@ for k = 1:length(fsRED)
             mimgR = zeros(Ly, Lx, ops.nplanes);
         end
         data = reshape(data, Ly, Lx, ops.nplanes, ntifs);         
-
+   
         for iPlane = 1:length(iplane0)
-            BiDiPhase = ops.BiDiPhase(iPlane);
+            BiDiPhase = ops.BiDiPhase;
             if abs(BiDiPhase) > 0
                 yrange = 2:2:Ly;
                 if BiDiPhase>0
-                    data(yrange,(1+BiDiPhase):Lx,:,iPlane,:) = data(yrange, 1:(Lx-BiDiPhase),:,iPlane,:);
+                    data(yrange,(1+BiDiPhase):Lx,iPlane,:) = data(yrange, 1:(Lx-BiDiPhase),iPlane,:);
                 else
-                    data(yrange,1:Lx+BiDiPhase,:,iPlane,:)   = data(yrange, 1-BiDiPhase:Lx,:,iPlane,:);
+                    data(yrange,1:(Lx+BiDiPhase),iPlane,:)   = data(yrange, (1-BiDiPhase):Lx,iPlane,:);
                 end
             end
         end
@@ -125,8 +125,7 @@ for k = 1:length(fsRED)
         
         nFr = nFramesTiff(fsRED{k});
         iplane0 = iplane0 - nFr/ops.nchannels_red;
-        
-%         keyboard;
+       
     end
 end
 
