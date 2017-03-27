@@ -38,19 +38,19 @@ Note: some of the options are not specified in either the example master_file or
 
 The output is a struct called dat which is saved into a mat file in ResultsSavePath using the same subfolder structure, under a name formatted like F_M150329_MP009_2015-04-29_plane1. It contains all the information collected throughout the processing, and contains the ROI and neuropil traces in Fcell and FcellNeu, and whether each ROI j is a cell or not in stat(j).iscell. stat(j) contains information about each ROI j and can be used to recover the corresponding pixels for each ROI in stat.ipix. The centroid of the ROI is specified in stat as well. Here is a summary of where the important results are:
 
-cell traces are in dat.Fcell
-neuropil traces are in dat.FcellNeu
-manual, GUI overwritten "iscell" labels are in dat.cl.iscell
+cell traces are in dat.Fcell  
+neuropil traces are in dat.FcellNeu  
+manual, GUI overwritten "iscell" labels are in dat.cl.iscell  
  
-stat(icell) contains all other information:
-iscell: automated label, based on anatomy
-neuropilCoefficient: neuropil subtraction coefficient, based on maximizing the skewness of the corrected trace (ICA)
-st: are the deconvolved spike times (in frames)
-c:  are the deconvolved amplitudes
-kernel: is the estimated kernel
+stat(icell) contains all other information:  
+iscell: automated label, based on anatomy  
+neuropilCoefficient: neuropil subtraction coefficient, based on maximizing the skewness of the corrected trace (ICA)  
+st: are the deconvolved spike times (in frames)  
+c:  are the deconvolved amplitudes  
+kernel: is the estimated kernel  
 
 
-### III. Input-output file paths ###
+### IV. Input-output file paths ###
 
 RootStorage --- the root location where the raw tiff files are  stored.
 
@@ -70,7 +70,7 @@ If you don't want to use this folder structure, see the make_db_example file for
 
 The output is a struct called dat which is saved into a mat file in ResultsSavePath using the same subfolder structure, under a name formatted like F_M150329_MP009_2015-04-29_plane1. It contains all the information collected throughout the processing, and contains the fluorescence traces in dat.Fcell and whether a given ROI is a cell or not in dat.stat(N).iscell. dat.stat contains information about each ROI and can be used to recover the corresponding pixels for each ROI N in dat.stat(N).ipix. The centroid of the ROI N is specified in dat.stat(N) as well. Here is a summary of where the important results are:
 
-### IV. Options for registration ###
+### V. Options for registration ###
 
 showTargetRegistration --- whether to show an image of the target frame immediately after it is computed. 
 
@@ -102,7 +102,7 @@ smoothBlocks --- if quadBlocks = 0, then smoothBlocks is the standard deviation 
 
 ++ Bidirectional scanning issues (frilly cells) taken care of automatically ++
 
-### V. Options for cell detection ###
+### VI. Options for cell detection ###
 
 sig --- spatial smoothing constant: smooths out the SVDs spatially. Indirectly forces ROIs to be more round. 
 
@@ -112,7 +112,7 @@ ShowCellMap --- whether to show the clustering results as an image every 10 iter
 
 getROIs --- whether to run the ROI detection algorithm after registration
 
-### VI. Options for SVD decomposition ###
+### VII. Options for SVD decomposition ###
 
 NavgFramesSVD --- for SVD, data has to be temporally binned. This number specifies the final number of points to be obtained after binning. In other words, datasets with many timepoints are binned in higher windows while small datasets are binned less. 
 
@@ -120,7 +120,7 @@ getSVDcomps --- whether to obtain and save to disk SVD components of the registe
 
 nSVD --- how many SVD components to keep.
 
-### VII. Options for spike deconvolution ###
+### VIII. Options for spike deconvolution ###
 
 imageRate --- imaging rate per plane. 
 
@@ -128,20 +128,20 @@ sensorTau --- decay timescale.
 
 maxNeurop --- neuropil contamination coef has to be less than this (sometimes good to impose a ceiling at 1, i.e. for interneurons)
 
-### VIII. Measures used by classifier ###
+### IX. Measures used by classifier ###
 
 The Suite2p classifier uses a number of features of each ROI to assign cell labels to ROIs. The classifier uses a naive Bayes approach for each feature, and models the distribution of each feature with a non-parametric, adaptively binned empirical distribution. The classifier is initialized with some standard distributions for these features, but is updated continuously with new data samples as the user refines the output manually in the GUI. 
 
 The features used are the following (can see values for each ROI by selecting it in the GUI). 
 
-std --- standard deviation of the cell trace, normalized to the size of the neuropil trace
-skew --- skewness of the neuropil-subtracted cell trace
-cmpct --- mean distance of pixels from ROI center, normalized to the same measuree for a perfect disk
-footprint --- spatial extent of correlation between ROI trace and nearby pixels
-mimgProjAbs --- whether this ROI shape is correlated to the shape on the mean image
-aspect_ratio --- of an ellipse fit to the ROI
+std --- standard deviation of the cell trace, normalized to the size of the neuropil trace  
+skew --- skewness of the neuropil-subtracted cell trace  
+cmpct --- mean distance of pixels from ROI center, normalized to the same measuree for a perfect disk  
+footprint --- spatial extent of correlation between ROI trace and nearby pixels  
+mimgProjAbs --- whether this ROI shape is correlated to the shape on the mean image  
+aspect_ratio --- of an ellipse fit to the ROI  
 
-### IX. Example database entry ###
+### X. Example database entry ###
 
 Look into make_db_example for more detailed examples.
 
