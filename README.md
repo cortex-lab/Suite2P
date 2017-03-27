@@ -1,9 +1,6 @@
-﻿UPDATE (Christmas 2016): number of clusters determined automatically, but do specify the "diameter" of an average cell for best results. You can do this with
-either db(iexp).diameter or ops.diameter. 
-
 # Suite2p: fast, accurate and complete two-photon pipeline#
 
-Registration, cell detection, spike extraction and manual GUI. 
+Registration, cell detection, spike extraction and visualization GUI. 
 
 Details in [http://biorxiv.org/content/early/2016/06/30/061507](http://biorxiv.org/content/early/2016/06/30/061507).
 
@@ -13,24 +10,46 @@ This code was written by Marius Pachitariu and members of the lab of Kenneth Har
 
 ### I. Introduction ###
 
-This is a complete automated pipeline for processing two-photon Calcium imaging recordings. It is very simple, very fast and yields a large set of active ROIs. A GUI further provides point-and-click capabilities for refining the results in minutes. The pipeline includes the following steps
+This is a complete, automated pipeline for processing two-photon Calcium imaging recordings. It is simple, fast and yields a large set of active ROIs. A GUI further provides point-and-click capabilities for refining the results in minutes. The pipeline includes the following steps
 
 
 1) X-Y subpixel registration --- using a version of the phase correlation algorithm and subpixel translation in the FFT domain. If a GPU is available, this completes in 20 minutes per 1h of recordings at 30Hz and 512x512 resolution.
 
-2) SVD decomposition --- this provides the basis for a number of pixel-level visualization tools. 
+2) SVD decomposition --- this provides the input to cell detection and accelerates the algorithm. 
 
-3) Cell detection --- using clustering methods in a low-dimensional space of the fluorescence activity. The pixel clustering algorithm directly provides a positive mask for each ROI identified and stands in contrast to more "black-box" methods that have been previously proposed. The mask is used to weigh the pixels of the ROI before taking the average over pixel ROIs. 
+3) Cell detection --- using clustering methods in a low-dimensional space. The clustering algorithm provides a positive mask for each ROI identified, and allows for overlaps between masks. 
 
-4) Manual curation --- the output of the cell detection algorithm can be visualized and further refined using the included GUI. The GUI is designed to make cell sorting a fun and enjoyable experience. 
+4) Signal extraction --- by default, all overlapping pixels are discarded when computing the signal inside each ROI, to avoid using "demixing" approaches, which can be biased. The neuropil signal is also computed independently for each ROI, as a weighted pixel average, pooling from a large area around each ROI, but excluding all pixels assigned to ROIs during cell detection. The neuropil subtraction coefficient is estimated by maximizing the skewness of F - coef*Fneu (F is the ROI signal, Fneu is the neuropil signal). The user is encouraged to also try varying this coefficient, to make sure that any scientific results do not depend crucially on it. 
 
-5) Spike deconvolution --- cell and neuropil traces are further processed to obtain an estimate of spike times and spike "amplitudes". The amplitudes here are understood as proportional to the number of spikes in a burst/bin. Under low SNR conditions, the deconvolution is still useful for temporally-localizing responses, and for providing an estimate of the neuropil contamination coefficient (estimated together, see paper for how this works).
+5) Manual curation --- the output of the cell detection algorithm can be visualized and further refined using the included GUI. The GUI is designed to make cell sorting a fun and enjoyable experience. It also includes an automatic classifier that gradually refines itself based on the manual labelling provided by the user. This allows the automated classifier to adapt for different types of data, acquired under different conditions. 
+
+6) Spike deconvolution --- cell and neuropil traces are further processed to obtain an estimate of spike times and spike "amplitudes". The amplitudes are proportional to the number of spikes in a burst/bin. Even under low SNR conditions, where transients might be hard to identify, the deconvolution is still useful for temporally-localizing responses. The cell traces are corrected using the ICA-derived neuropil contamination coefficients, and baselined using the minimum of the overly-smoothed trace. 
 
 ### II. Getting started ###
 
 The toolbox runs in Matlab (+ one mex file) and currently only supports tiff file inputs. To begin using the toolbox, you will need to make local copies (in a separate folder) of two included files: master_file and make_db. It is important that you make local copies of these files, otherwise updating the repository will overwrite them (and you can lose your files). The make_db file assembles a database of experiments that you would like to be processed in batch. It also adds per-session specific information that the algorithm requires such as the number of imaged planes and channels. The master_file sets general processing options that are applied to all sessions included in make_db, UNLESS the option is over-ridden in the make_db file.  The global and session-specific options are described in detail below. 
 
 For spike deconvolution, you need to run mex -largeArrayDims SpikeDetection/deconvL0.c (or .cpp under Linux/Mac)
+
+Below we describe the outputs of the pipeline first, and then describe the options for setting it up, and customizing it. Importantly, almost all options have pre-specified defaults. Any options specified in master_file in ops0 overrides these defaults. Furthermore, any option specified in the make_db file (experiment specific) overrides both the defaults and the options set in master_file. This allows for flexibility in processing different experiments with different options. The only critical option that you'll need to set is ops0.diameter, or db(N).diameter. This gives the algorithm the scale of the recording, and the size of ROIs you are trying to extract. We recommend as a first run to try the pipeline after setting the diameter option. Depending on the results, you can come back and try changing some of the other options.  
+
+Note: some of the options are not specified in either the example master_file or the example make_db file. These are usually more specialized features.
+
+### III. Outputs. ###
+
+The output is a struct called dat which is saved into a mat file in ResultsSavePath using the same subfolder structure, under a name formatted like F_M150329_MP009_2015-04-29_plane1. It contains all the information collected throughout the processing, and contains the ROI and neuropil traces in Fcell and FcellNeu, and whether each ROI j is a cell or not in stat(j).iscell. stat(j) contains information about each ROI j and can be used to recover the corresponding pixels for each ROI in stat.ipix. The centroid of the ROI is specified in stat as well. Here is a summary of where the important results are:
+
+cell traces are in dat.Fcell
+neuropil traces are in dat.FcellNeu
+manual, GUI overwritten "iscell" labels are in dat.cl.iscell
+ 
+stat(icell) contains all other information:
+iscell: automated label, based on anatomy
+neuropilCoefficient: neuropil subtraction coefficient, based on maximizing the skewness of the corrected trace (ICA)
+st: are the deconvolved spike times (in frames)
+c:  are the deconvolved amplitudes
+kernel: is the estimated kernel
+
 
 ### III. Input-output file paths ###
 
@@ -47,19 +66,6 @@ RegFileTiffLocation --- where to save registered tiffs (if empty, does not save)
 All of these filepaths are completed with separate subfolders per animal and experiment, specified in the make_db file. Your data MUST be stored under a file tree of the form
 
 \RootStorage\mouse_name\session\block\*.tif(f)
-
-The output is a struct called dat which is saved into a mat file in ResultsSavePath using the same subfolder structure, under a name formatted like F_M150329_MP009_2015-04-29_plane1_Nk650. It contains all the information collected throughout the processing, and contains the fluorescence traces in dat.F.Fcell and whether a given ROI is a cell or not in dat.F.iscell. dat.stat contains information about each ROI and can be used to recover the corresponding pixels for each ROI in dat.stat.ipix. The centroid of the ROI is specified in dat.stat as well. Here is a summary of where the important results are:
-
-cell traces are in dat.F.Fcell
-neuropil traces are in dat.F.FcellNeu
-neuropil subtraction coefficient is dat.cl.dcell{i}.B(3)
-baseline is dat.cl.dcell{i}.B(2)
-anatomical cell criterion is in dat.cl.isroi
-manual overwritten cell labels are in dat.cl.iscell
-dat.cl.dcell{i}.st are the deconvolved spike times (in frames)
-dat.cl.dcell{i}.c  are the deconvolved amplitudes
-dat.cl.dcell{i}.kernel is the estimated kernel
-
 
 ### IV. Options for registration ###
 
@@ -139,13 +145,6 @@ MaxNpix --- maximum number of pixels per ROI. Automatically set by diameter, if 
 
 MinNpix --- minimum number of pixels per ROI. Automatically set by diameter, if provided. 
 
-Compact --- a compactness criterion for how close pixels are to the center of the ROI. 1 is the lowest possible value, achieved by perfect disks. Best to leave this to a high value (i.e. 2) before the manual sorting stage. 
-
-parent --- these are criteria imposed on the parent cluster (before separating connected regions). These are not currently used during the automated step, but are available in the GUI.
-
-parent.minPixRelVar --- significant regions need to have at least >1/10 the mean variance of all regions
-
-parent.MaxRegions --- if there are more non-significant regions than this number, this parent ROI is probably very spread out over many small components and its connected regions are not good cells: it will be discarded. 
 
 ### IX. Example database entry ###
 
@@ -157,4 +156,6 @@ db(i).date          = '2015-04-27';
 db(i).expts         = [5 6]; % which experiments to process together
 
 Other (hidden) options are described in make_db_example.m, and at the top of run_pipeline.m (set to reasonable defaults), and get_signals_and_neuropil.m (neuropil "surround" option). 
+
+
 
