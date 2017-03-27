@@ -42,6 +42,8 @@ for k = 1:length(fsRED)
     
     data = cat(3, D, data);    
 end
+
+
 %%
 clear mimgR
 for j = 1:ops.nplanes

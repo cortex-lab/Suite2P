@@ -14,7 +14,7 @@ for i = 1:numel(ops.planesToProcess)
         ifr0 = iplane0(ops.planesToProcess(i));
         indframes = ifr0:ops.nplanes:size(data,3);
     end
-    
+
     for l = 1:size(xFOVs,2)
         dat = data(yFOVs(:,l),xFOVs(:,l),indframes);
         if ~isempty(ops.smooth_time_space)
@@ -36,7 +36,7 @@ for i = 1:numel(ops.planesToProcess)
         ops1{i,l}.Nframes(k)  = ops1{i,l}.Nframes(k) + length(indframes);
     end
     
-    1;
+    
     % check if there was a sharp drop in fluorescence
 %     lbright = sq(mean(data(:,:,indframes),2));
 %     mlbright = mean(ops1{i}.mimg, 2);
