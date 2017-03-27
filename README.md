@@ -43,12 +43,24 @@ neuropil traces are in dat.FcellNeu
 manual, GUI overwritten "iscell" labels are in dat.cl.iscell  
  
 stat(icell) contains all other information:  
+
 iscell: automated label, based on anatomy  
 neuropilCoefficient: neuropil subtraction coefficient, based on maximizing the skewness of the corrected trace (ICA)  
 st: are the deconvolved spike times (in frames)  
 c:  are the deconvolved amplitudes  
 kernel: is the estimated kernel  
 
+Less important fields of stat(icell):
+
+xpix, ypix: x and y indices of pixels belonging to this max. These index into the valid part of the image (defined by ops.yrange, ops.xrange).   
+ipix: linearized indices ((ypix, xpix) --> ypix + (xpix-1)*Ly) of pixels belonging to this mask.   
+isoverlap: whether the pixels overlap with other masks.     
+lam, lambda: mask coefficients for the corresponding pixels. lambda is the same as lam, but normalized to 1.   
+med: median of y and x pixels in the ROI (indices for the valid part of the image, defined by ops.yrange, ops.xrange).   
+neuropilCoefficient: multiplicative coefficient on the neuropil signal, for correction based on maximal skewness of the corrected trace.  
+blockstarts: the cumulative number of frames per block. Clould be useful for concatenating experiments correctly (some planes will have fewer frames/block). 
+
+footprint, mrs, mrs0, cmpct, aspec_ratio, ellipse, mimgProj, skew, std, maxMinusMed, top5pcMinusMed: these are used by the automated classifier to label an ROI as cell or not. see section IX for details.
 
 ### IV. Input-output file paths ###
 
