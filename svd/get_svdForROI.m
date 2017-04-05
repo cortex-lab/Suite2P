@@ -69,7 +69,7 @@ if nargin==1 || ~strcmp(clustModel, 'CNMF')
     mov             = reshape(mov, [], size(mov,3));
     
     if 1
-        sdmov           = mean(diff(mov, 2).^2).^.5;
+        sdmov           = mean(diff(mov, 2).^2, 2).^.5;
     else
         sdmov           = mean(mov.^2,2).^.5;
     end
