@@ -114,7 +114,7 @@ while 1
     % compute log variance at each location
     V = double(sq(mean(us.^2,1)));    
 
-    if 0
+    if 1
         if iter==1
             um = sq(mean(Ucell.^2,1));
             um = my_conv2_circ(reshape(um, Ly, Lx), sig, [1 2]);
@@ -128,7 +128,18 @@ while 1
         lbound = my_conv2(lbound, d0, [1 2]);
     end
     
-    V = V ./ lbound;
+    V = V - lbound;
+    
+    if iter==1
+       % find indices of all maxima  in plus minus 1 range
+        maxV    = -my_min(-V, 1, [1 2]);
+        ix      = (V > maxV-1e-10);
+        
+        % threshold is the mean peak, times a potential scaling factor
+        pks = V(ix);
+
+        Th  = ops.ThScaling * median(pks(pks>1e-4)); 
+    end
     
     % find local maxima in a +- d neighborhood
     maxV = -my_min(-V, 2*d0, [1 2]);

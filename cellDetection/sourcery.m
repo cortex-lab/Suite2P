@@ -48,7 +48,7 @@ Ucell   =  U0 - reshape(neu' * S', size(U0));
 
 nBasis = size(S,2);
 
-%%
+%
 while 1
     iter = iter + 1;    
    
@@ -83,9 +83,11 @@ while 1
 
         Th  = ops.ThScaling * median(pks(pks>1e-4));
         
-        V0 = V;
-        ops.Vcorr = V0;
+        ops.Vcorr = V;
     end
+    
+    % just in case this goes above original value
+    V = min(V, ops.Vcorr);
     
     % find local maxima in a +- d neighborhood
     maxV = -my_min(-V, 2*d0, [1 2]);
@@ -126,22 +128,22 @@ while 1
         mLam(:,icell)   = normc(getConnected(mLam(:,icell), rs)); % ADD normc HERE and BELOW!!!
         lam             = mLam(ipos,icell) ;
         
-        L(ipix,icell) = lam;
+        L(ipix,icell)   = lam;
         
-        LtU(icell, :) = U0(:,ipix) * lam;
-        LtS(icell, :) = lam' * S(ipix,:);
+        LtU(icell, :)   = U0(:,ipix) * lam;
+        LtS(icell, :)   = lam' * S(ipix,:);
     end    
-    %%
+    
     % ADD NEUROPIL INTO REGRESSION HERE    
     LtL     = full(L'*L);
-    codes = ([LtL LtS; LtS' StS]+ 1e-3 * eye(icell+nBasis))\[LtU; StU];
-    neu   = codes(icell+1:end,:);    
-    codes = codes(1:icell,:);
+    codes   = ([LtL LtS; LtS' StS]+ 1e-3 * eye(icell+nBasis))\[LtU; StU];
+    neu     = codes(icell+1:end,:);    
+    codes   = codes(1:icell,:);
 %     codes = (LtL+ 1e-3 * eye(icell))\LtU;    
     
     % subtract off everything
     Ucell = U0 - reshape(neu' * S', size(U0)) - reshape(double(codes') * L', size(U0));    
-    %
+    
     % re-estimate masks
     L   = sparse(Ly*Lx, icell);
     for j = 1:icell        
@@ -180,7 +182,7 @@ while 1
         
         figure(1)
         subplot(1,2, 1);
-        imagesc(V0, [0 2*Th])
+        imagesc(ops.Vcorr, [0 2*Th])
         axis off
         
         subplot(1,2, 2);
@@ -196,7 +198,7 @@ end
 if ops.fig
     figure
     subplot(1,2, 1);
-    imagesc(V0, [0 4*Th])
+    imagesc(ops.Vcorr, [0 4*Th])
     axis off
     
     subplot(1,2, 2);

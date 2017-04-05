@@ -66,11 +66,13 @@ F1   = bsxfun(@rdivide, F1 , 1e-12 + sd);
 
 sp = zeros(size(F1));
 
+tic
 % run the deconvolution to get fs etc\
 parfor icell = 1:size(ca,2)
     [sp(:,icell),dcell{icell}] = ...
         single_step_single_cell(F1(:,icell), Params, kernelS(:,icell), NT, npad,dcell{icell});
 end
+toc
 
 % rescale baseline contribution
 for icell = 1:size(ca,2)

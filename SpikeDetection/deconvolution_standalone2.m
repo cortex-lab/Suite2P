@@ -70,7 +70,7 @@ sd   = 1/2 * 1/sqrt(2) * std(F1(2:end, :) - F1(1:end-1, :), [], 1);
 F1   = bsxfun(@rdivide, F1 , 1e-12 + sd);
 
 
-if 0
+if 1
     % get new kernel
     kerns = exp(-bsxfun(@rdivide, [1:ceil(5*mtau)]',  mtau * [.05 .125 .25 .5 1 2]));
     spfilt = ones([size(kerns,2) size(F1)]);

@@ -81,7 +81,7 @@ for i = 1:numel(ops1)
         
     if ops.getROIs
         % get sources in stat, and clustering images in res
-        [ops, stat, model]           = sourcery2(ops,U, model);
+        [ops, stat, model]           = sourcery(ops,U, model);
         
         % extract dF
         switch ops.signalExtraction
