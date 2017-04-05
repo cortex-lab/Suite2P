@@ -1,22 +1,30 @@
 % splits FOV in X and Y as specified by numBlocks and blockFrac
+% computes xyMask with smoothing constants specified to smooth registration
+% offsets across blocks
 function ops = MakeBlocks(ops)
 
 Lx = ops.Lx;
 Ly = ops.Ly;
 numBlocks = ops.numBlocks;
+
+% fraction of block of total image
 bfrac     = 1./max(2,(numBlocks-3));
 bfrac(numBlocks==1) = 1;
 ops.blockFrac = getOr(ops, {'blockFrac'}, bfrac);
 bpix      = round(ops.blockFrac .* [Ly Lx]);
+
+% pixel overlap of blocks
 ops.pixoverlap    = [];
 ops.pixoverlap = round((bpix.*numBlocks-[Ly Lx])./(numBlocks-2));
 
+% edges of blocks
 yB        = linspace(0, Ly, numBlocks(1)+1);
 yB        = round((yB(1:end-1) + yB(2:end)) / 2);
 
 xB        = linspace(0, Lx, numBlocks(2)+1);
 xB        = round((xB(1:end-1) + xB(2:end)) / 2);
 
+% compute indices of blocks
 ib        = 0;
 for iy = 1:numBlocks(1)
     if iy == numBlocks(1)
@@ -47,6 +55,9 @@ for iy = 1:numBlocks(1)
 end
 nblocks = ib;
 
+% compute smoothing mask xyMask
+% gaussian centered on block with width 2/3 the size of block
+% (or specified by user as ops.smoothBlocks)
 sT(1)        = mean(diff(yB)) * 2/3;
 sT(2)        = mean(diff(xB)) * 2/3;
 ops.smoothBlocks = getOr(ops, {'smoothBlocks'}, sT);

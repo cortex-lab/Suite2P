@@ -1,3 +1,4 @@
+% non-rigid registration of frames with offsets ds
 function [dreg, Valid]= blockRegisterMovie(data, xyMask, ds)
 
 orig_class = class(data);
@@ -9,7 +10,7 @@ orig_class = class(data);
 
 %%
 
-
+% smooth offsets across blocks by xyMask
 dx = round(xyMask * squeeze(ds(:,2,:))');
 dy = round(xyMask * squeeze(ds(:,1,:))');
 
@@ -24,10 +25,12 @@ Valid = true(Ly, Lx);
 for i = 1:NT
     Im = data(:,:,i);    
     
+    % apply offsets to indexing
     DX = dx(:,:,i) + idx;
     DY = dy(:,:,i) + idy;
     
     
+    % compute valid area of frame
     xyInvalid = DX<0 | DX>Lx-1 | DY<1 | DY>Ly;
     Valid(xyInvalid) = false;
     

@@ -1,3 +1,5 @@
+% registers frames using offsets dsall (rigid registration)
+% loops over batches of frames and over splits in frames
 function [dreg] = RegMovie(data, ops1, dsall, yFOVs, xFOVs)
 
 ix0 = 0;

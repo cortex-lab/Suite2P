@@ -8,6 +8,7 @@ function ops = blockAlignIterative(data, ops)
 % ops.mimg        = data(:,:,isort(50));
 
 
+% take most correlated frames to compute initial mean image
 mimg = pick_reg_init(data);
 
 numBlocks = numel(ops.yBL);
@@ -21,13 +22,16 @@ for i = 1:ops.NiterPrealign
     for ib = 1:numBlocks
         % collect ds
         ops.mimg = mimg(ops.yBL{ib},ops.xBL{ib});
-        
+        % compute offsets from each frame to mean image and subtract mean
+        % offset (centered at offset = 0)
         [dsnew(:,:,ib), Corr(:,ib)]  = ...
             regoffKriging(data(ops.yBL{ib},ops.xBL{ib},:), ops, 1);
     end
     
+    % register frames
     dreg = blockRegisterMovie(data, ops.xyMask, dsnew);
     
+    % sort by correlation and take mean of most correlated frames
     [~, igood] = sort(mean(Corr,2), 'descend');
     if i<floor(ops.NiterPrealign/2)        
         igood = igood(1:100);  

@@ -1,3 +1,4 @@
+% find bad frames and ignore them during registration
 function badi = getOutliers(ops)
 
 Corr = ops.CorrFrame;

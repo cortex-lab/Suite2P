@@ -1,4 +1,6 @@
-% registers frames using block registration in Y
+% registers frames using block registration in X and Y
+% computes registration offsets separately in each block
+% and smooths offsets over frame
 function ops1 = blockReg2P(ops)
 %%
 if ops.doRegistration
@@ -8,6 +10,7 @@ else
 end
 
 % default is 8 blocks in the Y direction (1/6 pixels each)
+% ops.numBlocks(1) = # of blocks in Y, ops.numBlocks(2) = # of blocks in X
 ops.numBlocks      = getOr(ops, {'numBlocks'}, [8 1]);
 numBlocks          = ops.numBlocks;
 numPlanes = length(ops.planesToProcess);
@@ -17,12 +20,22 @@ nplanes            = getOr(ops, {'nplanes'}, 1);
 nchannels          = getOr(ops, {'nchannels'}, 1);
 ichannel           = getOr(ops, {'gchannel'}, 1);
 rchannel           = getOr(ops, {'rchannel'}, 2);
-red_align   = getOr(ops, {'AlignToRedChannel'}, 0);
+red_align          = getOr(ops, {'AlignToRedChannel'}, 0); % register frames using red channel
 LoadRegMean        = getOr(ops, {'LoadRegMean'}, 0);
-ops.RegFileBinLocation = getOr(ops, {'RegFileBinLocation'}, []);
-ops.splitFOV           = getOr(ops, {'splitFOV'}, [1 1]);
-ops.RegFileTiffLocation = getOr(ops, {'RegFileTiffLocation'}, []);
-ops.dobidi         = getOr(ops, {'dobidi'}, 1);
+ops.RegFileBinLocation = getOr(ops, {'RegFileBinLocation'}, []); % binary file location
+ops.splitFOV           = getOr(ops, {'splitFOV'}, [1 1]); % split FOV into chunks if memory issue
+% ops.splitFOV(1) = # of subsets in Y, ops.splitFOV(2) = # of subsets in X
+ops.RegFileTiffLocation = getOr(ops, {'RegFileTiffLocation'}, []); % write registered tiffs to disk
+
+% bidirectional phase offset computation
+% assumes same bidirectional offset for each plane
+ops.dobidi             = getOr(ops, {'dobidi'}, 1); % compute bidiphase?
+% if set to a value by user, do not recompute
+if isfield(ops, 'BiDiPhase')
+    ops.dobidi         = 0;
+end 
+ops.BiDiPhase          = getOr(ops, {'BiDiPhase'}, 0); % set to default 0
+BiDiPhase              = ops.BiDiPhase;
 
 fs = ops.fsroot;
 
@@ -38,6 +51,9 @@ if ops.doRegistration
     [Ly, Lx, ~, ~] = size(IMG);
     ops.Ly = Ly;
     ops.Lx = Lx;
+    
+    % makes blocks (number = numBlocks)
+    % also makes masks for smoothing registration offsets across blocks
     ops = MakeBlocks(ops);
     fprintf('--- using %d blocks in Y\n', numBlocks(1));
     fprintf('--- %d pixels/block; avg pixel overlap = %d pixels\n', ...
@@ -49,30 +65,28 @@ if ops.doRegistration
             round(ops.blockFrac(2)*Lx),  ops.pixoverlap(2));
     end
 
-    
     % compute phase shifts from bidirectional scanning
-    if ~getOr(ops, {'BiDiPhase'}, 0) && ops.dobidi
-        BiDiPhase = BiDiPhaseOffsets(IMG);
-    else
-        BiDiPhase = 0;
+    if ops.dobidi
+        ops.BiDiPhase = BiDiPhaseOffsets(IMG);
     end
-    ops.BiDiPhase = BiDiPhase;
+    BiDiPhase = ops.BiDiPhase;
     fprintf('bi-directional scanning offset = %d pixels\n', BiDiPhase);
-   
-    if abs(BiDiPhase) > 0
-        yrange = 2:2:Ly;
-        if BiDiPhase>0
-            IMG(yrange,(1+BiDiPhase):Lx,:,:) = IMG(yrange, 1:(Lx-BiDiPhase),:,:);
-        else
-            IMG(yrange,1:Lx+BiDiPhase,:,:)   = IMG(yrange, 1-BiDiPhase:Lx,:,:);
-        end
-    end
+    % shift random frames by BiDiPhase
+    if abs(BiDiPhase) > 0 
+        IMG = ShiftBiDi(BiDiPhase, IMG, Ly, Lx);
+    end 
+    
+    % for each plane: align chosen frames to average to generate target image
+    % aligned in blocks
     for i = 1:numPlanes
         ops1{i} = blockAlignIterative(squeeze(IMG(:,:,ops.planesToProcess(i),:)), ops);
     end
+    
+    % display target image
    if ops.showTargetRegistration
        PlotRegMean(ops1,ops);
    end
+% do not compute target mean image   
 else
     [Ly, Lx] = size(IMG);
     for i = 1:numPlanes
@@ -105,6 +119,7 @@ end
 nbytes = fs{1}(1).bytes;
 nFr = nFramesTiff(fs{1}(1).name);
 
+
 % compute registration offsets from mean img for each frame
 xyValid = true(Ly, Lx);
 tic
@@ -124,12 +139,7 @@ for k = 1:length(fs)
         data = loadFramesBuff(fs{k}(j).name, ichanset(1), ichanset(2), ichanset(3), ops.temp_tiff);
 
         if abs(BiDiPhase) > 0
-            yrange = 2:2:Ly;
-            if BiDiPhase>0
-                data(yrange, (1+BiDiPhase):Lx,:) = data(yrange, 1:(Lx-BiDiPhase),:);
-            else
-                data(yrange, 1:Lx+BiDiPhase,:) = data(yrange, 1-BiDiPhase:Lx,:);
-            end
+            data = ShiftBiDi(BiDiPhase, data, Ly, Lx);
         end
         
         if ops.doRegistration
@@ -143,7 +153,6 @@ for k = 1:length(fs)
                     fprintf('  WARNING: number of frames in tiff (%d) is NOT a multiple of number of channels!\n', j);
                 end
                 ichanset = [ichannel; nFr; nchannels];
-%                 data = img.loadFrames(fs{k}(j).name, ichanset(1), ichanset(2), ichanset(3));                
                 data = loadFramesBuff(ops.temp_tiff, ichanset(1), ichanset(2), ichanset(3));               
             end
             

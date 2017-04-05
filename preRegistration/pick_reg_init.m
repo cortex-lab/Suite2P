@@ -1,3 +1,6 @@
+% correlate frames with each other
+% sort frames by correlations 
+% take mean image as mean over most correlated frames
 
 function mimg = pick_reg_init(data)
 %%
