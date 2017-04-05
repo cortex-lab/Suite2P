@@ -26,7 +26,7 @@ if nargin<3 || isempty(neu)
     neu = zeros(size(ca));
 end
 
-Params = [1 1 1 2e4]; %parameters of deconvolution
+Params = [1 3 1 2e4]; %parameters of deconvolution
 
 % f0 = (mtau/2); % resample the initialization of the kernel to the right number of samples
 kernel = exp(-[1:ceil(5*mtau)]'/mtau);
@@ -50,7 +50,6 @@ kernel = normc(kernel(:));
 kernelS     = repmat(kernel, 1, NN);
 dcell       = cell(NN,1);
 
-tic
 Fsort       = my_conv2(caCorrected, ceil(ops.fs), 1);
 Fsort       = sort(Fsort, 1, 'ascend');
 baselines   = Fsort(ceil(NT/20), :);

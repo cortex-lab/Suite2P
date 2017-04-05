@@ -105,4 +105,4 @@ else
         end
     end
 end
-IMG =  IMG(:,:,:,1:indx);
+IMG(:,:,:,(1+indx):end) = [];
