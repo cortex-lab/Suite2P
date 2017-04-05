@@ -23,10 +23,11 @@ maskNeu = ones(size(S,1), 1);
 
 stat = getNonOverlapROIs(stat, Ly, Lx);
 
+LtS = zeros(Nk, size(S,2));
 for k = 1:Nk
     ix = stat(k).ipix(~stat(k).isoverlap);
     maskNeu(stat(k).ipix)= 0;
-    if numel(ix)==0
+    if numel(ix)==0 || sum(~stat(k).isoverlap)==0
         LtS(k,:) = 0;
     else
         LtS(k,:) = stat(k).lam(~stat(k).isoverlap)' * S(ix, :);

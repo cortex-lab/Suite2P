@@ -18,6 +18,7 @@ fid = fopen(ops.RegFile, 'r');
 
 mov = zeros(numel(ops.yrange), numel(ops.xrange), ops.NavgFramesSVD, 'single');
 
+ij = 0;
 while 1
     data = fread(fid,  Ly*Lx*nimgbatch, '*int16');
     if isempty(data)
@@ -29,7 +30,6 @@ while 1
     badi = ops.badframes(ix + [1:size(data,3)]);
     data(:,:, badi) = [];
     
-    %     data = data(:,:,1:30:end);
     % subtract off the mean of this batch
     if nargin==1
         data = bsxfun(@minus, data, mean(data,3));
@@ -47,6 +47,7 @@ while 1
     mov(:,:,ix + (1:size(davg,3))) = davg(ops.yrange, ops.xrange, :);
     
     ix = ix + size(davg,3);
+    ij = ij + 1;
 end
 fclose(fid);
 
@@ -66,7 +67,12 @@ if nargin==1 || ~strcmp(clustModel, 'CNMF')
     end
     
     mov             = reshape(mov, [], size(mov,3));
-    sdmov           = mean(mov.^2,2).^.5;
+    
+    if 1
+        sdmov           = mean((mov(:,2:end) - mov(:,1:end-1)).^2, 2).^.5;
+    else
+        sdmov           = mean(mov.^2,2).^.5;
+    end
     sdmov           = reshape(sdmov, numel(ops.yrange), numel(ops.xrange));
     ops.sdmov       = sdmov;
     

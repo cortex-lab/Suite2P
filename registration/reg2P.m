@@ -27,6 +27,7 @@ ops.smooth_time_space  = getOr(ops, 'smooth_time_space', []);
 ops.dobidi         = getOr(ops, {'dobidi'}, 1);
 LoadRegMean        = getOr(ops, {'LoadRegMean'}, 0);
 
+BiDiPhase = 0;
 
 fs = ops.fsroot;
 
