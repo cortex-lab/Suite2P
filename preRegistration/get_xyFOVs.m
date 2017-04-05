@@ -1,13 +1,17 @@
+% splits FOV into parts if scanning with high-resolution (>1024 pixels)
+
 function [xFOVs, yFOVs] = get_xyFOVs(ops)
 
 
 Ly = ops.Ly;
 Lx = ops.Lx;
+% iR(1) = size of Y pixel subsets, iR(2) = size of X pixel subsets
 iR = ops.splitFOV;
 
 ny = floor(Ly/iR(1));
 nx = floor(Lx/iR(2));
 
+% indices for each subset
 xFOVs = zeros(nx, iR(2), iR(1));
 yFOVs = zeros(ny, iR(2), iR(1));
 for i = 1:iR(1)

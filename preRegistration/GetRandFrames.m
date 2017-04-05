@@ -7,14 +7,17 @@ nchannels          = getOr(ops, {'nchannels'}, 1);
 ichannel           = getOr(ops, {'gchannel'}, 1);
 rchannel           = getOr(ops, {'rchannel'}, 2);
 red_align          = getOr(ops, {'AlignToRedChannel'}, 0);
-targetImage        = getOr(ops, {'targetImage'}, []); % if not empty, 
-% generate target image from specified experiment (useful if there is slow
-% drift in data)
-ntifs = sum(cellfun(@(x) numel(x), fs));
-nfmax = max(1, round(ops.NimgFirstRegistration/ntifs));
+
+% if not empty, generate target image from specified experiment (useful if there is slow drift in data)
+targetImage        = getOr(ops, {'targetImage'}, []); 
+
+ntifs = sum(cellfun(@(x) numel(x), fs)); % total number of tiff files
+nfmax = max(1, round(ops.NimgFirstRegistration/ntifs)); % number of tiffs to take per file
 if nfmax>=2000
     nfmax = 1999;
 end
+
+% size of images
 nbytes = fs{1}(1).bytes;
 Info0 = imfinfo(fs{1}(1).name);
 nFr = length(Info0);
@@ -26,8 +29,10 @@ ops.Ly = Ly;
 indx = 0;
 IMG = zeros(Ly, Lx, nplanes, ops.NimgFirstRegistration, 'single');
 
+% grab random frames from target experiment
 if ~isempty(targetImage)
     k = targetImage(1);
+    % compute number of frames in tiff
     if abs(nbytes - fs{k}(1).bytes)>1e3
         nbytes = fs{k}(1).bytes;
         nFr = nFrames(fs{k}(1).name);
@@ -41,11 +46,13 @@ if ~isempty(targetImage)
         if j == 1
             offset = nchannels*nplanes;
         end
+        % compute number of frames in tiff if size different from previous
         if abs(nbytes - fs{k}(j).bytes)>1e3
             nbytes = fs{k}(j).bytes;
             nFr = nFrames(fs{k}(j).name);
         end
         numFr = min(ops.NimgFirstRegistration-indx, nFr/nchannels/nplanes);
+        % load red channel if red_align == 1
         if red_align
             ichanset = [offset + nchannels*(nplanes-iplane) + [rchannel;...
                 nchannels*nplanes*numFr]; nchannels];
@@ -61,10 +68,12 @@ if ~isempty(targetImage)
         indx = indx + size(data,4);
         j = j + 1;
     end
+% grab frames from all files
 else
     for k = 1:length(ops.SubDirs)
         iplane0 = 1;
         for j = 1:length(fs{k})
+            % compute number of frames in tiff if size different from previous
             if abs(nbytes - fs{k}(j).bytes)>1e3
                 nbytes = fs{k}(j).bytes;
                 nFr = nFrames(fs{k}(j).name);
@@ -74,13 +83,13 @@ else
             else
                 offset = 0;
             end
-            
+            % check if there are enough frames in the tiff
             if nFr<(nchannels*nplanes*nfmax+offset)
                 continue;
             end
             
             iplane0 = mod(iplane0-1, nplanes) + 1;
-            
+            % load red channel if red_align == 1
             if red_align
                 ichanset = [offset + nchannels*(iplane0-1) + [rchannel;...
                     nchannels*nplanes*nfmax]; nchannels];
