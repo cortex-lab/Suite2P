@@ -1,3 +1,4 @@
+% compute covariance matrix of A on GPU in batches to avoid memory errors
 function out = gpuBlockXtX(A)
 
 g = gpuDevice;

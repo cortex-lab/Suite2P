@@ -8,7 +8,9 @@ iplane = ops.iplane;
 [Ly, Lx] = size(ops.mimg);
 
 ntotframes          = ceil(sum(ops.Nframes));
+% number of frames used to compute SVD
 ops.NavgFramesSVD   = min(ops.NavgFramesSVD, ntotframes);
+% size of binning
 nt0 = ceil(ntotframes / ops.NavgFramesSVD);
 
 if isfield(ops, 'chunk_align') && ~isempty(ops.chunk_align); chunk_align   = ops.chunk_align(iplane);
@@ -41,6 +43,7 @@ while 1
         data = data(:,:, 1:nSlices);
     end
     
+    % bin data
     data = reshape(data, Ly, Lx, nt0, []);
     data = single(data);
     davg = squeeze(mean(data,3));
@@ -54,6 +57,7 @@ mov = mov(:, :, 1:ix);
 
 %% SVD options
 
+% number of SVD components kept
 ops.nSVD = min(ops.nSVD, size(mov,3));
 %
 mov             = reshape(mov, [], size(mov,3));
