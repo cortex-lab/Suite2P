@@ -62,6 +62,8 @@ ops.nSVD = min(ops.nSVD, size(mov,3));
 %
 mov             = reshape(mov, [], size(mov,3));
 % mov             = mov./repmat(mean(mov.^2,2).^.5, 1, size(mov,2));
+
+% compute covariance matrix of frames
 if ops.useGPU
     COV             = gpuBlockXtX(mov)/size(mov, 1);
 else
@@ -70,6 +72,7 @@ end
 
 ops.nSVD = min(size(COV,1)-2, ops.nSVD);
 
+% take SVD of covariance matrix and keep ops.nSVD components
 if ops.nSVD<1000 || size(COV,1)>1e4
     [V, Sv]          = eigs(double(COV), ops.nSVD);
 else
@@ -87,6 +90,7 @@ else
 end
 %%
 
+% compute U (normalized spatial masks... pixels x components)
 if ops.useGPU
     U               = normc(gpuBlockXY(mov, V));
 else

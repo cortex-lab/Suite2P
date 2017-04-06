@@ -1,3 +1,4 @@
+% compute X*Y on GPU in batches to avoid memory errors
 function out = gpuBlockXY(X, Y)
 
 % this code is for a very tall X, and small Y
