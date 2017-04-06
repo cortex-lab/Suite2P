@@ -28,6 +28,7 @@ rs = dx.^2 + dy.^2 - d0^2;
 dx = dx(rs<=0);
 dy = dy(rs<=0);
 
+% initialize cell matrices
 mPix    = zeros(numel(dx), 1e4);
 mLam    = zeros(numel(dx), 1e4);
 mLam0   = zeros(numel(dx), 1e4);
@@ -40,6 +41,7 @@ L   = sparse(Ly*Lx, 0);
 LtU = zeros(0, nSVD);
 LtS = zeros(0, nBasis);
 
+% subtract neuropil contribution
 neu     = StS\StU;
 Ucell   =  U0 - reshape(neu' * S', size(U0));
 
@@ -60,10 +62,9 @@ while 1
     um = my_conv2_circ(um, sig, [1 2]);
     
     V = V./um ;
-%     V = log(V./um);
-    
-     V = double(V);
-    % do the morpholrogical opening trick
+    %     V = log(V./um);
+    V = double(V);
+    % do the morphological opening trick
     if iter==1
         lbound = -my_min2(-my_min2(V, d0), d0);
     end
