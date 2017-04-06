@@ -1,3 +1,4 @@
+% compute SVD of data and save to file
 function [ops, U, Sv] = get_svdcomps(ops)
 
 % load(sprintf('%s/%s/%s/regops_%s_%s_plane%d.mat', ops.ResultsSavePath, ops.mouse_name, ops.date, ...
