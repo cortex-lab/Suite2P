@@ -11,7 +11,7 @@ iplane = ops.iplane;
 ntotframes          = ceil(sum(ops.Nframes));
 % number of frames used to compute SVD
 ops.NavgFramesSVD   = min(ops.NavgFramesSVD, ntotframes);
-% size of binning
+% size of binning (in time)
 nt0 = ceil(ntotframes / ops.NavgFramesSVD);
 
 if isfield(ops, 'chunk_align') && ~isempty(ops.chunk_align); chunk_align   = ops.chunk_align(iplane);
@@ -104,8 +104,8 @@ if ~exist(ops.ResultsSavePath, 'dir')
     mkdir(ops.ResultsSavePath)
 end
 
+% project spatial masks onto raw data
 fid = fopen(ops.RegFile, 'r');
-
 ix = 0;
 Fs = zeros(ops.nSVD, sum(ops.Nframes), 'single');
 while 1
@@ -137,17 +137,16 @@ end
 totF = [0 cumsum(ops.Nframes)];
 for iexp = 1:length(ops.expts)
     Vcell{iexp} = Fs(:, (1+ totF(iexp)):totF(iexp+1));
-    %         save(sprintf('%s/%s/%s/SVD_%s_%s_exp%d_plane%d.mat', ops.ResultsSavePath, ops.mouse_name, ops.date,...
-    %             ops.mouse_name, ops.date, ops.expts(iexp), iplane), 'F')
 end
 
+%%% save SVDs
 U = reshape(U, numel(ops.yrange), numel(ops.xrange), []);
 try % this is faster, but is limited to 2GB files
-save(sprintf('%s/SVD_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
-    ops.mouse_name, ops.date, iplane), 'U', 'Sv', 'Vcell', 'ops', '-v6');
+    save(sprintf('%s/SVD_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
+        ops.mouse_name, ops.date, iplane), 'U', 'Sv', 'Vcell', 'ops', '-v6');
 catch % this takes a bit less space, but is significantly slower
-save(sprintf('%s/SVD_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
-    ops.mouse_name, ops.date, iplane), 'U', 'Sv', 'Vcell', 'ops');
+    save(sprintf('%s/SVD_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
+        ops.mouse_name, ops.date, iplane), 'U', 'Sv', 'Vcell', 'ops');
 end
 
 % keyboard;
