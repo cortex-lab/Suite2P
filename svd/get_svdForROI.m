@@ -122,6 +122,8 @@ if nargin==1 || ~strcmp(clustModel, 'CNMF')
     % reshape U to frame size
     U = reshape(U, numel(ops.yrange), numel(ops.xrange), []);
     
+    
+    
     % write SVDs to disk
     if ~exist(ops.ResultsSavePath, 'dir')
         mkdir(ops.ResultsSavePath);
