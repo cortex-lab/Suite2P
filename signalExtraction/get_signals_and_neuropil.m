@@ -1,4 +1,4 @@
-function Fcell = get_signals_and_neuropil(opt, iplane)
+function dat = get_signals_and_neuropil(opt, iplane, doSave)
 
 if ~isfield(opt,'zoomMicro')
     opt.zoomMicro=2; %fixed zoomMicro
@@ -30,8 +30,11 @@ if ~isfield(opt, 'newFile') % save new file '<name>_new.mat', otherwise
                             % existing file is overwritten
     opt.newFile = 0;
 end
+if nargin < 3
+    doSave = 1;
+end
 
-filenames = dir(sprintf('%s/F_%s_%s_plane%d_Nk*.mat',...
+filenames = dir(sprintf('%s/F_%s_%s_plane%d*.mat',...
     opt.ResultsSavePath, opt.mouse_name, opt.date, iplane));
 filenames = {filenames.name};
 if isfield(opt, 'Nk')
@@ -63,16 +66,11 @@ if opt.processed == 1
 end
 %%
 ops = data.ops;
-Nk       = numel(data.stat); % all ROIs including parents
-if opt.processed == 1
-    Nk_parents = find(isinf(data.cl.Mrs), 1, 'last');
-else
-    Nk_parents = ops.Nk;
-end
+Nk       = numel(data.stat); % all ROIs
 
 useCells = 1:Nk;
 if opt.processed == 1
-    useCells = find(data.cl.iscell);
+    useCells = find([data.stat.iscell]);
 end
 [LyU, LxU] = size(ops.mimg);
 LyR=length(ops.yrange);
@@ -81,17 +79,31 @@ LxR=length(ops.xrange);
 allField=zeros(LyR,LxR);
 
 cellFields=nan(length(useCells),LyR,LxR);
+exclude = [];
 for jCell=1:length(useCells)
     iCell=useCells(jCell);
+    % use all pixels of ROI to include into allFields (used to define
+    % neuropil mask)
     ipix=data.stat(iCell).ipix;
     temp=zeros(LyR,LxR);
     temp(ipix)=ones(1,length(ipix));
-    cellFields(jCell,:,:)=temp;
-    % do not include parent masks into allField
-    if jCell > Nk_parents
-        allField=allField+jCell.*temp;
+    allField=allField+jCell.*temp;
+    % if overlap of this ROI with other ROIs is larger than 2/3s of its
+    % size, exclude this ROI
+    overlap = data.stat(iCell).isoverlap;
+    if sum(overlap) > .66 * length(ipix)
+        exclude(end+1) = jCell;
+        continue
     end
+    % exclude pixels from ROI that overlap with other ROIs to determine
+    % signal of this ROI
+    ipix(overlap) = [];
+    temp=zeros(LyR,LxR);
+    temp(ipix)=ones(1,length(ipix));
+    cellFields(jCell,:,:)=temp;
 end
+cellFields(exclude,:,:) = [];
+useCells(exclude) = [];
 opt.totPixels=LxU;
 
 um2pix=infoPixUm(opt.totPixels,opt.zoomMicro,opt.microID);
@@ -130,16 +142,17 @@ if opt.useSVD == 0
         
         mov = single(reshape(mov, [], NT));
         
-        for k = 1:Nk
+        for k = 1:length(useCells)
+            iCell = useCells(k);
             if opt.getSignal
-                ipix = data.stat(k).ipix;
+                ipix = data.stat(iCell).ipix(~data.stat(iCell).isoverlap);
                 if ~isempty(ipix)
                     % F(k,ix + (1:NT)) = stat(k).lambda' * data(ipix,:);
                     F(k,ix + (1:NT)) = mean(mov(ipix,:), 1);
                 end
             end
             if opt.getNeuropil
-                ipix_neuropil= data.stat(k).ipix_neuropil;
+                ipix_neuropil= data.stat(iCell).ipix_neuropil;
                 if ~isempty(ipix_neuropil)
                     Fneu(k,ix + (1:NT)) = mean(mov(ipix_neuropil,:), 1);
                 end
@@ -198,10 +211,10 @@ else % opt.useSVD == 1
 end
 if opt.processed
     if opt.getSignal
-        data.F.Fcell = Fcell;
+        data.Fcell = Fcell;
     end
     if opt.getNeuropil
-        data.F.FcellNeu = FcellNeu;
+        data.FcellNeu = FcellNeu;
     end
 else
     if opt.getSignal
@@ -214,6 +227,9 @@ end
 
 dat = data;
 dat.opsNpil = opt;
+if doSave == 0
+    return
+end
 if opt.processed == 1
     if opt.newFile == 1
         save(fullfile(opt.ResultsSavePath, [filenames{1}(1:end-4) ...
