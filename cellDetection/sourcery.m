@@ -41,7 +41,9 @@ L   = sparse(Ly*Lx, 0);
 LtU = zeros(0, nSVD);
 LtS = zeros(0, nBasis);
 
-% subtract neuropil contribution
+% regress maps onto basis functions and subtract neuropil contribution
+% U = Ucell + neu'*S'
+% neu = inv(S'*S) * (S'*U')
 neu     = StS\StU;
 Ucell   =  U0 - reshape(neu' * S', size(U0));
 
@@ -50,7 +52,7 @@ nBasis = size(S,2);
 %
 while 1
     iter = iter + 1;    
-   
+    
     % residual is smoothed at every iteration
     us = my_conv2_circ(Ucell, sig, [2 3]);
     
@@ -65,6 +67,8 @@ while 1
     %     V = log(V./um);
     V = double(V);
     % do the morphological opening trick
+    % take the running max of the running min
+    % this normalizes the brightness of the image
     if iter==1
         lbound = -my_min2(-my_min2(V, d0), d0);
     end
@@ -73,6 +77,7 @@ while 1
     
     if iter==1        
         % find indices of all maxima  in plus minus 1 range
+        % use the median of these peaks to decide stopping criterion
         maxV    = -my_min(-V, 1, [1 2]);
         ix      = (V > maxV-1e-10);
         
