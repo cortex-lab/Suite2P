@@ -47,24 +47,6 @@ for i = planesToInterpolate
     corrsAll = cat(3, corrsAll, corrsFOV);
     dsAllPlanes = cat(4, dsAllPlanes, dsFOV);
 end
-for i = setdiff(2:nplanes, planesToInterpolate)
-    for j = 1:size(ops1,2)
-        ds = [];
-        corrs = [];
-        t = 0;
-        for k = 1:length(ops1{i,j}.Nframes)
-            d = NaN(ops1{1,j}.Nframes(k),2);
-            d(1:ops1{i,j}.Nframes(k),:) = ops1{i,j}.DS(t + (1:ops1{i,j}.Nframes(k)),:);
-            c = NaN(ops1{1,j}.Nframes(k),1);
-            c(1:ops1{i,j}.Nframes(k)) = ops1{i,j}.CorrFrame(t + (1:ops1{i,j}.Nframes(k)));
-            ds = [ds; d];
-            corrs = [corrs; c];
-            t = t + ops1{i,j}.Nframes(k);
-        end
-        ops1{i,j}.DS = ds;
-        ops1{i,j}.CorrFrame = corrs;
-    end
-end
 
 % find z-shifts in data; assume that whole stack is moving together
 % (won't detect very fast z-shifts)
@@ -176,11 +158,13 @@ for i = 1:length(planesToInterpolate)
     linearInd = sub2ind(size(ds(:,:,:,1)), subscripts(:,1), subscripts(:,2), ...
         subscripts(:,3));
     
+    indNoFrame = isnan(ops1{planesToInterpolate(i),j}.DS(:,planesToInterpolate(i)));
+    
     if ismember(i, indInterpolate)
         prof = eye(nplanes);
         prof(prof==0) = NaN;
         prof(planesToInterpolate, planesToInterpolate) = profiles;
-        up = planesToInterpolate(i) - shifts';
+        up = planesToInterpolate(i) - shifts(~indNoFrame)';
         up = prof(:,up)';
         up = ~isnan(up);
     end
@@ -193,19 +177,26 @@ for i = 1:length(planesToInterpolate)
             ops1{planesToInterpolate(i),j}.DS;
         values(isnan(values(:,1)),:) = [];
         ops1{planesToInterpolate(i),j}.DS = values;
+        corrs = ops1{planesToInterpolate(i),j}.CorrFrame;
+        corrs(indNoFrame,:) = [];
     
         if ismember(i, indInterpolate)
             ops1{planesToInterpolate(i),j}.planeInterpolated = 1;
             ops1{planesToInterpolate(i),j}.usedPlanes = up;
-            ops1{planesToInterpolate(i),j}.basisPlanes = planesToInterpolate(i) - shifts';
+            ops1{planesToInterpolate(i),j}.basisPlanes = ...
+                planesToInterpolate(i) - shifts(~indNoFrame)';
             ops1{planesToInterpolate(i),j}.profiles = prof;
+            corrs(~usedPlanes) = NaN;
+            ops1{planesToInterpolate(i),j}.CorrFrame = nanmean(corrs,2);
         else
             ops1{planesToInterpolate(i),j}.planeInterpolated = 0;
             up = false(size(ds,1), nplanes);
+            up(indNoFrame,:) = [];
             up(:,planesToInterpolate(i)) = true;
             ops1{planesToInterpolate(i),j}.usedPlanes = up;
+            ops1{planesToInterpolate(i),j}.CorrFrame = corrs(:,planesToInterpolate(i));
         end
-        ap = planesToInterpolate(i) + shifts';
+        ap = planesToInterpolate(i) + shifts(~indNoFrame)';
         ap(ap<planesToInterpolate(1)) = planesToInterpolate(1);
         ap(ap>planesToInterpolate(end)) = planesToInterpolate(end);
         ops1{planesToInterpolate(i),j}.alignedToPlanes = ap;
