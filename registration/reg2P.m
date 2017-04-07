@@ -22,16 +22,26 @@ interpolateAcrossPlanes = getOr(ops, {'interpolateAcrossPlanes'}, false); %if tr
 planesToInterpolate = getOr(ops, {'planesToInterpolate'}, 1:nplanes); % these planes will be considered for interpolation
 alignAcrossPlanes  = getOr(ops, {'alignAcrossPlanes'}, false); % at each time point, frame will be aligned to best matching target image (from different planes)
 
-ops.splitFOV           = getOr(ops, {'splitFOV'}, [1 1]);
+ops.splitFOV           = getOr(ops, {'splitFOV'}, [1 1]); % split FOV into chunks if memory issue
+% ops.splitFOV(1) = # of subsets in Y, ops.splitFOV(2) = # of subsets in X
 ops.smooth_time_space  = getOr(ops, 'smooth_time_space', []);
-ops.dobidi         = getOr(ops, {'dobidi'}, 1);
-LoadRegMean        = getOr(ops, {'LoadRegMean'}, 0);
+LoadRegMean            = getOr(ops, {'LoadRegMean'}, 0);
 
+% bidirectional phase offset computation
+% assumes same bidirectional offset for each plane
+ops.dobidi             = getOr(ops, {'dobidi'}, 1); % compute bidiphase?
+% if set to a value by user, do not recompute
+if isfield(ops, 'BiDiPhase')
+    ops.dobidi         = 0;
+end 
+ops.BiDiPhase          = getOr(ops, {'BiDiPhase'}, 0); % set to default 0
+BiDiPhase              = ops.BiDiPhase;
 
 fs = ops.fsroot;
 
 %% find the mean frame after aligning a random subset
 
+% check if there are tiffs in directory
 try
    IMG = loadFramesBuff(fs{1}(1).name, 1, 1, 1); 
 catch
@@ -40,29 +50,23 @@ end
 [Ly, Lx, ~, ~] = size(IMG);
 ops.Ly = Ly;
 ops.Lx = Lx;
+
 % split into subsets (for high scanning resolution recordings)
 [xFOVs, yFOVs] = get_xyFOVs(ops);
    
 if ops.doRegistration
+    % get frames for initial registration
     IMG = GetRandFrames(fs, ops);    
     
     % compute phase shifts from bidirectional scanning
-    if ~getOr(ops, {'BiDiPhase'}, 0) && ops.dobidi
-        BiDiPhase = BiDiPhaseOffsets(IMG);
-    else
-        BiDiPhase = getOr(ops, {'BiDiPhase'}, 0);
+    if ops.dobidi
+        ops.BiDiPhase = BiDiPhaseOffsets(IMG);
     end
-    ops.BiDiPhase = BiDiPhase;
+    BiDiPhase = ops.BiDiPhase;
     fprintf('bi-directional scanning offset = %d pixels\n', BiDiPhase);
-   
-    if abs(BiDiPhase) > 0
-        yrange = 2:2:Ly;
-        if BiDiPhase>0
-            IMG(yrange,(1+BiDiPhase):Lx,:,:) = IMG(yrange, 1:(Lx-BiDiPhase),:,:);
-        else
-            IMG(yrange,1:Lx+BiDiPhase,:,:)   = IMG(yrange, 1-BiDiPhase:Lx,:,:);
-        end
-    end
+    if abs(BiDiPhase) > 0 
+        IMG = ShiftBiDi(BiDiPhase, IMG, Ly, Lx);
+    end 
     
     % for each plane: align chosen frames to average to generate target image
     ops1 = cell(numPlanes, size(xFOVs,2));
@@ -104,12 +108,15 @@ if ops.doRegistration
         end
     end
     
+    % display target image
     if ops.showTargetRegistration   
         PlotRegMean(ops1,ops);
         drawnow
     end
     clear IMG
-else % no registration
+    
+% don't recompute mean image
+else 
     ops1 = cell(numPlanes, 1);
     for i = 1:numPlanes
         ops1{i} = ops;
@@ -158,6 +165,7 @@ end
 
 %%
 tic
+% compute registration offsets and align using offsets
 % if two consecutive files have as many bytes, they have as many frames
 nbytes = 0;
 for k = 1:length(fs)
@@ -168,6 +176,8 @@ for k = 1:length(fs)
     
     iplane0 = 1:1:ops.nplanes; % identity of planes for first frames in tiff file
     for j = 1:length(fs{k})
+        % only compute number of frames if size of tiff is different
+        % from previous tiff
         if abs(nbytes - fs{k}(j).bytes)>1e3
             nbytes = fs{k}(j).bytes;
             nFr = nFramesTiff(fs{k}(j).name);
@@ -183,17 +193,12 @@ for k = 1:length(fs)
         data = loadFramesBuff(fs{k}(j).name, ichanset(1), ichanset(2), ...
             ichanset(3), ops.temp_tiff);
         
-        if abs(BiDiPhase) > 0
-            yrange = 2:2:Ly;
-            if BiDiPhase>0
-                data(yrange, (1+BiDiPhase):Lx,:) = data(yrange, 1:(Lx-BiDiPhase),:);
-            else
-                data(yrange, 1:Lx+BiDiPhase,:) = data(yrange, 1-BiDiPhase:Lx,:);
-            end
+        if abs(BiDiPhase) > 0 
+            data = ShiftBiDi(BiDiPhase, data, Ly, Lx);
         end
-        
+    
         if ops.doRegistration
-            % get the registration offsets
+            % get the registration offsets for each frame
             [dsall, ops1] = GetRegOffsets(data, k, j, iplane0, ops, ops1);
             
             if ~alignAcrossPlanes
@@ -206,14 +211,11 @@ for k = 1:length(fs)
                     end
                     ichanset = [ichannel; nFr; nchannels];
                     data = loadFramesBuff(ops.temp_tiff, ichanset(1), ichanset(2), ichanset(3), ops.temp_tiff);
+                    % shift green channel by same bidiphase offset
                     if abs(BiDiPhase) > 0
-                        yrange = 2:2:Ly;
-                        if BiDiPhase>0
-                            data(yrange, (1+BiDiPhase):Lx,:) = data(yrange, 1:(Lx-BiDiPhase),:);
-                        else
-                            data(yrange, 1:Lx+BiDiPhase,:) = data(yrange, 1-BiDiPhase:Lx,:);
-                        end
+                        data = ShiftBiDi(BiDiPhase, data, Ly, Lx);
                     end
+    
                 end
                 % align the frames according to the registration offsets
                 dreg = RegMovie(data, ops1, dsall, yFOVs, xFOVs);
@@ -222,8 +224,8 @@ for k = 1:length(fs)
             dreg = data;
         end
         
+        % write dreg to bin file+
         if ~alignAcrossPlanes
-            % write dreg to bin file+
             for i = 1:numPlanes
                 ifr0 = iplane0(ops.planesToProcess(i));
                 indframes = ifr0:nplanes:size(data,3);
@@ -254,6 +256,8 @@ for i = 1:numel(ops1)
     ops1{i}.badframes = false(1, size(ops1{i}.DS,1));
 end
 %%
+
+% write registered tiffs to disk if ~isempty(ops.RegFileTiffLocation)
 for i = 1:numel(ops1)    
     fclose(fid{i});
     fid{i}           = fopen(ops1{i}.RegFile, 'r');
@@ -317,7 +321,7 @@ for i = 1:numel(ops1)
     end
 end
 %%
-% compute xrange, yrange
+% compute outlier frames and xrange, yrange of registered frames
 for i = 1:numel(ops1)
     if ops.doRegistration
         % determine bad frames

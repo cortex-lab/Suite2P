@@ -1,7 +1,9 @@
+% rigid registration of frames with offsets ds
 function dreg = register_movie(data, ops, ds)
 
 orig_class = class(data);
 
+% compute maximum batch size for GPU
 [h, w, nFrames] = size(data);
 if getOr(ops, 'useGPU', 0)
     nFramesPerBatch = getBatchSize(w*h);

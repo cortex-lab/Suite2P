@@ -1,4 +1,4 @@
-function [sp, dcell] = deconvolution_standalone(ops, ca, neu)
+function [sp, dcell] = deconvolution_standalone2(ops, ca, neu, gt)
 % takes as input the calcium and (optionally) neuropil traces,  
 % both NT by NN (number of neurons).
 % outputs a cell array dcell containing spike times (dcell.st) and amplitudes
@@ -26,14 +26,14 @@ if nargin<3 || isempty(neu)
     neu = zeros(size(ca));
 end
 
-Params = [1 3 1 2e4]; %parameters of deconvolution
+Params = [1 1 1 2e4]; %parameters of deconvolution
 
 % f0 = (mtau/2); % resample the initialization of the kernel to the right number of samples
-kernel = exp(-[1:ceil(5*mtau)]'/mtau);
+kernel = exp(-[1:ceil(5*mtau)]'/mtau) ;
 %
 npad        = 250;
 [NT, NN]    = size(ca);
-coefNeu = .8 * ones(1,NN); % initialize neuropil subtraction coef with 0.8
+coefNeu     = .8 * ones(1,NN); % initialize neuropil subtraction coef with 0.8
 
 caCorrected = ca - bsxfun(@times, neu, coefNeu);
 
@@ -50,7 +50,12 @@ kernel = normc(kernel(:));
 kernelS     = repmat(kernel, 1, NN);
 dcell       = cell(NN,1);
 
+% running minimum subtraction here???
+
+
 Fsort       = my_conv2(caCorrected, ceil(ops.fs), 1);
+
+
 Fsort       = sort(Fsort, 1, 'ascend');
 baselines   = Fsort(ceil(NT/20), :);
 
@@ -64,15 +69,36 @@ sd   = 1/2 * 1/sqrt(2) * std(F1(2:end, :) - F1(1:end-1, :), [], 1);
 
 F1   = bsxfun(@rdivide, F1 , 1e-12 + sd);
 
+
+if 1
+    % get new kernel
+    kerns = exp(-bsxfun(@rdivide, [1:ceil(5*mtau)]',  mtau * [.05 .125 .25 .5 1 2]));
+    spfilt = ones([size(kerns,2) size(F1)]);
+    for j = 1:size(kerns,2)
+        spfilt(j, :,:) = filter(kerns(:,j), 1, gt);
+    end
+    
+    sts = zeros(size(spfilt,1));
+    stF = zeros(size(spfilt,1), 1);
+    for k = 1:size(spfilt,3)
+        sts = sts + spfilt(:,:,k) * spfilt(:,:,k)';
+        stF = stF + spfilt(:,:,k) * F1(:,k);
+    end
+    coefs = sts \ stF;
+    kernel = normc(kerns * coefs);
+    kernelS = repmat(kernel, 1, NN);
+
+    plot(kernel)
+    drawnow
+end
+
 sp = zeros(size(F1));
 
-tic
 % run the deconvolution to get fs etc\
 parfor icell = 1:size(ca,2)
     [sp(:,icell),dcell{icell}] = ...
         single_step_single_cell(F1(:,icell), Params, kernelS(:,icell), NT, npad,dcell{icell});
 end
-toc
 
 % rescale baseline contribution
 for icell = 1:size(ca,2)

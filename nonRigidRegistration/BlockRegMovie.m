@@ -1,5 +1,5 @@
-% non-rigid registers data frames using dsall and returns dreg
-% loop over batch size
+% registers frames using offsets dsall (rigid registration)
+% loops over batches
 function [dreg, xyValid] = BlockRegMovie(data, ops, dsall, xyValid)
 
 ix0 = 0;

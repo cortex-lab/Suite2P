@@ -49,8 +49,7 @@ Uneu = U;
 
 tic
 for k = 1:niter
-    %recompute neuropil
-    
+    %recompute neuropil    
     Sm = bsxfun(@times, S, PixL);
     StS = Sm' * Sm;
     StU = Sm' * Uneu';
@@ -69,7 +68,7 @@ for k = 1:niter
     Ucell = U - gather(neuropil); %what's left over for cell model
     PixL = PixL';
     
-    keyboard;
+%     keyboard;
     
     if k==1
         iclust = initialize_clusters(Ucell, Nk, 'squares', Lx, Ly);       % 'random', Voronoi', 'squares'

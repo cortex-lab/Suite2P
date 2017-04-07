@@ -23,10 +23,11 @@ maskNeu = ones(size(S,1), 1);
 
 stat = getNonOverlapROIs(stat, Ly, Lx);
 
+LtS = zeros(Nk, size(S,2));
 for k = 1:Nk
     ix = stat(k).ipix(~stat(k).isoverlap);
     maskNeu(stat(k).ipix)= 0;
-    if numel(ix)==0
+    if numel(ix)==0 || sum(~stat(k).isoverlap)==0
         LtS(k,:) = 0;
     else
         LtS(k,:) = stat(k).lam(~stat(k).isoverlap)' * S(ix, :);
@@ -142,7 +143,8 @@ Fneu(:, ops.badframes)  = Fneu(:, indNoNaN(ix));
 % figure out the ICA coefficients here
 ops.fs           = getOr(ops, 'fs', ops.imageRate/ops.nplanes);
 %
-[coefNeu, inomax]   = my_ica(F', Fneu', ops.fs, 0.7);
+[coefNeu, inomax]   = my_ica(F', Fneu', ops.fs, 0.7, ops.maxNeurop);
+%
 dF                  = F - bsxfun(@times, Fneu, coefNeu(:));
 
 % dF          = F - Fneu;
@@ -176,7 +178,7 @@ for i = 1:length(ops.Nframes)
 end
 
 if getOr(ops, 'saveNeuropil', 0)
-    S = reshape(S, numel(ops.yrange), numel(ops.xrange), Nbasis);
+    S = reshape(S, numel(ops.yrange), numel(ops.xrange), nBasis);
     save(sprintf('%s/NEU_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
         ops.mouse_name, ops.date, ops.iplane),  'ops', 'S', 'Ntraces', '-v7.3')
 end

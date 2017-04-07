@@ -1,14 +1,27 @@
 function [w_out inomax]= my_ica(ca, neu, fs, w_default, w_max)
 %%
+if nargin<4; w_default = .7; end
+if nargin<5; w_max = 1.4; end
+    
 ca = double(ca);
 neu = double(neu);
 
 [b1, a1] = butter(3, 2*[1/100 1/10]/fs, 'bandpass');
-ca   = filtfilt(b1, a1, ca);
-neu = filtfilt(b1, a1, neu);
+
+nPerBatch = 5e8/size(ca,1)/8;
+
+for j = 1:ceil(size(ca,2)/nPerBatch)
+    i0 = (j-1) * nPerBatch + [1:nPerBatch];
+    i0(i0>size(ca,2)) = [];
+    
+    ca(:,i0)   = filtfilt(b1, a1, ca(:,i0));
+    neu(:,i0) = filtfilt(b1, a1, neu(:,i0));
+    
+end
+
 neu = bsxfun(@minus, neu, mean(neu,1));
 ca   = bsxfun(@minus, ca, mean(ca,1));
-
+    
 wR = mean(ca.*neu, 1)./mean(neu.*neu, 1);
 ca = ca - bsxfun(@times, neu, wR);
 

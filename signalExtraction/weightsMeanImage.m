@@ -6,7 +6,7 @@ nBasis = size(S,2);
 Nk = numel(stat);
 Ireg = diag([ones(Nk,1); zeros(nBasis,1)]);
 
-covL = [m.LtL m.LtS; m.LtS' m.StS] + 1e-4 * Ireg;
+covL = [m.LtL m.LtS; m.LtS' m.StS] + 1e-2 * Ireg;
 %%
 mimg1 = ops.mimg1(ops.yrange, ops.xrange);
 mimg1 = my_conv2(mimg1, ops.sig, [1 2]);

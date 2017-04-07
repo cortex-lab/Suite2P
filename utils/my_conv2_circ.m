@@ -27,6 +27,7 @@ if sig>.25
         NT = size(S1,1);        
         
         S1 = cat(1, S1(size(S1,1)-nO + [1:nO], :),  S1(:,:), S1([1:nO], :));
+%         S1 = cat(1, S1([nO:-1:1], :),  S1(:,:), S1(size(S1,1)-nO + [nO:-1:1], :));
         
         S1 = my_conv(S1, sig);        
         S1 = S1(nO + [1:NT], :);
