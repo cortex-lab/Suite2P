@@ -75,12 +75,12 @@ try
     ch = str2num(str(16 : ind(1)-1));
     ops.nchannels = length(ch);
     
-    fastZEnable = sscanf(hh(findstr(hh, 'fastZEnable = '):end), 'fastZEnable = %d');
-    fastZDiscardFlybackFrames = sscanf(hh(findstr(hh, 'fastZDiscardFlybackFrames = '):end), 'fastZDiscardFlybackFrames = %d');
+    fastZEnable = sscanf(hh(strfind(hh, 'fastZEnable = '):end), 'fastZEnable = %d');
+    fastZDiscardFlybackFrames = sscanf(hh(strfind(hh, 'fastZDiscardFlybackFrames = '):end), 'fastZDiscardFlybackFrames = %d');
     if isempty(fastZDiscardFlybackFrames)
         fastZDiscardFlybackFrames = 0;
     end
-    stackNumSlices = sscanf(hh(findstr(hh, 'stackNumSlices = '):end), 'stackNumSlices = %d');
+    stackNumSlices = sscanf(hh(strfind(hh, 'stackNumSlices = '):end), 'stackNumSlices = %d');
     
     ops.nplanes = 1;
     if fastZEnable
@@ -90,6 +90,8 @@ try
     str = hh(strfind(hh, 'scanZoomFactor = '):end);
     ind = strfind(str, 'scanimage');
     ops.zoomMicro = str2double(str(18 : ind(1)-1));
+    
+    ops.imageRate = sscanf(hh(strfind(hh, 'scanFrameRate = '):end), 'scanFrameRate = %f');
     
     % get number of channels of red experiment
     if isfield(db, 'expred') && ~isempty(db.expred) && ...
