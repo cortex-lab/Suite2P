@@ -13,6 +13,8 @@ nchannels          = getOr(ops, {'nchannels'}, 1);
 ichannel           = getOr(ops, {'gchannel'}, 1);
 rchannel           = getOr(ops, {'rchannel'}, 2);
 red_align          = getOr(ops, {'AlignToRedChannel'}, 0);
+
+ops.RegFileBinLocation = getOr(ops, {'RegFileBinLocation'}, []);
 RegFileBinLocation = getOr(ops, {'RegFileBinLocation'}, []);
 targetImage        = getOr(ops, {'targetImage'}, []); % specify experiment to generate target image from (useful if drift) 
 alignTargetImages  = getOr(ops, {'alignTargetImages'}, false); % if true, align target images to each other
@@ -22,6 +24,9 @@ alignAcrossPlanes  = getOr(ops, {'alignAcrossPlanes'}, false); % at each time po
 
 ops.splitFOV           = getOr(ops, {'splitFOV'}, [1 1]);
 ops.smooth_time_space  = getOr(ops, 'smooth_time_space', []);
+ops.dobidi         = getOr(ops, {'dobidi'}, 1);
+LoadRegMean        = getOr(ops, {'LoadRegMean'}, 0);
+
 
 fs = ops.fsroot;
 
@@ -37,7 +42,7 @@ ops.Ly = Ly;
 ops.Lx = Lx;
 % split into subsets (for high scanning resolution recordings)
 [xFOVs, yFOVs] = get_xyFOVs(ops);
-
+   
 if ops.doRegistration
     IMG = GetRandFrames(fs, ops);    
     
@@ -47,6 +52,7 @@ if ops.doRegistration
     else
         BiDiPhase = getOr(ops, {'BiDiPhase'}, 0);
     end
+    ops.BiDiPhase = BiDiPhase;
     fprintf('bi-directional scanning offset = %d pixels\n', BiDiPhase);
    
     if abs(BiDiPhase) > 0

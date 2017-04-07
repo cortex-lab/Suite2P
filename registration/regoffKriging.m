@@ -60,7 +60,7 @@ xt = [x1(:) x2(:)]';
 if useGPU
     xt = gpuArray(single(xt));
 end
-    
+
 if ops.kriging
     % compute kernels for regression
     sigL     = .85; % kernel width in pixels

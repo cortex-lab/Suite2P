@@ -18,7 +18,6 @@ nchannels          = getOr(ops, {'nchannels'}, 1);
 ichannel           = getOr(ops, {'gchannel'}, 1);
 rchannel           = getOr(ops, {'rchannel'}, 2);
 red_align   = getOr(ops, {'AlignToRedChannel'}, 0);
-BiDiPhase          = getOr(ops, {'BiDiPhase'}, 0);
 LoadRegMean        = getOr(ops, {'LoadRegMean'}, 0);
 ops.RegFileBinLocation = getOr(ops, {'RegFileBinLocation'}, []);
 ops.splitFOV           = getOr(ops, {'splitFOV'}, [1 1]);
@@ -52,11 +51,12 @@ if ops.doRegistration
 
     
     % compute phase shifts from bidirectional scanning
-    if ops.dobidi
+    if ~getOr(ops, {'BiDiPhase'}, 0) && ops.dobidi
         BiDiPhase = BiDiPhaseOffsets(IMG);
     else
         BiDiPhase = 0;
     end
+    ops.BiDiPhase = BiDiPhase;
     fprintf('bi-directional scanning offset = %d pixels\n', BiDiPhase);
    
     if abs(BiDiPhase) > 0

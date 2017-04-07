@@ -1,22 +1,49 @@
-function [ops, stat, Fcell, FcellNeu]      = extractSignals(ops, m, stat)
+function [ops, stat, Fcell, FcellNeu]      = extractSignalsNoOverlaps(ops, m, stat)
 
 ops.saveNeuropil = getOr(ops, 'saveNeuropil', 0);
 
 Nk = numel(stat);
 
-S = reshape(m.S, [], size(m.S, ndims(m.S)));
+Ly = numel(ops.yrange);
+Lx = numel(ops.xrange);
 
+% make new set of basis functions (larger coverage)
+ops.neuropilRange = 10;
+
+S = getNeuropilBasis(ops, Ly, Lx, 'raisedcosyne'); % 'raisedcosyne', 'Fourier'
+S = normc(S);
+
+% S = m.S;
+
+S = reshape(S, [], size(S, ndims(S)));
 nBasis = size(S,2);
 
-Ireg = diag([ones(Nk,1); zeros(nBasis,1)]);
+% initialize mask
+maskNeu = ones(size(S,1), 1);
 
-% maskNeu = ones(size(S,1), 1);
+stat = getNonOverlapROIs(stat, Ly, Lx);
 
-covL = [m.LtL m.LtS; m.LtS' m.StS];
+for k = 1:Nk
+    ix = stat(k).ipix(~stat(k).isoverlap);
+    maskNeu(stat(k).ipix)= 0;
+    if numel(ix)==0
+        LtS(k,:) = 0;
+    else
+        LtS(k,:) = stat(k).lam(~stat(k).isoverlap)' * S(ix, :);
+    end
+end
 
-% covLinv = inv(covL + 1e-4 * Ireg);
-% covLinv = covLinv ./ repmat(diag(covLinv), 1, size(covLinv,2));
+% add all pixels within X um 
+if isfield(ops, 'exclFracCell') && ops.exclFracCell>0
+    H       = fspecial('disk', round(ops.diameter * ops.exclFracCell));
+    maskNeu = reshape(maskNeu, Ly, Lx);
+    maskNeu = imfilter(maskNeu, H, 'replicate');
+    maskNeu = single(maskNeu(:) > 1-1e-3);
+end
 %% get signals  
+S    = bsxfun(@times, S, maskNeu(:));
+StS = S' * S;
+StS = StS + 1e-2 * eye(size(StS));
 
 nimgbatch = 2000;
 
@@ -55,20 +82,22 @@ while 1
     %
     Ftemp = zeros(Nk, NT, 'single');
     for k = 1:Nk
-       ipix = stat(k).ipix(:)'; 
+       ipix = stat(k).ipix(~stat(k).isoverlap)'; 
        if ~isempty(ipix)
-           Ftemp(k,:) = stat(k).lam(:)' * data(ipix,:);
+           Ftemp(k,:) = stat(k).lam(~stat(k).isoverlap)' * data(ipix,:);
        end
     end
-    %
-    StU         = S' * data;
-    Fdeconv     = covL\cat(1, Ftemp, StU);
+    F(:,ix + (1:NT))    = Ftemp;
     
-    Fneu(:,ix + (1:NT))     = m.LtS * Fdeconv(1+Nk:end, :); % estimated neuropil
-    F(:,ix + (1:NT))        = Fneu(:,ix + (1:NT)) + Fdeconv(1:Nk, :); % estimated ROI signal
+    Tneu                = StS\(S' * data);
+    Ftemp2              = LtS * Tneu;    
+    Fneu(:,ix + (1:NT)) = Ftemp2;
+    
+%     Fneu(:,ix + (1:NT))     = m.LtS * Fdeconv(1+Nk:end, :); % estimated neuropil
+%     F(:,ix + (1:NT))        = Fneu(:,ix + (1:NT)) + Fdeconv(1:Nk, :); % estimated ROI signal
     
     if ops.saveNeuropil
-        Ntraces(:,ix + (1:NT)) = Fdeconv(1+Nk:end, :);
+        Ntraces(:,ix + (1:NT)) = Tneu;
     end
     
     ix = ix + NT;
@@ -85,20 +114,18 @@ data = single(reshape(data, [], 1));
 scalefactors = nan(numel(stat),1);
 Ftemp = zeros(Nk, 1, 'single');
 for k = 1:Nk
-    ipix = stat(k).ipix(:)';
+    ipix = stat(k).ipix(~stat(k).isoverlap)'; 
     if ~isempty(ipix)
-        Ftemp(k,:) = stat(k).lam(:)' * data(ipix,1);
+        Ftemp(k,:) = stat(k).lam(~stat(k).isoverlap)' * data(ipix,1);
         scalefactors(k) = mean(m.sdmov(ipix));
     end
 end
-%
-StU         = S' * data;
-Fdeconv     = covL\cat(1, Ftemp, StU);
 
-muS                     = m.LtS * Fdeconv(1+Nk:end, 1); % estimated neuropil
+Tneu                = StS\(S' * data);
+Ftemp2              = LtS * Tneu;
 
-Fneu     = bsxfun(@plus, Fneu, muS); % estimated neuropil
-F        = bsxfun(@plus, F,    muS+Fdeconv(1:Nk, 1));
+Fneu     = bsxfun(@plus, Fneu, Ftemp2); % estimated neuropil
+F        = bsxfun(@plus, F,    Ftemp);
 
 Fneu     = bsxfun(@times, Fneu, scalefactors); % estimated neuropil
 F        = bsxfun(@times, F,    scalefactors);
@@ -112,8 +139,7 @@ ix(ix>numel(indNoNaN))  = numel(indNoNaN);
    F(:, ops.badframes)  = F(:,    indNoNaN(ix));
 Fneu(:, ops.badframes)  = Fneu(:, indNoNaN(ix));
 
-
-% figure out the ICA coefficients here <--- FIX THIS
+% figure out the ICA coefficients here
 ops.fs           = getOr(ops, 'fs', ops.imageRate/ops.nplanes);
 %
 [coefNeu, inomax]   = my_ica(F', Fneu', ops.fs, 0.7);
@@ -140,7 +166,7 @@ for j = 1:numel(stat)
     stat(j).neuropilCoefficient    = coefNeu(j); 
 end
 
-%
+%%
 csumNframes = [0 cumsum(ops.Nframes)];
 Fcell       = cell(1, length(ops.Nframes));
 FcellNeu    = cell(1, length(ops.Nframes));

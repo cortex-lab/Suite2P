@@ -81,6 +81,7 @@ try
     load(fullfile(root, fname))
     for j = 1:ops.nplanes
         DS{j} = ops1{j}.DS;
+        ops.BiDiPhase = ops1{j}.BiDiPhase;
     end
 catch       
 end
@@ -88,19 +89,32 @@ end
 ntf0 = 0;
 numPlanes = ops.nplanes;
 iplane0 = 1:1:ops.nplanes;
+
 for k = 1:length(fsRED)
     if nimgall(indx(k))>=median(nimgall(indx))        
         iplane0 = mod(iplane0-1, numPlanes) + 1;
          
         ichanset = [ops.nchannels_red*ops.nplanes + [ops.nchannels_red (ntifs*ops.nchannels_red*ops.nplanes)] ...
             ops.nchannels_red]; 
-        data = loadFrames(fsRED{k}, ichanset(1),ichanset(2), ichanset(3));        
+        data = loadFramesBuff(fsRED{k}, ichanset(1),ichanset(2), ichanset(3));        
         if ~exist('mimgR')
             [Ly, Lx, ~] = size(data);
             mimgR = zeros(Ly, Lx, ops.nplanes);
         end
         data = reshape(data, Ly, Lx, ops.nplanes, ntifs);         
-
+   
+        for iPlane = 1:length(iplane0)
+            BiDiPhase = ops.BiDiPhase;
+            if abs(BiDiPhase) > 0
+                yrange = 2:2:Ly;
+                if BiDiPhase>0
+                    data(yrange,(1+BiDiPhase):Lx,iPlane,:) = data(yrange, 1:(Lx-BiDiPhase),iPlane,:);
+                else
+                    data(yrange,1:(Lx+BiDiPhase),iPlane,:)   = data(yrange, (1-BiDiPhase):Lx,iPlane,:);
+                end
+            end
+        end
+        
         for j = 1:size(data,3)
             dsall = DS{j}(nimgFirst(indx(k), j)+1 + [1:size(data,4)], :);
             data(:, :, j,:)        = ...
@@ -111,8 +125,7 @@ for k = 1:length(fsRED)
         
         nFr = nFramesTiff(fsRED{k});
         iplane0 = iplane0 - nFr/ops.nchannels_red;
-        
-%         keyboard;
+       
     end
 end
 
