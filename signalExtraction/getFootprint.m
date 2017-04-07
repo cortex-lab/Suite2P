@@ -30,11 +30,12 @@ for j = 1:size(mPix,2)
     y0 = ceil(stat(j).med(1));
     x0 = ceil(stat(j).med(2));
     
+    % pixels within FOV and within radius d0 of center
     ivalid = find((x0 + dx)>=1 & (x0 + dx)<=Lx & (y0 + dy)>=1 & (y0 + dy)<=Ly);
-    
     ipix = (y0+dy(ivalid)) + (x0 + dx(ivalid)-1) * Ly;
-    proj = codes(j,:) * Ucell(:, ipix);
-    
+    % weight of cell onto each pixel across components
+    proj = codes(j,:) * Ucell(:, ipix); 
+    % mean of radius of pixels with weights > frac
     stat(j).footprint = mean(rs(ivalid(proj>max(proj) * frac))) /ops.diameter;
     
 end
