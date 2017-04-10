@@ -7,7 +7,24 @@ function [frames, headers] = loadFramesBuff(tiff, firstIdx, lastIdx, stride, tem
 
 if nargin>4
     if ~isequal(tiff, temp_file) % do not copy if already copied
-        copyfile(tiff,temp_file);
+        % in case copying fails (server hangs)
+        iscopied = 0;
+        firstfail = 1;
+        while ~iscopied
+            try       
+                copyfile(tiff,temp_file);
+                iscopied = 1;
+                if ~firstfail
+                    fprintf('  succeeded!\n');
+                end
+            catch
+                if firstfail
+                    fprintf('copy tiff failed, retrying...');
+                end
+                firstfail = 0;
+                pause(10);
+            end
+        end
         tiff = temp_file;
     end
     info = imfinfo(temp_file); % get info after copying
