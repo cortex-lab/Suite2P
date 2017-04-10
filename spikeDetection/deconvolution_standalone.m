@@ -1,13 +1,9 @@
-function [sp, dcell] = deconvolution_standalone(ops, ca, neu)
+function [sp, ca, sd, tproc, F1, kernel] = deconvolution_standalone(ops, ca, neu)
 % takes as input the calcium and (optionally) neuropil traces,  
 % both NT by NN (number of neurons).
-% outputs a cell array dcell containing spike times (dcell.st) and amplitudes
-% (dcell.c). dcell.B(3) is the neuropil contamination coefficient. 
-% dcell.B(2) is an estimate of the baseline. 
 
 % specify in ops the following options, or leave empty for defaults
 %       fs = sampling rate
-%       recomputeKernel = whether to estimate kernel from data
 %       sensorTau  = timescale of sensor, if recomputeKernel = 0
 % additional options can be specified (mostly for linking with Suite2p, see below).
 
@@ -18,6 +14,8 @@ ops.sameKernel   = getOr(ops, {'sameKernel'}, 1); % 1 for same kernel per plane,
 ops.maxNeurop    = getOr(ops, {'maxNeurop'}, Inf); % maximum allowed neuropil contamination coefficient. 
 ops.recomputeKernel = getOr(ops, {'recomputeKernel'}, 1); % whether to estimate kernel from data
 
+lam = getOr(ops, 'lam', 3);
+
 % the kernel should depend on timescale of sensor and imaging rate
 ops.fs           = getOr(ops, 'fs', ops.imageRate/ops.nplanes);
 mtau             = ops.fs * ops.sensorTau; 
@@ -26,7 +24,7 @@ if nargin<3 || isempty(neu)
     neu = zeros(size(ca));
 end
 
-Params = [1 3 1 2e4]; %parameters of deconvolution
+Params = [1 lam 1 2e4]; %parameters of deconvolution
 
 % f0 = (mtau/2); % resample the initialization of the kernel to the right number of samples
 kernel = exp(-[1:ceil(5*mtau)]'/mtau);
@@ -47,8 +45,6 @@ if ops.recomputeKernel
 end
 kernel = normc(kernel(:));
 %%
-kernelS     = repmat(kernel, 1, NN);
-dcell       = cell(NN,1);
 
 Fsort       = my_conv2(caCorrected, ceil(ops.fs), 1);
 Fsort       = sort(Fsort, 1, 'ascend');
@@ -64,22 +60,25 @@ sd   = 1/2 * 1/sqrt(2) * std(F1(2:end, :) - F1(1:end-1, :), [], 1);
 
 F1   = bsxfun(@rdivide, F1 , 1e-12 + sd);
 
-sp = zeros(size(F1));
+sp = zeros(size(F1), 'single');
 
 tic
 % run the deconvolution to get fs etc\
 parfor icell = 1:size(ca,2)
-    [sp(:,icell),dcell{icell}] = ...
-        single_step_single_cell(F1(:,icell), Params, kernelS(:,icell), NT, npad,dcell{icell});
+    sp(:,icell) = ...
+        single_step_single_cell(F1(:,icell), Params, kernel, NT, npad);
 end
-toc
+tproc = toc;
 
-% rescale baseline contribution
-for icell = 1:size(ca,2)
-    dcell{icell}.c                      = dcell{icell}.c * sd(icell);
-    dcell{icell}.baseline               = baselines(icell);
-    dcell{icell}.neuropil_coefficient   = coefNeu(icell);
-end
+ca = filter(kernel, 1, sp);
+ca   = bsxfun(@times, ca, sd);
+
+% % rescale baseline contribution
+% for icell = 1:size(ca,2)
+%     dcell{icell}.c                      = dcell{icell}.c * sd(icell);
+%     dcell{icell}.baseline               = baselines(icell);
+%     dcell{icell}.neuropil_coefficient   = coefNeu(icell);
+% end
 
 %%
 

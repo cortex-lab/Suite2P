@@ -1,6 +1,5 @@
 function stat = run_deconvolution3(ops, dat)
 % outputs a cell array of deconvolved spike times and amplitudes.
-% Optionally output this in matrix form Ffr (very sparse).
 
 stat = dat.stat;
 
@@ -51,13 +50,22 @@ kernel = normc(kernel(:));
 kernelS   = repmat(kernel, 1, NN);
 dcell = cell(NN,1);
 
-% run the deconvolution to get fs etc\
+
+switch ops.deconvType
+    case 'OASIS'
+        [sp, ca, coefs, B] = wrapperOASIS(ops, F, N);
+    case 'L0'
+
+end
+% run the deconvolution to get fs etc
 parfor icell = 1:size(Ff,2)
     [F1(:,icell),dcell{icell}] = ...
         single_step_single_cell(F1(:,icell), Params, kernelS(:,icell), NT, npad,dcell{icell});
 end
 
 fprintf('Percent bins with spikes %2.4f \n', 100*mean(F1(:)>0))
+
+
 
 % rescale baseline contribution
 for icell = 1:size(Ff,2)

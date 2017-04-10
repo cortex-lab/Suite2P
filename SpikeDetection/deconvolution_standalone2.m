@@ -17,6 +17,7 @@ ops.sensorTau    = getOr(ops, {'sensorTau'}, 2); % approximate timescale in seco
 ops.sameKernel   = getOr(ops, {'sameKernel'}, 1); % 1 for same kernel per plane, 0 for individual kernels (does not work right now)
 ops.maxNeurop    = getOr(ops, {'maxNeurop'}, Inf); % maximum allowed neuropil contamination coefficient. 
 ops.recomputeKernel = getOr(ops, {'recomputeKernel'}, 1); % whether to estimate kernel from data
+lam = getOr(ops, 'lam', 3);
 
 % the kernel should depend on timescale of sensor and imaging rate
 ops.fs           = getOr(ops, 'fs', ops.imageRate/ops.nplanes);
@@ -26,7 +27,7 @@ if nargin<3 || isempty(neu)
     neu = zeros(size(ca));
 end
 
-Params = [1 1 1 2e4]; %parameters of deconvolution
+Params = [1 lam 1 2e4]; %parameters of deconvolution
 
 % f0 = (mtau/2); % resample the initialization of the kernel to the right number of samples
 kernel = exp(-[1:ceil(5*mtau)]'/mtau) ;

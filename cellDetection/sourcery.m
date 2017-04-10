@@ -224,7 +224,6 @@ stat = getFootprint(ops, codes, Ucell, mPix, mLam, mLam0);
 % compute compactness of ROIs
 stat = anatomize(ops, mPix, mLam, stat);
 
-figure
 [~, iclust, lam] = drawClusters(ops, r, mPix, mLam, Ly, Lx);
 
 model.L     = L;
