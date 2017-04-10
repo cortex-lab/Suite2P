@@ -1,3 +1,4 @@
+% compute SVD of data and save to file
 function [ops, U, Sv] = get_svdcomps(ops)
 
 % load(sprintf('%s/%s/%s/regops_%s_%s_plane%d.mat', ops.ResultsSavePath, ops.mouse_name, ops.date, ...
@@ -8,7 +9,9 @@ iplane = ops.iplane;
 [Ly, Lx] = size(ops.mimg);
 
 ntotframes          = ceil(sum(ops.Nframes));
+% number of frames used to compute SVD
 ops.NavgFramesSVD   = min(ops.NavgFramesSVD, ntotframes);
+% size of binning (in time)
 nt0 = ceil(ntotframes / ops.NavgFramesSVD);
 
 if isfield(ops, 'chunk_align') && ~isempty(ops.chunk_align); chunk_align   = ops.chunk_align(iplane);
@@ -41,6 +44,7 @@ while 1
         data = data(:,:, 1:nSlices);
     end
     
+    % bin data
     data = reshape(data, Ly, Lx, nt0, []);
     data = single(data);
     davg = squeeze(mean(data,3));
@@ -54,10 +58,13 @@ mov = mov(:, :, 1:ix);
 
 %% SVD options
 
+% number of SVD components kept
 ops.nSVD = min(ops.nSVD, size(mov,3));
 %
 mov             = reshape(mov, [], size(mov,3));
 % mov             = mov./repmat(mean(mov.^2,2).^.5, 1, size(mov,2));
+
+% compute covariance matrix of frames
 if ops.useGPU
     COV             = gpuBlockXtX(mov)/size(mov, 1);
 else
@@ -66,6 +73,7 @@ end
 
 ops.nSVD = min(size(COV,1)-2, ops.nSVD);
 
+% take SVD of covariance matrix and keep ops.nSVD components
 if ops.nSVD<1000 || size(COV,1)>1e4
     [V, Sv]          = eigs(double(COV), ops.nSVD);
 else
@@ -83,6 +91,7 @@ else
 end
 %%
 
+% compute U (normalized spatial masks... pixels x components)
 if ops.useGPU
     U               = normc(gpuBlockXY(mov, V));
 else
@@ -95,8 +104,8 @@ if ~exist(ops.ResultsSavePath, 'dir')
     mkdir(ops.ResultsSavePath)
 end
 
+% project spatial masks onto raw data
 fid = fopen(ops.RegFile, 'r');
-
 ix = 0;
 Fs = zeros(ops.nSVD, sum(ops.Nframes), 'single');
 while 1
@@ -128,17 +137,16 @@ end
 totF = [0 cumsum(ops.Nframes)];
 for iexp = 1:length(ops.expts)
     Vcell{iexp} = Fs(:, (1+ totF(iexp)):totF(iexp+1));
-    %         save(sprintf('%s/%s/%s/SVD_%s_%s_exp%d_plane%d.mat', ops.ResultsSavePath, ops.mouse_name, ops.date,...
-    %             ops.mouse_name, ops.date, ops.expts(iexp), iplane), 'F')
 end
 
+%%% save SVDs
 U = reshape(U, numel(ops.yrange), numel(ops.xrange), []);
 try % this is faster, but is limited to 2GB files
-save(sprintf('%s/SVD_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
-    ops.mouse_name, ops.date, iplane), 'U', 'Sv', 'Vcell', 'ops', '-v6');
+    save(sprintf('%s/SVD_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
+        ops.mouse_name, ops.date, iplane), 'U', 'Sv', 'Vcell', 'ops', '-v6');
 catch % this takes a bit less space, but is significantly slower
-save(sprintf('%s/SVD_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
-    ops.mouse_name, ops.date, iplane), 'U', 'Sv', 'Vcell', 'ops');
+    save(sprintf('%s/SVD_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
+        ops.mouse_name, ops.date, iplane), 'U', 'Sv', 'Vcell', 'ops');
 end
 
 % keyboard;

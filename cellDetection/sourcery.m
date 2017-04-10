@@ -1,36 +1,34 @@
+% run cell detection on spatial masks U
 function [ops, stat, model] = sourcery(ops, U, model)
 
 ops.fig         = getOr(ops, 'fig', 1);
 ops.ThScaling   = getOr(ops, 'ThScaling', 1);
 
+% reshape U to be (nMaps x Y x X)
 U0 =  reshape(U, [], size(U,ndims(U)))';
-
 Ly = numel(ops.yrange);
 Lx = numel(ops.xrange);
-
 [nSVD, Npix] = size(U0);
-
 U0 = reshape(U0, nSVD, Ly, Lx);
 
+% compute neuropil basis functions for cell detection
 S = getNeuropilBasis(ops, Ly, Lx, 'raisedcosyne'); % 'raisedcosyne', 'Fourier'
 S = normc(S);
 nBasis = size(S,2);
 
-StU = S'*U0(:,:)';
-StS = S'*S;
+StU = S'*U0(:,:)'; % covariance of neuropil with spatial masks
+StS = S'*S; % covariance of neuropil basis functions
 
+% make cell mask with ops.diameter
 d0   = ceil(ops.diameter); % expected cell diameter in pixels
-
 sig = ceil(d0/4); 
-
-% data Ucell is nMaps by Ly by Lx
 dx = repmat([-d0:d0], 2*d0+1, 1);
 dy = dx';
-
 rs = dx.^2 + dy.^2 - d0^2;
 dx = dx(rs<=0);
 dy = dy(rs<=0);
 
+% initialize cell matrices
 mPix    = zeros(numel(dx), 1e4);
 mLam    = zeros(numel(dx), 1e4);
 mLam0   = zeros(numel(dx), 1e4);
@@ -43,6 +41,9 @@ L   = sparse(Ly*Lx, 0);
 LtU = zeros(0, nSVD);
 LtS = zeros(0, nBasis);
 
+% regress maps onto basis functions and subtract neuropil contribution
+% U = Ucell + neu'*S'
+% neu = inv(S'*S) * (S'*U')
 neu     = StS\StU;
 Ucell   =  U0 - reshape(neu' * S', size(U0));
 
@@ -51,7 +52,7 @@ nBasis = size(S,2);
 %
 while 1
     iter = iter + 1;    
-   
+    
     % residual is smoothed at every iteration
     us = my_conv2_circ(Ucell, sig, [2 3]);
     
@@ -63,10 +64,11 @@ while 1
     um = my_conv2_circ(um, sig, [1 2]);
     
     V = V./um ;
-%     V = log(V./um);
-    
-     V = double(V);
-    % do the morpholrogical opening trick
+    %     V = log(V./um);
+    V = double(V);
+    % do the morphological opening trick
+    % take the running max of the running min
+    % this normalizes the brightness of the image
     if iter==1
         lbound = -my_min2(-my_min2(V, d0), d0);
     end
@@ -75,6 +77,7 @@ while 1
     
     if iter==1        
         % find indices of all maxima  in plus minus 1 range
+        % use the median of these peaks to decide stopping criterion
         maxV    = -my_min(-V, 1, [1 2]);
         ix      = (V > maxV-1e-10);
         
