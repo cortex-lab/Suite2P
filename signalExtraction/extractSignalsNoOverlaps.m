@@ -166,7 +166,6 @@ for j = 1:numel(stat)
     stat(j).top5pcMinusMed   = sk(j,4);
     stat(j).blockstarts      = [0 cumsum(ops.Nframes)];
     stat(j).iplane                 = ops.iplane;
-    stat(j).neuropilCoefficient    = coefNeu(j); 
 end
 
 %%
