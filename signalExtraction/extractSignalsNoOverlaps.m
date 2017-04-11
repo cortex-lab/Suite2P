@@ -143,7 +143,8 @@ Fneu(:, ops.badframes)  = Fneu(:, indNoNaN(ix));
 % figure out the ICA coefficients here
 ops.fs           = getOr(ops, 'fs', ops.imageRate/ops.nplanes);
 %
-[coefNeu, inomax]   = my_ica(F', Fneu', ops.fs, 0.7, ops.maxNeurop);
+%[coefNeu, inomax]   = my_ica(F', Fneu', ops.fs, 0.7, ops.maxNeurop);
+coefNeu = 0.7;
 %
 dF                  = F - bsxfun(@times, Fneu, coefNeu(:));
 
