@@ -56,11 +56,11 @@ for i = 1:length(ops.planesToProcess)
         stat(j).neuropilCoefficient = coefs(j);
         stat(j).noiseLevel          = sd(j);  
     end
-    %%
+    
     nCum = 0;
     for j = 1:length(dat.Fcell)
        dat.sp{j} = sp(nCum + [1:size(dat.Fcell{j},2)], :)'; 
-       nCum = nCum + size(dat.Fcell{j},1);
+       nCum = nCum + size(dat.Fcell{j},2);
     end
     
     
