@@ -1,4 +1,4 @@
-function [sp, ca, sd] = OASISpreprocess(ops, ca, neu)
+function [sp, ca, sd, F1] = OASISpreprocess(ops, ca, neu, gt)
 % takes as input the calcium and (optionally) neuropil traces,  
 % both NT by NN (number of neurons).
 
@@ -21,7 +21,7 @@ if nargin<3 || isempty(neu)
     neu = zeros(size(ca));
 end
 
-[NT NN] = size(ca);
+[NT , ~] = size(ca);
 
 % determine and subtract the running baseline
 if getOr(ops, 'runningBaseline', 0)
@@ -54,14 +54,56 @@ ca = zeros(size(F1), 'single');
 lam         = getOr(ops, 'lam', 3);
 mtau        = ops.fs * ops.sensorTau; 
 g           = exp(-1/mtau);
-parfor n = 1:size(F1,2)
-    [ca(:,n), sp(:,n)] = oasisAR1(F1(:,n)', g, lam);
-%     [c_oasis, sp(:,n)] = oasisAR2(F1(:,n)', [], lam);
-%     [c_oasis, sp(:,n)] = constrained_oasisAR1(F1(:,n)', g);
-    %         [c_oasis, sp(:,n)] = oasisAR1(Raw{id}(:,n)', g);
+
+if nargin>3
+    % get GT kernel    
+    kerns = exp(-bsxfun(@rdivide, [1:ceil(5*mtau)]',  mtau * exp(linspace(-3, 1.5, 11))));
+        
+    spfilt0 = ones([size(kerns,2) size(F1)]);
+    for j = 1:size(kerns,2)
+        spfilt0(j, :,:) = filter(kerns(:,j), 1, gt);
+    end    
+    
+    err = Inf * ones(size(kerns,2));
+    for j = 1:size(kerns,2)-1
+        for i = j+1:size(kerns,2)
+            spfilt = spfilt0([j i], :, :);
+            
+            sts = zeros(size(spfilt,1));
+            stF = zeros(size(spfilt,1), 1);
+            for k = 1:size(spfilt,3)
+                sts = sts + spfilt(:,:,k) * spfilt(:,:,k)';
+                stF = stF + spfilt(:,:,k) * F1(:,k);
+            end
+            coefs   = sts \ stF;
+            pred    = coefs' * spfilt(:,:);
+            err(j,i) = mean((pred(:) - F1(:)).^2);            
+        end
+    end
+    
+    [i, j] = find(err==min(err(:)));
+    g = kerns(1, [j i]);
+        
+    g = [(g(1)+g(2))  -g(1)*g(2)];
+    parfor n = 1:size(F1,2)
+        [ca(:,n), sp(:,n)] = oasisAR2(F1(:,n)', g, lam);
+    end
+
+elseif isfield(ops, 'fracTau') 
+    g           = [exp(-1/mtau) exp(-1/(ops.fracTau*mtau))];
+    g = [(g(1)+g(2))  -g(1)*g(2)];
+    parfor n = 1:size(F1,2)
+        [ca(:,n), sp(:,n)] = oasisAR2(F1(:,n)', g, lam);
+    end
+else
+    parfor n = 1:size(F1,2)
+        [ca(:,n), sp(:,n)] = oasisAR1(F1(:,n)', g, lam);
+        %     [c_oasis, sp(:,n)] = constrained_oasisAR1(F1(:,n)', g);
+        %         [c_oasis, sp(:,n)] = oasisAR1(Raw{id}(:,n)', g);
+    end
 end
 
 ca   = bsxfun(@times, ca, sd);
-
+F1   = bsxfun(@times, F1, sd);
 %%
 

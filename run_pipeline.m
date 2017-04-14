@@ -33,7 +33,7 @@ end
 ops.diameter                        = getOr(ops, 'diameter', 10);
 ops.clustrules.diameter             = ops.diameter;
 ops.clustrules                      = get_clustrules(ops.clustrules);
-%%
+%
 % this loads ops1 and checks if processed binary files exist
 opath = sprintf('%s/regops_%s_%s.mat', ops.ResultsSavePath, ops.mouse_name, ops.date);
 processed = 1;
@@ -47,7 +47,7 @@ if exist(opath, 'file')
 else
     processed = 0;
 end
-%%
+%
 % do registration if the processed binaries do not exist
 if processed==0
     if ops.nonrigid
