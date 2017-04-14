@@ -22,7 +22,7 @@ for k = 1:niter
     Fsub = bsxfun(@minus, F, bsxfun(@times, N, coefs));
     
     % at each iteration run the deconvolution on the residual
-    switch getOr(ops, 'deconvType', 'OASIS')
+    switch getOr(ops, 'deconvType', 'L0')
         case 'OASIS'
             [sp, ca, sd2] = OASISpreprocess(ops,  Fsub);
         case 'L0'
