@@ -101,8 +101,9 @@ clear IMG
 
 % prepare individual options files and open binaries
 for i = 1:numPlanes
-    ops1{i}.RegFile = fullfile(ops.RegFileRoot, sprintf('tempreg_plane%d.bin',...
-        ops.planesToProcess(i)));
+    ops1{i}.RegFile = fullfile(ops.RegFileRoot, ...
+        sprintf('%s_%s_%s_plane%d.bin', ops.mouse_name, ops.date, ...
+        ops.CharSubDirs, i));
     regdir = fileparts(ops1{i}.RegFile);
     if ~exist(regdir, 'dir')
         mkdir(regdir);
@@ -195,11 +196,13 @@ for i = 1:numPlanes
     end    
     if ~isempty(ops.RegFileBinLocation)
         folder = fullfile(ops1{i}.RegFileBinLocation, ops1{i}.mouse_name, ...
-            ops1{i}.date);
+            ops1{i}.date, ops.CharSubDirs);
         if ~exist(folder, 'dir')
             mkdir(folder)
         end
-        fidCopy = fopen(fullfile(folder, sprintf('plane%d.bin', i)), 'w');
+        fidCopy = fopen(fullfile(folder, ...
+            sprintf('%s_%s_%s_plane%d.bin', ops.mouse_name, ops.date, ...
+            ops.CharSubDirs, i)), 'w');
         sz = ops1{i}.Lx * ops1{i}.Ly;
         parts = ceil(sum(ops1{i}.Nframes) / 2000);
         for p = 1:parts
@@ -232,12 +235,6 @@ for i = 1:numPlanes
         ops1{i}.xrange = 1:Lx;
     end
     
-    savepath = sprintf('%s/', ops.ResultsSavePath);
-    
-    if ~exist(savepath, 'dir')
-        mkdir(savepath)
-    end
-    
     mimg = zeros(size(ops1{i}.mimg1));
     for ib = 1:numBlocks
         mimg(ops1{i}.yBL{ib}, ops1{i}.xBL{ib}) = ops1{i}.mimgB{ib};
@@ -245,7 +242,11 @@ for i = 1:numPlanes
     ops1{i}.mimg = mimg;
     
 end
-
+    
+savepath = sprintf('%s/', ops.ResultsSavePath);
+if ~exist(savepath, 'dir')
+    mkdir(savepath)
+end
 save(sprintf('%s/regops_%s_%s.mat', ops.ResultsSavePath, ...
         ops.mouse_name, ops.date),  'ops1')
 
