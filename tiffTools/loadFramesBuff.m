@@ -83,7 +83,11 @@ if true %nargin <=4  %if the file was not copied locally use Tiff library
         frames(:,:,t) = read(tiff);
         
         if loadHeaders
+            headerNames = tiff.getTagNames;
             headers{t} = getTag(tiff, 'ImageDescription');
+            if any(contains(headerNames,'Software')) % metadata for scanimage2016, SF
+                headers{t} = [headers{t} getTag(tiff,'Software')];
+            end
         end
         
         if t < nFrames
