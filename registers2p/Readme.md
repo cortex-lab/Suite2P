@@ -22,13 +22,13 @@ Allows users to import two Suite2P output structures (F...proc.mat files) genera
 - Manually curate ROIs with Suite2P visualization GUI and save data files
 - Import 2 Suite2P F...proc.mat files  (Load dataset 1, Load dataset 2)
 - Click Register
-- Navigate the window that opens clicking corresponding control points in the left and right image (in order, i.e. click point 1 in left-hand image, click 1 in right-hand image, click 2 in left-hand image etc.)
+- Navigate the window that opens, clicking corresponding control points in the left and right image (in order, i.e. click point 1 in left-hand image, click 1 in right-hand image, click 2 in left-hand image etc.)
 - Click "File -> Close Control Point Selection Tool"
 - Wait for transform to be applied
 ---
 
 ### 4. Detect overlap ###
-- In "ROIs panel" above image window 2 decide on proportion of pixel overlap you require (this is calculated from the ROIs in dataset 1, i.e. if and ROI from dataset 2 covers all pixels in the ROI from dataset 1 then this corresponds to 100% overlap)
+- In "ROIs panel" above image window 2 decide on proportion of pixel overlap you require (this is calculated from the ROIs in dataset 1, i.e. if an ROI from dataset 2 covers all pixels in the ROI from dataset 1 then this corresponds to 100% overlap)
 - Click "Detect overlap"
 - Manually curate overlap states of ROIs (see sections 1 & 2) in ROI display (right). NB can use O to toggle cursor mirroring on the two displays (cursor position on ROI display will be shown on image display also)
 - Clicking "Reset" will reset all ROI overlap states to non-overlapping.
