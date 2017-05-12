@@ -2,7 +2,10 @@
 
 [![IMG](https://img.youtube.com/vi/6jutIbOM4Lg/0.jpg)](https://www.youtube.com/watch?v=6jutIbOM4Lg)
 
+### Introduction ###
+
 Allows users to import two Suite2P output structures (F..._proc.mat files) generated from a single FOV across 2 time-points (e.g. > 1 day) and semi-automatically register the mean image of the FOV and the corresponding Suite2P ROIs. It also has the optional functionality of loading in user-defined target centroids which can then be mapped onto Suite2P ROIs (and overlapped across days).
+---------------------------------------------------------------------------------
 
 ### 1. Mean image window (left) ###
 - Displays 1 of the 2 imported datasets: Q = dataset 1, W = dataset 2
