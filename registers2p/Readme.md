@@ -1,4 +1,4 @@
-# Register S2P: semi-automatic cross-day Suite2P ROI registration #
+# Register S2P: semi-automatic cross-day ROI registration #
 
 [![IMG](https://img.youtube.com/vi/6jutIbOM4Lg/0.jpg)](https://www.youtube.com/watch?v=6jutIbOM4Lg)
 
