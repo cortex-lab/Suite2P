@@ -2,7 +2,7 @@
 
 [![IMG](https://img.youtube.com/vi/6jutIbOM4Lg/0.jpg)](https://www.youtube.com/watch?v=6jutIbOM4Lg)
 
-Allows users to import two Suite2P output structures (F_..._proc.mat files) generated from a single FOV across 2 time-points (e.g. > 1 day) and semi-automatically register the mean image of the FOV and the corresponding Suite2P ROIs. It also has the optional functionality of loading in user-defined target centroids which can then be mapped onto Suite2P ROIs (and overlapped across days). Allows quick and easy manual curation of overlaps. Use cat_overlap.m function provided to daisy-chain registered ROIs recorded at multiple time-points which have all been registered to one reference time-point.
+Allows users to import two Suite2P output structures (F...proc.mat files) generated from a single FOV across 2 time-points (e.g. > 1 day) and semi-automatically register the mean image of the FOV and the corresponding Suite2P ROIs. It also has the optional functionality of loading in user-defined target centroids which can then be mapped onto Suite2P ROIs (and overlapped across days). Allows quick and easy manual curation of overlaps. Use cat_overlap.m function provided to daisy-chain registered ROIs recorded at multiple time-points which have all been registered to one reference time-point.
 
 ---
 
@@ -20,7 +20,7 @@ Allows users to import two Suite2P output structures (F_..._proc.mat files) gene
 
 ### 3. Registration ###
 - Manually curate ROIs with Suite2P visualization GUI and save data files
-- Import 2 Suite2P F_..._proc.mat files  (Load dataset 1, Load dataset 2)
+- Import 2 Suite2P F...proc.mat files  (Load dataset 1, Load dataset 2)
 - Click Register
 - Navigate the window that opens clicking corresponding control points in the left and right image (in order, i.e. click point 1 in left-hand image, click 1 in right-hand image, click 2 in left-hand image etc.)
 - Click "File -> Close Control Point Selection Tool"
@@ -57,7 +57,7 @@ Left-click (right-display): toggle the overlap state of selected ROIs that have 
 
 ### 6. Outputs ###
 Click "Save analysis..." to save registered ROIs (and targets) for subsequent analysis in a variable called regi with fields:
-- rois.idcs = n * 2 matrix where n is the number of overlapping rois and columns correspond the 2 time-points. Elements are the indices of raw Suite2P ROIs in the F_..._proc.mat file, not parsed by the iscell classifer. I.e. an element that equals 10 in rois.idcs is truly ROI 10 in F_..._proc.mat. Use this to index directly into dat.Fcell/dat.FcellNeu.
-- rois.iscell_idcs = n * 2 matrix where n is the number of overlapping rois and columns correspond to time-points. Elements are the indices of Suite2P ROIs in the F_..._proc.mat file after being parsed by the iscell classifier. If you are only importing positively classified ROIs (iscell == 1) then use this to index into your resulting matrix directly: classfied_cells(rois.iscell_idcs,:). If you are importing all ROIs (iscell==1 || iscell == 0) then index into this matrix using non-negative indices of iscell: nn_idcs = find(iscell);nonclassified_cells(nn_idcs(rois.iscell_idcs),:);
+- rois.idcs = n * 2 matrix where n is the number of overlapping rois and columns correspond the 2 time-points. Elements are the indices of raw Suite2P ROIs in the F...proc.mat file, not parsed by the iscell classifer. I.e. an element that equals 10 in rois.idcs is truly ROI 10 in F...proc.mat. Use this to index directly into dat.Fcell/dat.FcellNeu.
+- rois.iscell_idcs = n * 2 matrix where n is the number of overlapping rois and columns correspond to time-points. Elements are the indices of Suite2P ROIs in the F...proc.mat file after being parsed by the iscell classifier. If you are only importing positively classified ROIs (iscell == 1) then use this to index into your resulting matrix directly: classfied_cells(rois.iscell_idcs,:). If you are importing all ROIs (iscell==1 || iscell == 0) then index into this matrix using non-negative indices of iscell: nn_idcs = find(iscell);nonclassified_cells(nn_idcs(rois.iscell_idcs),:);
 - targets.idcs = n * 3 matrix where n is the number of targets that you imported, columns 1 and 2 are the two time-points and column 3 is 0 | 1 depending on whether the target has overlapping ROIs across days (1) or only has an ROI on one/other/neither day (0). Elements in the first 2 columns are nan if no ROI overlapped with that target, or indices of raw Suite2P ROIs not parsed by the iscell classifier (see roi.idcs above).
 - targets.iscell_idcs = n * 3 matrix where n is the number of targets that you imported, columns 1 and 2 are the two time-points and column 3 is 0 | 1 depending on whether the target has overlapping ROIs across days (1) or only has an ROI on one/other/neither day (0). Elements in the first 2 columns are NaN if no ROI overlapped with that target, or indices of Suite2P ROIs after they have been parsed with the iscell classifier (see roi.iscell_idcs above).
