@@ -19,22 +19,9 @@ if ~exist(regdir, 'dir')
     mkdir(regdir);
 end
 
-splitBlocks    = getOr(ops1{1}, {'splitBlocks'}, 'none');
 Ly = ops1{1}.Ly;
 Lx = ops1{1}.Lx;
-if iscell(splitBlocks)
-    numBlocks = length(ops1{1}.yBL);
-    xyMask = zeros(Ly, Lx, numBlocks, 'single');
-    for i = 1:numBlocks
-        msk = zeros(Ly, Lx, 'single');
-        msk(ops1{1}.yBL{i},ops1{1}.xBL{i}) = 1;
-        sT = ops1{1}.splitTaper;
-        msk = my_conv(my_conv(msk, sT)',sT)';
-        xyMask(:,:,i) = msk;
-    end
-    xyMask = xyMask./repmat(sum(xyMask, 3), 1, 1, numBlocks);
-    xyMask = reshape(xyMask, Ly*Lx, numBlocks);
-end
+BiDiPhase = getOr(ops1{1}, {'BiDiPhase'}, 0);
 
 % open bin file for writing
 fid = cell(1, length(iplanes));
@@ -42,16 +29,25 @@ for i = 1:length(iplanes)
     fid{i} = fopen(ops1{iplanes(i)}.RegFile, 'w');
 end
 
-dsall = NaN(size(ops1{1}.DS,1), 2, nplanes);
+sz = size(ops1{1}.DS);
+dsall = NaN([sz, nplanes]);
 for i = 1:nplanes
     t = 0;
     for k = 1:length(ops1{i}.Nframes)
-        dsall(t + (1:ops1{i}.Nframes(k)),:,i) = ...
-            ops1{i}.DS(sum(ops1{i}.Nframes(1:k-1)) + (1:ops1{i}.Nframes(k)),:);
+        sub = t + (1:ops1{i}.Nframes(k))';
+        for d = 2:length(sz)
+            sub = [repmat(sub, sz(d), 1), ...
+                reshape(repmat(1:sz(d), length(sub), 1), [], 1)];
+        end
+        sub = [sub, ones(size(sub,1),1).*i];
+        sub = mat2cell(sub, size(sub,1), ones(1, size(sub,2)));
+        ind = sub2ind(size(dsall), sub{:});
+        dsall(ind) = ops1{i}.DS(sum(ops1{i}.Nframes(1:k-1)) + ...
+            (1:ops1{i}.Nframes(k)),:);
         t = t + ops1{1}.Nframes(k);
     end
 end
-dsall = reshape(permute(dsall, [3 1 2]), [], 2);
+dsall = reshape(permute(dsall, [length(sz)+1 1:length(sz)]), [nplanes*sz(1) sz(2:end)]);
 
 t2 = 0;
 % if two consecutive files have as many bytes, they have as many frames
@@ -71,27 +67,22 @@ for k = 1:length(fs)
         data = loadFramesBuff(fs{k}(j).name, ichanset(1), ichanset(2), ...
             ichanset(3));
         
-        ix0 = 0;
-        Nbatch = 1000;
-        dreg = zeros(size(data), class(data));
-        while ix0<size(data,3)
-            indxr = ix0 + (1:Nbatch);
-            indxr(indxr>size(data,3)) = [];
-            if iscell(splitBlocks)
-                dreg(:, :, indxr) = blockRegisterMovie(data(:, :, indxr), ...
-                    xyMask, dsall(t1+t2 + indxr,:,:));
-            else
-                dreg(:, :, indxr)        = ...
-                    register_movie(data(:, :, indxr), ops1{1}, dsall(t1+t2 + indxr,:));
-            end
-            ix0 = ix0 + Nbatch;
+        if abs(BiDiPhase) > 0
+            data = ShiftBiDi(BiDiPhase, data, Ly, Lx);
+        end
+        
+        if isfield(ops1{1}, 'numBlocks') && ~isempty(ops1{1}.numBlocks)
+            dreg = BlockRegMovie(data, ops1{1}, ...
+                dsall(t1+t2 + (1:size(data,3)),:,:), true(Ly,Lx));
+        else
+            dreg = register_movie(data, ops1{1}, dsall(t1+t2 + (1:size(data,3)),:));
         end
         
         dataNext = [];
         for i = 1:length(iplanes)
+            ind1 = iplane0(iplanes(i)) : nplanes : size(data,3);
             if isfield(ops1{iplanes(i)}, 'planeInterpolated') && ...
                     ops1{iplanes(i)}.planeInterpolated == 1
-                ind1 = iplane0(iplanes(i)) : nplanes : size(data,3);
                 bases = ops1{iplanes(i)}.basisPlanes(ceil((t2+t1)/nplanes + ...
                     (1:length(ind1))));
                 uniqueBases = unique(bases)';
@@ -129,7 +120,7 @@ for k = 1:length(fs)
                 end
                 fwrite(fid{i}, dwrite, class(data));
             else
-                fwrite(fid{i}, dreg, class(data));
+                fwrite(fid{i}, dreg(:,:,ind1), class(data));
             end
         end
         dataPrev = dreg(:,:,end-nplanes+1:end);
