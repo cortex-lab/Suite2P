@@ -34,10 +34,10 @@ Allows users to import two Suite2P output structures (F...proc.mat files) genera
 - Clicking "Reset" will reset all ROI overlap states to non-overlapping.
 ---
 
-### 4. Detect targets overlap ###
+### 5. Detect targets overlap ###
 ---
 
-### 5. Controls ###
+### 6. Controls ###
 O: Toggle cursor mirror on left and right displays
 
 Q: Display mean image (left-display) and highlight ROIs (right-display) from dataset 1
@@ -58,7 +58,7 @@ Left-click (left-display): click once to open a lasso tool to select user-import
 
 Left-click (right-display): toggle the overlap state of selected ROIs that have >0 pixel overlap with each other.
 
-### 6. Outputs ###
+### 7. Outputs ###
 Click "Save analysis..." to save registered ROIs (and targets) for subsequent analysis in a variable called regi with fields:
 - rois.idcs = n * 2 matrix where n is the number of overlapping rois and columns correspond the 2 time-points. Elements are the indices of raw Suite2P ROIs in the F...proc.mat file, not parsed by the iscell classifer. I.e. an element that equals 10 in rois.idcs is truly ROI 10 in F...proc.mat. Use this to index directly into dat.Fcell/dat.FcellNeu.
 - rois.iscell_idcs = n * 2 matrix where n is the number of overlapping rois and columns correspond to time-points. Elements are the indices of Suite2P ROIs in the F...proc.mat file after being parsed by the iscell classifier. If you are only importing positively classified ROIs (iscell == 1) then use this to index into your resulting matrix directly: classfied_cells(rois.iscell_idcs,:). If you are importing all ROIs (iscell==1 | iscell == 0) then index into this matrix using the non-negative indices of iscell: nn_idcs = find(iscell); nonclassified_cells(nn_idcs(rois.iscell_idcs),:).
