@@ -2,7 +2,7 @@
 
 [![IMG](https://img.youtube.com/vi/6jutIbOM4Lg/0.jpg)](https://www.youtube.com/watch?v=6jutIbOM4Lg)
 
-Allows users to import two Suite2P output structures (F..._proc.mat files) generated from a single FOV across 2 time-points (e.g. > 1 day) and semi-automatically register the mean image of the FOV and the corresponding Suite2P ROIs. It also has the optional functionality of loading in user-defined target centroids which can then be mapped onto Suite2P ROIs (and overlapped across days).
+Allows users to import two Suite2P output structures (F_..._proc.mat files) generated from a single FOV across 2 time-points (e.g. > 1 day) and semi-automatically register the mean image of the FOV and the corresponding Suite2P ROIs. It also has the optional functionality of loading in user-defined target centroids which can then be mapped onto Suite2P ROIs (and overlapped across days).
 
 ---
 
@@ -19,7 +19,7 @@ Allows users to import two Suite2P output structures (F..._proc.mat files) gener
 ---
 
 ### 3. Registration ###
-- Import 2 Suite2P proc.mat files (Load dataset 1, Load dataset 2)
+- Import 2 Suite2P F_..._proc.mat files (Load dataset 1, Load dataset 2)
 - Click Register
 - Navigate the window that opens clicking corresponding control points in the left and right image (in order, i.e. click point 1 in left-hand image, click 1 in right-hand image, click 2 in left-hand image etc.)
 - Click "File -> Close Control Point Selection Tool"
