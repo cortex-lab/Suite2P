@@ -51,7 +51,7 @@ D: When user-imported centroid targets are selected this returns them to their d
 
 Arrow keys: When user-imported centroid targets are selected this will nudge them around the image
 
-Left-click (left-display): lick once to open a lasso tool to select user-imported target centroids (if present). The cursor will switch to a cross-hair. Subsequently click and drag to define the lasso area around targets you want to select. Double-click to finish defining area. Selected targets within the area will turn from red to yellow. Subsequent clicks and drags will move targets around. Hit Enter to de-select targets and leave them where you have dragged them.
+Left-click (left-display): click once to open a lasso tool to select user-imported target centroids (if present). The cursor will switch to a cross-hair. Subsequently click and drag to define the lasso area around targets you want to select. Double-click to finish defining area. Selected targets within the area will turn from red to yellow. Subsequent clicks and drags will move targets around. Hit Enter to de-select targets and leave them where you have dragged them.
 
 Left-click (right-display): toggle the overlap state of selected ROIs that have >0 pixel overlap with each other.
 
