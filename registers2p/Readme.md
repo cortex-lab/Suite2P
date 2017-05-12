@@ -54,3 +54,10 @@ Arrow keys: When user-imported centroid targets are selected this will nudge the
 Left-click (left-display): lick once to open a lasso tool to select user-imported target centroids (if present). The cursor will switch to a cross-hair. Subsequently click and drag to define the lasso area around targets you want to select. Double-click to finish defining area. Selected targets within the area will turn from red to yellow. Subsequent clicks and drags will move targets around. Hit Enter to de-select targets and leave them where you have dragged them.
 
 Left-click (right-display): toggle the overlap state of selected ROIs that have >0 pixel overlap with each other.
+
+### 6. Outputs ###
+Click "Save analysis..." to save registered ROIs (and targets) for subsequent analysis in a variable called regi with fields:
+- rois.idcs = n * 2 matrix where n is the number of overlapping rois and columns correspond to time-points. Elements are the indices of raw Suite2P ROIs in the F_..._proc.mat file, not parsed by the iscell classifer. I.e. an element that equals 10 in rois.idcs is truly ROI 10 in F_..._proc.mat. Use this to index directly into dat.Fcell/dat.FcellNeu
+- rois.iscell_idcs = n * 2 matrix where n is the number of overlapping rois and columns correspond to time-points. Elements are the indices of Suite2P ROIs in the F_..._proc.mat file after being parsed by the iscell classifier. If are only importing positively classified ROIs (iscell == 1) then use this to index into your resulting matrix directly:  classfied_cells(rois.iscell_idcs,:)  If you are importing all ROIs (iscell==1 || iscell == 0) then index into this matrix using non-negative indices of iscell:  idcs = find(iscell);nonclassified_cells(idcs(rois.iscell_idcs),:);
+- targets.idcs
+- targets.iscell_idcs
