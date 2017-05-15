@@ -70,6 +70,47 @@ try
     [~, header] = loadFramesBuff(ops.fsroot{1}(1).name, 1, 1, 1);
     
     hh=header{1};
+    
+    verStr = ['SI.VERSION_MAJOR = ',char(39),'2016b',char(39)];
+    
+    if contains(hh, verStr) % For scanimage 2016b, SF
+        str = hh(strfind(hh,'channelSave = '):end);
+        ind = strfind(str, 'SI');
+        ch = str2num(str(15 : ind(1)-1));
+        ops.nchannels = length(ch);
+        
+        fastZEnable = sscanf(hh(strfind(hh,'hFastZ.enable = '):end), 'hFastZ.enable = %s');
+        fastZEnable = strcmp(fastZEnable,'true');
+        fastZDiscardFlybackFrames = sscanf(hh(strfind(hh, 'hFastZ.discardFlybackFrames = '):end), 'hFastZ.discardFlybackFrames = %s');
+        fastZDiscardFlybackFrames = strcmp(fastZDiscardFlybackFrames,'true');
+        stackNumSlices = sscanf(hh(strfind(hh, 'hStackManager.numSlices = '):end), 'hStackManager.numSlices = %d');
+        
+        ops.nplanes = 1;
+        
+        if fastZEnable
+            ops.nplanes = stackNumSlices+fastZDiscardFlybackFrames;
+        end
+        
+        str = hh(strfind(hh, 'scanZoomFactor = '):end);
+        ind = strfind(str, 'SI');
+        ops.zoomMicro = str2double(str(18 : ind(1)-1));
+        
+        ops.imageRate = sscanf(hh(strfind(hh, 'scanFrameRate = '):end), 'scanFrameRate = %f');
+        
+        if isfield(db, 'expred') && ~isempty(db.expred) && ...
+            (~isfield(db, 'nchannels_red') || isempty(db.nchannels_red))
+        [~, header] = loadFramesBuff(ops.fsred(1).name, 1, 1, 1);
+        hh=header{1};
+        str = hh(strfind(hh, 'channelSave = '):end);
+        ind = strfind(str, 'SI');
+        ch = str2num(str(15 : ind(1)-1));
+        ops.nchannels_red = length(ch);
+        end
+        
+    end
+        
+    % Old scanimage
+    
     str = hh(strfind(hh, 'channelsSave = '):end);
     ind = strfind(str, 'scanimage');
     ch = str2num(str(16 : ind(1)-1));

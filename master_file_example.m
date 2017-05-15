@@ -68,7 +68,8 @@ for iexp = 1 %[3:length(db) 1:2]
     run_pipeline(db(iexp), ops0);
     
     % deconvolved data into (dat.)cl.dcell, and neuropil subtraction coef
-    add_deconvolution(ops0, db0(iexp));
+    % commented out for now, back up ~ 10 May 
+    % add_deconvolution(ops0, db0(iexp));
     
     % add red channel information (if it exists)
     if isfield(db0,'expred') && ~isempty(db0(iexp).expred)
