@@ -44,6 +44,7 @@ Allows users to import two Suite2P output structures (F...proc.mat files) genera
 - Click "Find closest ROIs".
 - Manually curate overlap of targets with ROIs by clicking, lassoing around desired targets and dragging/nudging (see section 1).
 - Selected targets will become yellow. Targets that overlap with an ROI on one or other day will cause the border of that ROI to toggle to red. Targets the overlap with ROIs on both days will cause both ROIs' borders to toggle to red and the target marker will increase in size.
+- Clicking "Reset" will reset all targets to be non-overlapping with ROIs.
 ---
 
 ### 6. Outputs ###
