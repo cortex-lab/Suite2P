@@ -43,7 +43,7 @@ Allows users to import two Suite2P output structures (F...proc.mat files) genera
 - In the "Targets" panel above image window 2 decide on the minimum pixel distance you require between each of your targets and surrounding ROI centroids.
 - Click "Find closest ROIs".
 - Manually curate overlap of targets with ROIs by clicking, lassoing around desired targets and dragging/nudging (see section 1).
-- Selecting targets will become yellow. Targets that overlap with an ROI on one or other day will cause the border of that ROI to toggle to red. Targets the overlap with ROIs on both days will cause both ROIs' borders to toggle to red and the target marker will increase in size.
+- Selected targets will become yellow. Targets that overlap with an ROI on one or other day will cause the border of that ROI to toggle to red. Targets the overlap with ROIs on both days will cause both ROIs' borders to toggle to red and the target marker will increase in size.
 ---
 
 ### 6. Outputs ###
