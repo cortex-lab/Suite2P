@@ -48,7 +48,7 @@ Click "Save analysis..." to save registered ROIs (and targets) for subsequent an
 - rois.iscell_idcs = n * 2 matrix where n is the number of overlapping rois and columns correspond to the 2 time-points. Elements are the indices of Suite2P ROIs in the F...proc.mat file after being parsed by the iscell classifier. If you are only importing positively classified ROIs (iscell == 1) then use this to index into your resulting matrix directly: classfied_cells(rois.iscell_idcs,:). If you are importing all ROIs (iscell==1 | iscell == 0) then index into this matrix using the non-negative indices of iscell: nn_idcs = find(iscell); nonclassified_cells(nn_idcs(rois.iscell_idcs),:).
 - targets.idcs = n * 3 matrix where n is the number of targets that you imported, columns 1 and 2 are the two time-points and column 3 is 0 | 1 depending on whether the target has overlapping ROIs across the 2 time-points (1) or only has an ROI on one/other/neither time-point (0). Elements in the first 2 columns are NaN if no ROI overlapped with that target, or indices of raw Suite2P ROIs not parsed by the iscell classifier (see roi.idcs above) if an ROI did.
 - targets.iscell_idcs = n * 3 matrix where n is the number of targets that you imported, columns 1 and 2 are the two time-points and column 3 is 0 | 1 depending on whether the target has overlapping ROIs across the 2 time-points (1) or only has an ROI on one/other/neither time-point (0). Elements in the first 2 columns are NaN if no ROI overlapped with that target, or indices of Suite2P ROIs after they have been parsed with the iscell classifier (see roi.iscell_idcs above) if an ROI did.
-
+---
 
 ### 7. Controls ###
 O: Toggle cursor mirror on left and right displays
