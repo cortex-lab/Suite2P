@@ -14,6 +14,13 @@ ops.maxNeurop    = getOr(ops, {'maxNeurop'}, Inf); % maximum allowed neuropil co
 
 ops.lam              = getOr(ops, 'lam', 3);
 
+if ops.lam<1
+    warning('L0 penalty with lambda < 0 is very slow to solve... \n')
+end
+if ops.lam<1e-10
+    error('Penalty lambda is < 1e-10. Cannot solve. Typical values are 1 to 10... \n')
+end
+
 % the kernel should depend on timescale of sensor and imaging rate
 ops.fs           = getOr(ops, 'fs', ops.imageRate/ops.nplanes);
 mtau             = ops.fs * ops.sensorTau; 
@@ -33,15 +40,7 @@ coefNeu     = .7 * ones(1,NN); % initialize neuropil subtraction coef with 0.8
 
 caCorrected = ca - bsxfun(@times, neu, coefNeu);
 
-if isfield(ops, 'fracTau') 
-    kernel1 = exp(-[1:ceil(5*mtau)]'/mtau);
-    kernel2 = exp(-[1:ceil(5*mtau)]'/(mtau * ops.fracTau));
-    
-    kernel = kernel1 - kernel2; 
-end
-kernel = normc(kernel(:));
 %%
-
 Fsort       = my_conv2(caCorrected, ceil(ops.fs), 1);
 Fsort       = sort(Fsort, 1, 'ascend');
 baselines   = Fsort(ceil(NT/20), :);
@@ -55,6 +54,27 @@ F1 = caCorrected - bsxfun(@times, ones(NT,1), baselines);
 sd   = 1/2 * 1/sqrt(2) * std(F1(2:end, :) - F1(1:end-1, :), [], 1);
 
 F1   = bsxfun(@rdivide, F1 , 1e-12 + sd);
+
+
+if ops.sensorTau>1e-3
+    if isfield(ops, 'fracTau')
+        kernel1 = exp(-[1:ceil(5*mtau)]'/mtau);
+        kernel2 = exp(-[1:ceil(5*mtau)]'/(mtau * ops.fracTau));
+        
+        kernel = kernel1 - kernel2;
+    end
+    kernel = normc(kernel(:));
+    kernel = repmat(kernel, 1, size(F1,2));
+else
+    kernel = zeros(ceil(5*ops.fs), size(F1,2));
+    for k = 1:size(F1,2)
+        g = estimate_time_constant(F1(:,k), 1);
+        g = g(1);
+        
+        kernel(:, k) = g.^[1:ceil(5*ops.fs)];
+    end
+    kernel = normc(kernel);
+end
 
 if nargin>3
     % get GT kernel
@@ -82,14 +102,16 @@ tic
 % run the deconvolution to get fs etc\
 parfor icell = 1:size(ca,2)
     sp(:,icell) = ...
-        single_step_single_cell(F1(:,icell), Params, kernel, NT, npad);
+        single_step_single_cell(F1(:,icell), Params, kernel(:, icell), NT, npad);
 end
 tproc = toc;
 
-ca = filter(kernel, 1, sp);
+parfor icell = 1:size(ca,2)
+    ca(:,icell) = filter(kernel(:,icell), 1, sp(:,icell));    
+end
 ca   = bsxfun(@times, ca, sd);
 F1   = bsxfun(@times, F1, sd);
-
+    
 % % rescale baseline contribution
 % for icell = 1:size(ca,2)
 %     dcell{icell}.c                      = dcell{icell}.c * sd(icell);
