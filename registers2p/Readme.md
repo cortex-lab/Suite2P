@@ -28,7 +28,7 @@ Allows users to import two Suite2P output structures (F...proc.mat files) genera
 ---
 
 ### 4. Detect ROI overlap ###
-- In "ROIs panel" above image window 2 decide on proportion of pixel overlap you require (this is calculated from the ROIs in dataset 1, i.e. if an ROI from dataset 2 covers all pixels in the ROI from dataset 1 then this corresponds to 100% overlap).
+- In "ROIs" panel above image window 2 decide on proportion of pixel overlap you require (this is calculated from the ROIs in dataset 1, i.e. if an ROI from dataset 2 covers all pixels in the ROI from dataset 1 then this corresponds to 100% overlap).
 - Click "Detect overlap".
 - Manually curate overlap states of ROIs by clicking them (see sections 1 & 2) in ROI display (right). NB can use O to toggle cursor mirroring on the two displays (actual cursor position on either display will also be displayed on the other display as a blue circle).
 - Clicking "Reset" will reset all ROI overlap states to non-overlapping.
@@ -36,8 +36,21 @@ Allows users to import two Suite2P output structures (F...proc.mat files) genera
 
 ### 5. Detect targets overlap ###
 ---
+- Save a target centroids file in one of 2 formats: a black (zeros) .tiff/.tif file of the same dimensions as the Suite2P datasets with non-zero elements at the pixel locations of your targets, or a .mat file containing a variable called "params" with a field "targets_yxzc" which is an n * 2 matrix where n is the number of targets, column 1 is the y co-ordinates and column 2 is the x co-ordinates of each target.
+- Targets will be plotted as small red dots surrounded by one small and one large concentric circle. Concentric circles are stationary and indicate default positions of targets as imported. Selecting targets will become yellow. Targets that overlap with an ROI on one or other day will cause the border of that ROI to toggle to red. Targets the overlap with ROIs on both days will cause both ROIs' borders to toggle to red and the target marker will increase in size.
+- In the "Targets" panel above image window 2 decide on the minimum pixel distance you require between each of your targets and surrounding ROI centroids.
+- Click "Find closest ROIs".
+- Manually curate overlap of targets with ROIs by clicking, lassoing around desired targets and dragging/nudging (see section 1).
 
-### 6. Controls ###
+### 6. Outputs ###
+Click "Save analysis..." to save registered ROIs (and targets) for subsequent analysis in a variable called regi with fields:
+- rois.idcs = n * 2 matrix where n is the number of overlapping rois and columns correspond to the 2 time-points. Elements are the indices of raw Suite2P ROIs in the F...proc.mat file, not parsed by the iscell classifer. I.e. an element that equals 10 in rois.idcs is truly ROI 10 in F...proc.mat. Use this to index directly into dat.Fcell/dat.FcellNeu.
+- rois.iscell_idcs = n * 2 matrix where n is the number of overlapping rois and columns correspond to the 2 time-points. Elements are the indices of Suite2P ROIs in the F...proc.mat file after being parsed by the iscell classifier. If you are only importing positively classified ROIs (iscell == 1) then use this to index into your resulting matrix directly: classfied_cells(rois.iscell_idcs,:). If you are importing all ROIs (iscell==1 | iscell == 0) then index into this matrix using the non-negative indices of iscell: nn_idcs = find(iscell); nonclassified_cells(nn_idcs(rois.iscell_idcs),:).
+- targets.idcs = n * 3 matrix where n is the number of targets that you imported, columns 1 and 2 are the two time-points and column 3 is 0 | 1 depending on whether the target has overlapping ROIs across the 2 time-points (1) or only has an ROI on one/other/neither time-point (0). Elements in the first 2 columns are NaN if no ROI overlapped with that target, or indices of raw Suite2P ROIs not parsed by the iscell classifier (see roi.idcs above) if an ROI did.
+- targets.iscell_idcs = n * 3 matrix where n is the number of targets that you imported, columns 1 and 2 are the two time-points and column 3 is 0 | 1 depending on whether the target has overlapping ROIs across the 2 time-points (1) or only has an ROI on one/other/neither time-point (0). Elements in the first 2 columns are NaN if no ROI overlapped with that target, or indices of Suite2P ROIs after they have been parsed with the iscell classifier (see roi.iscell_idcs above) if an ROI did.
+
+
+### 7. Controls ###
 O: Toggle cursor mirror on left and right displays
 
 Q: Display mean image (left-display) and highlight ROIs (right-display) from dataset 1
@@ -57,10 +70,3 @@ Arrow keys: When user-imported centroid targets are selected this will nudge the
 Left-click (left-display): click once to open a lasso tool to select user-imported target centroids (if present). The cursor will switch to a cross-hair. Subsequently click and drag to define the lasso area around targets you want to select. Double-click to finish defining area. Selected targets within the area will turn from red to yellow. Subsequent clicks and drags will move targets around. Hit Enter to de-select targets and leave them where you have dragged them.
 
 Left-click (right-display): toggle the overlap state of selected ROIs that have >0 pixel overlap with each other.
-
-### 7. Outputs ###
-Click "Save analysis..." to save registered ROIs (and targets) for subsequent analysis in a variable called regi with fields:
-- rois.idcs = n * 2 matrix where n is the number of overlapping rois and columns correspond to the 2 time-points. Elements are the indices of raw Suite2P ROIs in the F...proc.mat file, not parsed by the iscell classifer. I.e. an element that equals 10 in rois.idcs is truly ROI 10 in F...proc.mat. Use this to index directly into dat.Fcell/dat.FcellNeu.
-- rois.iscell_idcs = n * 2 matrix where n is the number of overlapping rois and columns correspond to the 2 time-points. Elements are the indices of Suite2P ROIs in the F...proc.mat file after being parsed by the iscell classifier. If you are only importing positively classified ROIs (iscell == 1) then use this to index into your resulting matrix directly: classfied_cells(rois.iscell_idcs,:). If you are importing all ROIs (iscell==1 | iscell == 0) then index into this matrix using the non-negative indices of iscell: nn_idcs = find(iscell); nonclassified_cells(nn_idcs(rois.iscell_idcs),:).
-- targets.idcs = n * 3 matrix where n is the number of targets that you imported, columns 1 and 2 are the two time-points and column 3 is 0 | 1 depending on whether the target has overlapping ROIs across the 2 time-points (1) or only has an ROI on one/other/neither time-point (0). Elements in the first 2 columns are NaN if no ROI overlapped with that target, or indices of raw Suite2P ROIs not parsed by the iscell classifier (see roi.idcs above) if an ROI did.
-- targets.iscell_idcs = n * 3 matrix where n is the number of targets that you imported, columns 1 and 2 are the two time-points and column 3 is 0 | 1 depending on whether the target has overlapping ROIs across the 2 time-points (1) or only has an ROI on one/other/neither time-point (0). Elements in the first 2 columns are NaN if no ROI overlapped with that target, or indices of Suite2P ROIs after they have been parsed with the iscell classifier (see roi.iscell_idcs above) if an ROI did.
