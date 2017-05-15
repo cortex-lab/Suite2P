@@ -64,6 +64,8 @@ A: Display ROIs (left-display) and highlight ROIs (right-display) from dataset 1
 
 S: Display ROIs (left-display) and highlight ROIs (right-display) from dataset 2 
 
+P: Toggle processing on currently displayed mask (left-display)
+
 Enter: When user-imported centroid targets are selected this deselects them (leaving them where they currently are)
 
 D: When user-imported centroid targets are selected this returns them to their default location
