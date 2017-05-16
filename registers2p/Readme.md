@@ -8,7 +8,7 @@ Allows users to import two Suite2P output structures (F...proc.mat files) genera
 
 ### 1. Image window (left) ###
 - Displays 1 of the 2 imported datasets: Q = dataset 1, W = dataset 2.
-- Can display 1 of 5 masks for each dataset: 1 = x, 2 = mean, 3 = x, 4 = x, 5 = correlation.
+- Can display 1 of 5 masks for each dataset: 1 = mean mask, 2 = local correlation mask
 - Hit p to toggle processing on any of these images (enhances contrast).
 - Can display ROIs of the displayed dataset: A = dataset 1 ROIs, S = dataset 2 ROIs.
 - Clicking: Click once to open a lasso tool to select user-imported target centroids (if present). The cursor will switch to a cross-hair. Subsequently click and drag to define the lasso area around targets you want to select. Double-click to finish defining area. Selected targets within the area will turn from red to yellow. Subsequent clicks and drags will move targets around. Hit Enter to de-select targets and leave them where you have dragged them. If you select targets you can revert them to their default locations by pressing D.
@@ -67,6 +67,10 @@ A: Display ROIs (left-display) and highlight ROIs (right-display) from dataset 1
 S: Display ROIs (left-display) and highlight ROIs (right-display) from dataset 2 
 
 P: Toggle processing on currently displayed mask (left-display)
+
+1: Displays mean image of currently displayed dataset (left-display)
+
+2: Displays local correlation image of currently displayed dataset (left-display)
 
 Enter: When user-imported centroid targets are selected this deselects them (leaving them where they currently are)
 
