@@ -21,7 +21,6 @@ Allows users to import two Suite2P output structures (F...proc.mat files) genera
 ---
 
 ### 3. Registration ###
-- Manually curate ROIs with Suite2P visualization GUI and save data files.
 - Import 2 Suite2P F...proc.mat files  (Load dataset 1, Load dataset 2).
 - Click Register.
 - Navigate the window that opens, clicking corresponding control points in the left and right image (in order, i.e. click point 1 in left-hand image, click 1 in right-hand image, click 2 in left-hand image etc.).
