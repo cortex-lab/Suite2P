@@ -81,3 +81,8 @@ Arrow keys: When user-imported centroid targets are selected this will nudge the
 Left-click (left-display): click once to open a lasso tool to select user-imported target centroids (if present). The cursor will switch to a cross-hair. Subsequently click and drag to define the lasso area around targets you want to select. Double-click to finish defining area. Selected targets within the area will turn from red to yellow. Subsequent clicks and drags will move targets around. Hit Enter to de-select targets and leave them where you have dragged them.
 
 Left-click (right-display): toggle the overlap state of selected ROIs that have >0 pixel overlap with each other.
+---
+
+### 7. Additional functions ###
+- cat_overlap: Allows daisy-chaining of multiple registers2p regi variables. NB all must have been registered to the same time-point 1. See function description for details of inputs and outputs.
+- find_consistent_rois: sub-function of cat_overlap, essentially similar functionality but takes a cell array constructed from sub-fields of regi structures instead of the regi structures themselves.
