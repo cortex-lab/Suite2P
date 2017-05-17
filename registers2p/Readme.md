@@ -15,7 +15,7 @@ Allows users to import two Suite2P output structures (F...proc.mat files) genera
 ---
 
 ### 2. ROI window (right) ###
-- Displays ROIs of both images overlaid with grey-level dictating which image is currently displayed on the Mean image window: white = displayed image, grey = non-displayed image. This is also dictated by Q (dataset 1) and W (dataset 2).
+- Displays ROIs of both images overlaid with grey-level dictating which image is currently displayed on the Image window: white = displayed image, grey = non-displayed image. This is also dictated by Q (dataset 1) and W (dataset 2).
 - ROIs can be in two states: non-overlapping (open contour) or overlapping (filled contour). All ROIs start in default non-overlapping state until decided otherwise by the user.
 - Clicking: Clicking ROIs will toggle the overlap state of selected ROIs that have >0 pixel overlap with each other. In the condition where ROI 1 overlaps with 2 ROIs clicking it will cause it to overlap with the ROI with which it shares the most pixels. An ROI can only overlap with max 1 other ROI so designating ROI 1 (which already overlaps with ROI 2) to overlap with ROI 3 will result in ROI 2 to revert to the non-overlapping state.
 ---
