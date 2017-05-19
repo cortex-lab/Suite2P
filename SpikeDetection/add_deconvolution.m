@@ -45,7 +45,6 @@ for i = 1:length(ops.planesToProcess)
     end
     
     ops.fs                  = ops.imageRate/ops.nplanes;
-    ops.lam                 = getOr(ops0, 'lam', 0);
     ops.estimateNeuropil    = getOr(ops0, 'estimateNeuropil', 1);
     ops.runningBaseline     = 0;
 

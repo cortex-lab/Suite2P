@@ -33,7 +33,7 @@ end
 ops.diameter                        = getOr(ops, 'diameter', 10);
 ops.clustrules.diameter             = ops.diameter;
 ops.clustrules                      = get_clustrules(ops.clustrules);
-%%
+%
 % this loads ops1 and checks if processed binary files exist
 opath = sprintf('%s/regops_%s_%s.mat', ops.ResultsSavePath, ops.mouse_name, ops.date);
 processed = 1;
@@ -47,7 +47,7 @@ if exist(opath, 'file')
 else
     processed = 0;
 end
-%%
+%
 % do registration if the processed binaries do not exist
 if processed==0
     if ops.nonrigid
@@ -60,9 +60,11 @@ else
 end
 
 %%
-for i = 1:numel(ops1)
+for i = 1:numel(ops1) %[1:2 4:numel(ops1)]
     ops         = ops1{i};    
     ops.iplane  = i;
+    
+%     ops.ThScaling = 0.5;
     
     if numel(ops.yrange)<10 || numel(ops.xrange)<10
         warning('valid range after registration very small, continuing to next plane')

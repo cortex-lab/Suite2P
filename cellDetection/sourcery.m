@@ -12,7 +12,7 @@ Lx = numel(ops.xrange);
 U0 = reshape(U0, nSVD, Ly, Lx);
 
 % compute neuropil basis functions for cell detection
-S = getNeuropilBasis(ops, Ly, Lx, 'raisedcosyne'); % 'raisedcosyne', 'Fourier'
+S = getNeuropilBasis(ops, Ly, Lx, 'Fourier'); % 'raisedcosyne', 'Fourier'
 S = normc(S);
 nBasis = size(S,2);
 

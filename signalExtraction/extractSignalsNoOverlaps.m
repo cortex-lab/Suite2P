@@ -144,7 +144,8 @@ Fneu(:, ops.badframes)  = Fneu(:, indNoNaN(ix));
 ops.fs           = getOr(ops, 'fs', ops.imageRate/ops.nplanes);
 %
 %[coefNeu, inomax]   = my_ica(F', Fneu', ops.fs, 0.7, ops.maxNeurop);
-coefNeu = 0.7 * ones(numel(stat),1);
+
+coefNeu = 0.7 * ones(1, size(F,1));
 %
 dF                  = F - bsxfun(@times, Fneu, coefNeu(:));
 
@@ -166,7 +167,6 @@ for j = 1:numel(stat)
     stat(j).top5pcMinusMed   = sk(j,4);
     stat(j).blockstarts      = [0 cumsum(ops.Nframes)];
     stat(j).iplane                 = ops.iplane;
-    stat(j).neuropilCoefficient    = coefNeu(j); 
 end
 
 %%

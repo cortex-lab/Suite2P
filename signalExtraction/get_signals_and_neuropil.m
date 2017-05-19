@@ -88,16 +88,19 @@ for jCell=1:length(useCells)
     temp=zeros(LyR,LxR);
     temp(ipix)=ones(1,length(ipix));
     allField=allField+jCell.*temp;
-    % if overlap of this ROI with other ROIs is larger than 2/3s of its
-    % size, exclude this ROI
-    overlap = data.stat(iCell).isoverlap;
-    if sum(overlap) > .66 * length(ipix)
-        exclude(end+1) = jCell;
-        continue
+    if isfield(data.stat, 'isoverlap')
+        % if overlap of this ROI with other ROIs is larger than 2/3s of its
+        % size, exclude this ROI
+        overlap = data.stat(iCell).isoverlap;
+        if sum(overlap) > .66 * length(ipix)
+            exclude(end+1) = jCell;
+            data.stat(iCell).iscell = 0;
+            continue
+        end
+        % exclude pixels from ROI that overlap with other ROIs to determine
+        % signal of this ROI
+        ipix(overlap) = [];
     end
-    % exclude pixels from ROI that overlap with other ROIs to determine
-    % signal of this ROI
-    ipix(overlap) = [];
     temp=zeros(LyR,LxR);
     temp(ipix)=ones(1,length(ipix));
     cellFields(jCell,:,:)=temp;
@@ -145,16 +148,19 @@ if opt.useSVD == 0
         for k = 1:length(useCells)
             iCell = useCells(k);
             if opt.getSignal
-                ipix = data.stat(iCell).ipix(~data.stat(iCell).isoverlap);
+                ipix = data.stat(iCell).ipix;
+                if isfield(data.stat, 'isoverlap')
+                    ipix(data.stat(iCell).isoverlap) = [];
+                end
                 if ~isempty(ipix)
                     % F(k,ix + (1:NT)) = stat(k).lambda' * data(ipix,:);
-                    F(k,ix + (1:NT)) = mean(mov(ipix,:), 1);
+                    F(iCell,ix + (1:NT)) = mean(mov(ipix,:), 1);
                 end
             end
             if opt.getNeuropil
                 ipix_neuropil= data.stat(iCell).ipix_neuropil;
                 if ~isempty(ipix_neuropil)
-                    Fneu(k,ix + (1:NT)) = mean(mov(ipix_neuropil,:), 1);
+                    Fneu(iCell,ix + (1:NT)) = mean(mov(ipix_neuropil,:), 1);
                 end
             end
         end

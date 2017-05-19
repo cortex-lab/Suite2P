@@ -18,11 +18,14 @@ else
     niter = 1;
 end
 
+% maximum neuropil coefficient
+ops.maxNeurop = getOr(ops, 'maxNeurop', 1);
+
 for k = 1:niter
     Fsub = bsxfun(@minus, F, bsxfun(@times, N, coefs));
     
     % at each iteration run the deconvolution on the residual
-    switch getOr(ops, 'deconvType', 'OASIS')
+    switch getOr(ops, 'deconvType', 'L0')
         case 'OASIS'
             [sp, ca, sd2] = OASISpreprocess(ops,  Fsub);
         case 'L0'
@@ -44,7 +47,7 @@ for k = 1:niter
     end
     
     B(isnan(B)) = 1;    
-    coefs       = B(2,:);   
+    coefs       = min(B(2,:), ops.maxNeurop);   
 end
 
 sd = sd.*sd2;
