@@ -60,9 +60,11 @@ else
 end
 
 %%
-for i = 1:numel(ops1)
+for i = 1:numel(ops1) %[1:2 4:numel(ops1)]
     ops         = ops1{i};    
     ops.iplane  = i;
+    
+%     ops.ThScaling = 0.5;
     
     if numel(ops.yrange)<10 || numel(ops.xrange)<10
         warning('valid range after registration very small, continuing to next plane')

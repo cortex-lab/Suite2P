@@ -23,9 +23,12 @@ for k = 1:Nk
     end
 end
 %
-StU         = S' * mimg1(:);
-we          = covL \ cat(1, Ftemp, StU);
-
+if isempty(S)
+    we          = covL \ Ftemp; 
+else
+    StU         = S' * mimg1(:);
+    we          = covL \ cat(1, Ftemp, StU);
+end
 we = we(1:Nk);
 
 for j = 1:Nk

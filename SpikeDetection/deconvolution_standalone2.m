@@ -5,6 +5,8 @@ function [sp, dcell] = deconvolution_standalone2(ops, ca, neu, gt)
 % (dcell.c). dcell.B(3) is the neuropil contamination coefficient. 
 % dcell.B(2) is an estimate of the baseline. 
 
+% this version also estimates a single timescale
+
 % specify in ops the following options, or leave empty for defaults
 %       fs = sampling rate
 %       recomputeKernel = whether to estimate kernel from data

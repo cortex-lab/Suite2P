@@ -116,7 +116,7 @@ Fneu(:, ops.badframes)  = Fneu(:, indNoNaN(ix));
 % figure out the ICA coefficients here <--- FIX THIS
 ops.fs           = getOr(ops, 'fs', ops.imageRate/ops.nplanes);
 %
-[coefNeu, inomax]   = my_ica(F', Fneu', ops.fs, 0.7);
+%[coefNeu, inomax]   = my_ica(F', Fneu', ops.fs, 0.7);
 dF                  = F - bsxfun(@times, Fneu, coefNeu(:));
 
 % dF          = F - Fneu;

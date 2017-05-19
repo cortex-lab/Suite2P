@@ -18,6 +18,9 @@ else
     niter = 1;
 end
 
+% maximum neuropil coefficient
+ops.maxNeurop = getOr(ops, 'maxNeurop', 1);
+
 for k = 1:niter
     Fsub = bsxfun(@minus, F, bsxfun(@times, N, coefs));
     
@@ -44,7 +47,7 @@ for k = 1:niter
     end
     
     B(isnan(B)) = 1;    
-    coefs       = B(2,:);   
+    coefs       = min(B(2,:), ops.maxNeurop);   
 end
 
 sd = sd.*sd2;

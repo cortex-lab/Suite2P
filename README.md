@@ -18,11 +18,14 @@ This is a complete, automated pipeline for processing two-photon Calcium imaging
 
 3) Cell detection --- using clustering methods in a low-dimensional space. The clustering algorithm provides a positive mask for each ROI identified, and allows for overlaps between masks. 
 
-4) Signal extraction --- by default, all overlapping pixels are discarded when computing the signal inside each ROI, to avoid using "demixing" approaches, which can be biased. The neuropil signal is also computed independently for each ROI, as a weighted pixel average, pooling from a large area around each ROI, but excluding all pixels assigned to ROIs during cell detection. The neuropil subtraction coefficient is estimated by maximizing the skewness of F - coef*Fneu (F is the ROI signal, Fneu is the neuropil signal). The user is encouraged to also try varying this coefficient, to make sure that any scientific results do not depend crucially on it. 
+4) Signal extraction --- by default, all overlapping pixels are discarded when computing the signal inside each ROI, to avoid using "demixing" approaches, which can be biased. The neuropil signal is also computed independently for each ROI, as a weighted pixel average, pooling from a large area around each ROI, but excluding all pixels assigned to ROIs during cell detection. 
 
 5) Automatic and manual curation --- the output of the cell detection algorithm can be visualized and further refined using the included GUI. The GUI is designed to make cell sorting a fun and enjoyable experience. It also includes an automatic classifier that gradually refines itself based on the manual labelling provided by the user. This allows the automated classifier to adapt for different types of data, acquired under different conditions. 
 
-6) Spike deconvolution --- cell and neuropil traces are further processed to obtain an estimate of spike times and spike "amplitudes". The amplitudes are proportional to the number of spikes in a burst/bin. Even under low SNR conditions, where transients might be hard to identify, the deconvolution is still useful for temporally-localizing responses. The cell traces are corrected using the ICA-derived neuropil contamination coefficients, and baselined using the minimum of the overly-smoothed trace. 
+6) Spike deconvolution --- cell and neuropil traces are further processed to obtain an estimate of spike times and spike "amplitudes". The amplitudes are proportional to the number of spikes in a burst/bin. Even under low SNR conditions, where transients might be hard to identify, the deconvolution is still useful for temporally-localizing responses. The cell traces are baselined using the minimum of the (overly) smoothed trace. 
+
+7) Neuropil subtraction --- coefficient is estimated iteratively together with spike deconvolution to minimize the residual of spike deconvolution. The user is encouraged to also try varying this coefficient, to make sure that any scientific results do not depend crucially on it. 
+
 
 ### II. Getting started ###
 
