@@ -19,8 +19,9 @@ for j = 1:size(mPix,2)
     ipix = mPix(ipos,j);
     
     stat(j).ipix    = ipix;
-    stat(j).xpix    = ceil(ipix/Ly);
-    stat(j).ypix    = rem(ipix-1, Ly)+1;
+    [ypix, xpix]    = ind2sub([Ly Lx], ipix);
+    stat(j).ypix    = ypix;
+    stat(j).xpix    = xpix;
     stat(j).lam     = mLam(ipos,j);
     stat(j).lambda  = mLam0(ipos,j);
     stat(j).npix    = numel(ipix);
