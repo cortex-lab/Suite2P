@@ -14,8 +14,10 @@ ops.maxNeurop    = getOr(ops, {'maxNeurop'}, Inf); % maximum allowed neuropil co
 
 ops.lam              = getOr(ops, 'lam', 3);
 
-if ops.lam<1
-    warning('L0 penalty with lambda < 0 is very slow to solve... \n')
+if ops.lam<.25
+    warning('L0 penalty with lambda < 1 is *very* slow to solve... \n')
+elseif ops.lam<1
+    warning('L0 penalty with lambda < 1 is slow to solve... \n')
 end
 if ops.lam<1e-10
     error('Penalty lambda is < 1e-10. Cannot solve. Typical values are 1 to 10... \n')
@@ -36,25 +38,37 @@ kernel = exp(-[1:ceil(5*mtau)]'/mtau);
 %
 npad        = 250;
 [NT, NN]    = size(ca);
-coefNeu     = .7 * ones(1,NN); % initialize neuropil subtraction coef with 0.8
-
-caCorrected = ca - bsxfun(@times, neu, coefNeu);
 
 %%
-Fsort       = my_conv2(caCorrected, ceil(ops.fs), 1);
-Fsort       = sort(Fsort, 1, 'ascend');
-baselines   = Fsort(ceil(NT/20), :);
 
-% determine and subtract the neuropil
-F1 = caCorrected - bsxfun(@times, ones(NT,1), baselines);
+% determine and subtract the running baseline
+if getOr(ops, 'runningBaseline', 0)
+    Fbase    = ca;
+    NT      = size(Fbase,1);
+    ntBase  = 2*ceil(ops.running_baseline * ops.fs/2)+1;
+    Fbase    = cat(1, Fbase((ntBase-1)/2:-1:1, :), Fbase, Fbase(end:-1:end-(ntBase-1)/2, :));
+    Fbase   = my_conv2(Fbase, 3, 1); % medfilt1(Fneu(:), 5);
+    Fbase   = ordfilt2(Fbase, 1, true(ntBase,1));
+    
+    Fbase = Fbase((ntBase-1)/2 + [1:NT], :);
+    
+%     y = Fneu - Fbase;    
+elseif getOr(ops, 'doBaseline', 1)
+    Fsort       = my_conv2(ca, ceil(ops.fs), 1);
+    Fsort       = sort(Fsort, 1, 'ascend');
+    baselines   = Fsort(ceil(NT/20), :);
+    Fbase   = bsxfun(@times, ones(NT,1), baselines);
+else
+    Fbase = zeros(size(ca));
+end
+F1 = ca - Fbase;
 
-% normalize signal
-% sd   = 1/2 * std(F1 - my_conv2(F1, max(2, ops.fs/4), 1), [], 1);
-
+% normalize by the noise. EXTRA FACTOR OF 1/2 compared with OASIS.
 sd   = 1/2 * 1/sqrt(2) * std(F1(2:end, :) - F1(1:end-1, :), [], 1);
-
 F1   = bsxfun(@rdivide, F1 , 1e-12 + sd);
 
+
+%%
 
 if ops.sensorTau>1e-3
     if isfield(ops, 'fracTau')
@@ -111,13 +125,8 @@ parfor icell = 1:size(ca,2)
 end
 ca   = bsxfun(@times, ca, sd);
 F1   = bsxfun(@times, F1, sd);
-    
-% % rescale baseline contribution
-% for icell = 1:size(ca,2)
-%     dcell{icell}.c                      = dcell{icell}.c * sd(icell);
-%     dcell{icell}.baseline               = baselines(icell);
-%     dcell{icell}.neuropil_coefficient   = coefNeu(icell);
-% end
+
+
 
 %%
 

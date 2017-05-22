@@ -114,7 +114,7 @@ elseif g>1e-3
         %         [c_oasis, sp(:,n)] = oasisAR1(Raw{id}(:,n)', g);
     end
 else 
-    parfor n = 1:size(F1,2)
+    for n = 1:size(F1,2)
         [ca(:,n), sp(:,n)] = oasisAR1(F1(:,n)', [], lam);
         %     [c_oasis, sp(:,n)] = constrained_oasisAR1(F1(:,n)', g);
         %         [c_oasis, sp(:,n)] = oasisAR1(Raw{id}(:,n)', g);
