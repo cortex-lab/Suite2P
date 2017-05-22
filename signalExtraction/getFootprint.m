@@ -12,7 +12,9 @@ rs = rs(rs<=2*d0);
 
 frac = [.5]; %[0.15 0.25 0.33 0.5 .75];
 %%
-[nSVD, Ly, Lx] = size(Ucell);
+Ly = length(ops.yrange);
+Lx = length(ops.xrange);
+
 % find maximum contamination distance for each ROI
 for j = 1:size(mPix,2)
     ipos = find(mPix(:,j)>0 & mLam(:,j)>1e-10);
