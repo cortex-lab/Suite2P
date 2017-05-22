@@ -9,6 +9,7 @@ if exist(fullfile(root, fregops), 'file')
     flag = 1;
 end
 
+fclose all;
 for i = 1:length(ops.planesToProcess)
     iplane  = ops.planesToProcess(i);
     try

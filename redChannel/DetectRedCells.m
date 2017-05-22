@@ -1,6 +1,6 @@
+function DetectRedCells(db, ops0)
 
-
-ops = build_ops3(db0(iexp), ops0);
+ops = build_ops3(db, ops0);
 redcells = [];
 for i = 1:length(ops.planesToProcess)
     iplane  = ops.planesToProcess(i);
