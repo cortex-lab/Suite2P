@@ -1089,7 +1089,7 @@ if handles.targets_loaded && (handles.files(1).loaded || handles.files(2).loaded
     end
     handles.targets_s2p_rois(:,3) = ~isnan(sum(handles.targets_s2p_rois(:,1:2),2));
     handles.plotted_targets.SizeData = handles.target_sizes(handles.targets_s2p_rois(:,3)+1);
-    handles.targets_overlapped = true;
+    handles.targets_overlapped = true; 
 end
 
 
@@ -1422,7 +1422,7 @@ function overlap_threshold_input_KeyPressFcn(hObject, eventdata, handles)
 %	Character: character interpretation of the key(s) that was pressed
 %	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
 % handles    structure with handles and user data (see GUIDATA)
-figure1_KeyPressFcn(hObject, eventdata, handles)
+%figure1_KeyPressFcn(hObject, eventdata, handles)
 
 
 % --- Executes on button press in save_session_button.
@@ -1586,7 +1586,7 @@ function target_overlap_threshold_input_KeyPressFcn(hObject, eventdata, handles)
 %	Character: character interpretation of the key(s) that was pressed
 %	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
 % handles    structure with handles and user data (see GUIDATA)
-figure1_KeyPressFcn(hObject, eventdata, handles)
+%figure1_KeyPressFcn(hObject, eventdata, handles)
 
 
 % --- Executes on mouse motion over figure - except title and menu.
