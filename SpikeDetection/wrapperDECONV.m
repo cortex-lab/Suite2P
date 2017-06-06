@@ -1,9 +1,10 @@
 function [sp, ca, coefs, B, sd, ops] = wrapperDECONV(ops, F, N)
 
+% maximum neuropil coefficient
+ops.maxNeurop = getOr(ops, 'maxNeurop', 1);
+
 if getOr(ops, 'estimateNeuropil', 0)
     niter = 5;
-    % maximum neuropil coefficient
-    ops.maxNeurop = getOr(ops, 'maxNeurop', 1);
 else
     niter = 1;
 end
@@ -20,7 +21,7 @@ else
     niter = 1;
 end
 
-coefs   = .7 * ones(1, NN);
+coefs   = min(.7, ops.maxNeurop) * ones(1, NN);
 B       = zeros(2, NN);
 
 
