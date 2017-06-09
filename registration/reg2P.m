@@ -158,7 +158,7 @@ for i = 1:numPlanes
             end
             fidIntpol{i,j} = fopen(fullfile(folder, ...
                 sprintf('%s_%s_%s_plane%d.bin', ops.mouse_name, ops.date, ...
-                ops.CharSubDirs, i + (j-1)*numPlanes)));
+                ops.CharSubDirs, i + (j-1)*numPlanes)), 'w');
         end
     end
 end
