@@ -191,13 +191,17 @@ for i = 1:length(planesToInterpolate)
         dsall(indframes,:,j) = values;
         ops1{planesToInterpolate(i),j}.DS_allPlanes = ...
             ops1{planesToInterpolate(i),j}.DS;
-        values(isnan(values(:,1)),:) = [];
+        ops1{planesToInterpolate(i),j}.CorrFrame_allPlanes = ...
+            ops1{planesToInterpolate(i),j}.CorrFrame;
+        nanInds = isnan(values(:,1));
+        values(nanInds,:) = [];
         ops1{planesToInterpolate(i),j}.DS = values;
     
         if ismember(i, indInterpolate)
             ops1{planesToInterpolate(i),j}.planeInterpolated = 1;
             ops1{planesToInterpolate(i),j}.usedPlanes = up;
             ops1{planesToInterpolate(i),j}.basisPlanes = planesToInterpolate(i) - shifts';
+        ops1{planesToInterpolate(i),j}.basisPlanes(nanInds) = [];
             ops1{planesToInterpolate(i),j}.profiles = prof;
         else
             ops1{planesToInterpolate(i),j}.planeInterpolated = 0;
@@ -209,6 +213,14 @@ for i = 1:length(planesToInterpolate)
         ap(ap<planesToInterpolate(1)) = planesToInterpolate(1);
         ap(ap>planesToInterpolate(end)) = planesToInterpolate(end);
         ops1{planesToInterpolate(i),j}.alignedToPlanes = ap;
+        
+        ops =  ops1{planesToInterpolate(i),j};
+        ops.CorrFrame(~ops.usedPlanes) = NaN;
+        ops.CorrFrame = nanmean(ops.CorrFrame,2);
+        ops.CorrFrame(nanInds) = [];
+        ops1{planesToInterpolate(i),j}.CorrFrame = ops.CorrFrame;
+        ops1{planesToInterpolate(i),j}.usedPlanes(nanInds,:) = [];
+        ops1{planesToInterpolate(i),j}.alignedToPlanes(nanInds) = [];
     end
 end
 

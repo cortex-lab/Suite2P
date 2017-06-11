@@ -1,6 +1,6 @@
 function redoRegistration(ops1, ichannel, iplanes)
 
-% Cannot be used with multiple FOVs, and ignores BiDiPhase
+% Cannot be used with multiple FOVs
 
 if nargin < 2 || isempty(ichannel)
     if isfield(ops, 'gchannel') && ~isempty(ops.gchannel)
@@ -83,8 +83,12 @@ for k = 1:length(fs)
             ind1 = iplane0(iplanes(i)) : nplanes : size(data,3);
             if isfield(ops1{iplanes(i)}, 'planeInterpolated') && ...
                     ops1{iplanes(i)}.planeInterpolated == 1
-                bases = ops1{iplanes(i)}.basisPlanes(ceil((t2+t1)/nplanes + ...
-                    (1:length(ind1))));
+                prevFrames = sum(ops1{iplanes(i)}.Nframes(1:(k-1)));
+                bases = ops1{iplanes(i)}.basisPlanes(prevFrames + ...
+                    floor(t1/nplanes) + double(mod(t1,nplanes)>=iplanes(i)) + ...
+                    (1:length(ind1)));
+%                 bases = ops1{iplanes(i)}.basisPlanes(ceil((t2+t1)/nplanes + ...
+%                     (1:length(ind1))));
                 uniqueBases = unique(bases)';
                 dwrite = zeros(size(dreg,1), size(dreg,2), length(ind1));
                 for b = uniqueBases
