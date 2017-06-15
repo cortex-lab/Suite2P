@@ -1,12 +1,22 @@
 % computes registration offsets for data split into blocks
 % loops over blocks and returns offsets dsall
 function [dsall,ops1] = GetBlockOffsets(data, j, iplane0, ops, ops1)
-            
+
+nplanes = getOr(ops, {'nplanes'}, 1);
+alignAcrossPlanes  = getOr(ops, {'alignAcrossPlanes'}, false);
+planesToInterpolate = getOr(ops, {'planesToInterpolate'}, 1:nplanes);
+
 nblocks = ops.numBlocks(1)*ops.numBlocks(2);
 dsall = zeros(size(data,3), 2, nblocks);
+
 for i = 1:ops.numPlanes
-    ifr0 = iplane0(ops.planesToProcess(i));
-    indframes = ifr0:ops.nplanes:size(data,3);
+    if alignAcrossPlanes && ismember(i, planesToInterpolate) % load frames of all planes
+        indframes = 1:size(data,3);
+    else
+        ifr0 = iplane0(ops.planesToProcess(i));
+        indframes = ifr0:ops.nplanes:size(data,3);
+    end
+    
     ds = zeros(numel(indframes), 2, nblocks,'double');
     Corr = zeros(numel(indframes), nblocks,'double');
     for ib = 1:nblocks
