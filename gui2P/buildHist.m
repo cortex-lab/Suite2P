@@ -51,7 +51,7 @@ for j = 1:size(grids,2)
         L = zeros(size(grids,1), 1);
         if pX0(k)>0
             L(k, 1) = pX0(k);
-            Xhist(:,j) = Xhist(:,j) + my_conv2(L, sig / pX(k), 1);
+            Xhist(:,j) = Xhist(:,j) + my_conv2(L, sig, 1);
         end
     end
 end

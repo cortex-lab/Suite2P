@@ -11,8 +11,8 @@ orig_class = class(data);
 %%
 
 % smooth offsets across blocks by xyMask
-dx = round(xyMask * squeeze(ds(:,2,:))');
-dy = round(xyMask * squeeze(ds(:,1,:))');
+dx = round(xyMask * reshape(squeeze(ds(:,2,:))',size(xyMask,2),[]));
+dy = round(xyMask * reshape(squeeze(ds(:,1,:))',size(xyMask,2),[]));
 
 dx = reshape(dx, Ly, Lx, []);
 dy = reshape(dy, Ly, Lx, []);
