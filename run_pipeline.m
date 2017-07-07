@@ -62,6 +62,7 @@ end
 %%
 for i = 1:numel(ops1) %[1:2 4:numel(ops1)]
     ops         = ops1{i};    
+  
     ops.iplane  = i;
     
 %     ops.ThScaling = 0.5;

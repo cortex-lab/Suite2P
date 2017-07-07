@@ -9,7 +9,7 @@ usFac = getOr(ops, 'registrationUpsample', 1); % factor to upsample
 phaseCorrelation = getOr(ops, {'phaseCorrelation' 'PhaseCorrelation'}, false);
 useGPU = getOr(ops, 'useGPU', false);
 
-maskSlope   = 1.2; % slope on taper mask preapplied to image. was 2, then 1.2
+maskSlope   = getOr(ops, 'maskSlope', 2); % slope on taper mask preapplied to image. was 2, then 1.2
 % SD pixels of gaussian smoothing applied to correlation map (MOM likes .6)
 smoothSigma = 1.15/sqrt(usFac);
 
@@ -54,6 +54,7 @@ eps0 = single(1e-20);
 if phaseCorrelation
     cfRefImg = cfRefImg./(eps0 + abs(cfRefImg)).*fhg;
 end
+
 if useGPU
     batchSize = getBatchSize(lyus*lxus);
     maskMul = gpuArray(maskMul);
