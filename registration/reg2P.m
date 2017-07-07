@@ -254,6 +254,9 @@ for i = 1:numel(ops1)
     ops1{i}.mimg1 = ops1{i}.mimg1/sum(ops1{i}.Nframes);
     
     ops1{i}.badframes = false(1, size(ops1{i}.DS,1));
+    if isfield(ops, 'badframes0') && ~isempty(ops.badframes0)
+        ops1{i}.badframes(ops.badframes0) = true;
+    end
 end
 %%
 

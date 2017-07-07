@@ -58,7 +58,7 @@ if processed==0
 else
     disp('already registered binary found');
 end
-
+% keyboard;
 %%
 for i = 1:numel(ops1) %[1:2 4:numel(ops1)]
     ops         = ops1{i};    

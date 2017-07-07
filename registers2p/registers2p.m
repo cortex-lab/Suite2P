@@ -22,7 +22,7 @@ function varargout = registers2p(varargin)
 
 % Edit the above text to modify the response to help registers2p
 
-% Last Modified by GUIDE v2.5 17-May-2017 11:52:07
+% Last Modified by GUIDE v2.5 26-May-2017 15:46:35
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1089,7 +1089,7 @@ if handles.targets_loaded && (handles.files(1).loaded || handles.files(2).loaded
     end
     handles.targets_s2p_rois(:,3) = ~isnan(sum(handles.targets_s2p_rois(:,1:2),2));
     handles.plotted_targets.SizeData = handles.target_sizes(handles.targets_s2p_rois(:,3)+1);
-    handles.targets_overlapped = true;
+    handles.targets_overlapped = true; 
 end
 
 
@@ -1422,7 +1422,7 @@ function overlap_threshold_input_KeyPressFcn(hObject, eventdata, handles)
 %	Character: character interpretation of the key(s) that was pressed
 %	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
 % handles    structure with handles and user data (see GUIDATA)
-figure1_KeyPressFcn(hObject, eventdata, handles)
+%figure1_KeyPressFcn(hObject, eventdata, handles)
 
 
 % --- Executes on button press in save_session_button.
@@ -1586,7 +1586,7 @@ function target_overlap_threshold_input_KeyPressFcn(hObject, eventdata, handles)
 %	Character: character interpretation of the key(s) that was pressed
 %	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
 % handles    structure with handles and user data (see GUIDATA)
-figure1_KeyPressFcn(hObject, eventdata, handles)
+%figure1_KeyPressFcn(hObject, eventdata, handles)
 
 
 % --- Executes on mouse motion over figure - except title and menu.
@@ -1656,5 +1656,13 @@ function figure1_ButtonDownFcn(hObject, eventdata, handles)
 % --- Otherwise, executes on mouse press in 5 pixel border or over text1.
 function text1_ButtonDownFcn(hObject, eventdata, handles)
 % hObject    handle to text1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over target_overlap_threshold_input.
+function target_overlap_threshold_input_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to target_overlap_threshold_input (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
