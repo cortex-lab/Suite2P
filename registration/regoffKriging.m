@@ -5,7 +5,7 @@ subpixel = getOr(ops, {'subPixel' 'SubPixel'}, 10); % subpixel factor
 useGPU = getOr(ops, 'useGPU', false);
 phaseCorrelation = getOr(ops, {'phaseCorrelation' 'PhaseCorrelation'}, true);
 maxregshift = getOr(ops, 'maxregshift', round(.1*max(ops.Ly,ops.Lx)));
-maskSlope   = 2; % slope on taper mask preapplied to image. was 2, then 1.2
+maskSlope   = getOr(ops, 'maskSlope', 2); % slope on taper mask preapplied to image. was 2, then 1.2
 % SD pixels of gaussian smoothing applied to correlation map (MOM likes .6)
 smoothSigma = 1.15;
 
