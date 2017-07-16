@@ -35,23 +35,44 @@ The toolbox runs in Matlab and currently only supports tiff file inputs. To begi
 Look into make_db_example for more detailed examples.
 
 The following is a typical database entry in the local make_db file, which can be modelled after make_db_example. The folder structure assumed is RootStorage/mouse_name/date/expts(k) for all entries in expts(k).
-
-i = i+1; db(i).mouse_name = 'M150329_MP009'; db(i).date = '2015-04-27'; db(i).expts = [5 6]; % which experiments to process together
-
+```
+i = i+1; 
+db(i).mouse_name = 'M150329_MP009'; 
+db(i).date = '2015-04-27'; 
+db(i).expts = [5 6]; % which experiments to process together
+```
 Other (hidden) options are described in make_db_example.m, and at the top of run_pipeline.m (set to reasonable defaults).
 
 ### Running the pipeline
-Build the ops structure
-ops = build_ops3(db, ops0);
-and then run the main function
-run_pipeline(db, ops);
+Run the top part of make_db_example.m to create the db0 and ops0 variables.
 
+Build the ops structure
+```
+iexp = 1; % which experiment you are processing in db file
+db   = db0(iexp);
+ops = build_ops3(db, ops0);
+```
+and then run the main function
+```
+run_pipeline(db, ops);
+```
 
 ### Spike deconvolution
 
 For L0 spike deconvolution, you need to run mex -largeArrayDims SpikeDetection/deconvL0.c (or .cpp under Linux/Mac). If you're on Windows, you will need to install Visual Studio Community in order to mex files in matlab. This is the default deconvolution method.
 
-For L1 spike deconvolution, you need to download the OASIS github (https://github.com/zhoupc/OASIS_matlab) and add the path to this folder on your computer to the top of your master_file (addpath(genpath('folderpath'))). To choose this deconvolution method, set  ops0.deconvType = 'OASIS';
+For L1 spike deconvolution, you need to download the OASIS github (https://github.com/zhoupc/OASIS_matlab) and add the path to this folder on your computer to the top of your master_file 
+```
+addpath(genpath('pathtoOASIS')))
+```
+To choose this deconvolution method, set  
+```
+ops0.deconvType = 'OASIS';
+```
+To run spike deconvolution (after running the pipeline), run
+```
+add_deconvolution(ops0, db);
+```
 
 Below we describe the outputs of the pipeline first, and then describe the options for setting it up, and customizing it. Importantly, almost all options have pre-specified defaults. Any options specified in master_file in ops0 overrides these defaults. Furthermore, any option specified in the make_db file (experiment specific) overrides both the defaults and the options set in master_file. This allows for flexibility in processing different experiments with different options. The only critical option that you'll need to set is ops0.diameter, or db(N).diameter. This gives the algorithm the scale of the recording, and the size of ROIs you are trying to extract. We recommend as a first run to try the pipeline after setting the diameter option. Depending on the results, you can come back and try changing some of the other options.  
 
@@ -162,6 +183,8 @@ imageRate --- imaging rate per plane.
 sensorTau --- decay timescale.
 
 maxNeurop --- neuropil contamination coef has to be less than this (sometimes good to impose a ceiling at 1, i.e. for interneurons)
+
+deconvType --- which type of deconvolution to use (either 'L0' or 'OASIS') 
 
 # IX. Measures used by classifier
 
