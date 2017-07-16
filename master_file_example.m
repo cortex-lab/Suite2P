@@ -1,5 +1,10 @@
 %% SET ALL DEFAULT OPTIONS HERE
 
+% UPDATE summer 2017: default spike deconvolution changed to a customized version of
+% OASIS (due to our results in this paper http://www.biorxiv.org/content/early/2017/06/27/156786). Please
+% Please download the OASIS code from https://github.com/zhoupc/OASIS_matlab, and
+% add the folder, with its subfolders, to your Matlab path. 
+
 % UPDATE Christmas 2016: number of clusters determined automatically, but
 % do specify the "diameter" of an average cell for best results. You can do this with either
 % db(iexp).diameter, or ops0.diameter
@@ -67,9 +72,8 @@ db0 = db;
 for iexp = 1 %[3:length(db) 1:2]
     run_pipeline(db(iexp), ops0);
     
-    % deconvolved data into (dat.)cl.dcell, and neuropil subtraction coef
-    % commented out for now, back up ~ 10 May 
-    % add_deconvolution(ops0, db0(iexp));
+    % deconvolved data into st, and neuropil subtraction coef in stat
+    add_deconvolution(ops0, db0(iexp));
     
     % add red channel information (if it exists)
     if isfield(db0,'expred') && ~isempty(db0(iexp).expred)

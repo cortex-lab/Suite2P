@@ -2,8 +2,10 @@ function add_deconvolution(ops, db)
 ops = build_ops3(db, ops);
 ops0 = ops;
 
+% ops.deconvType = 'OASIS' (default) or 'L0'. See
+% http://www.biorxiv.org/content/early/2017/06/27/156786 for more info. 
 
-% warning('ops0.imageRate now represents the TOTAL frame rate of the recording over all planes. This warning will be disabled in a future version. ')
+% warning: ops0.imageRate now represents the TOTAL frame rate of the recording over all planes. This warning will be disabled in a future version.
 
 for i = 1:length(ops.planesToProcess)
     iplane  = ops.planesToProcess(i);
