@@ -59,21 +59,23 @@ run_pipeline(db, ops);
 
 ### Spike deconvolution
 
-For L0 spike deconvolution, you need to run mex -largeArrayDims SpikeDetection/deconvL0.c (or .cpp under Linux/Mac). If you're on Windows, you will need to install Visual Studio Community in order to mex files in matlab. This is the default deconvolution method.
-
-For L1 spike deconvolution, you need to download the OASIS github (https://github.com/zhoupc/OASIS_matlab) and add the path to this folder on your computer to the top of your master_file 
+For spike deconvolution, you need to download the OASIS github (https://github.com/zhoupc/OASIS_matlab) and add the path to this folder on your computer to the top of your master_file 
 ```
 addpath(genpath('pathtoOASIS')))
-```
-To choose this deconvolution method, set  
-```
-ops0.deconvType = 'OASIS';
 ```
 To run spike deconvolution (after running the pipeline), run
 ```
 add_deconvolution(ops0, db);
 ```
 
+For L0 spike deconvolution, you need to run mex -largeArrayDims SpikeDetection/deconvL0.c (or .cpp under Linux/Mac). If you're on Windows, you will need to install Visual Studio Community in order to mex files in matlab. To choose this deconvolution method, set  
+```
+ops0.deconvType = 'L0';
+```
+
+See this paper comparing spike deconvolution methods for more information: http://www.biorxiv.org/content/early/2017/06/27/156786
+
+----------
 Below we describe the outputs of the pipeline first, and then describe the options for setting it up, and customizing it. Importantly, almost all options have pre-specified defaults. Any options specified in master_file in ops0 overrides these defaults. Furthermore, any option specified in the make_db file (experiment specific) overrides both the defaults and the options set in master_file. This allows for flexibility in processing different experiments with different options. The only critical option that you'll need to set is ops0.diameter, or db(N).diameter. This gives the algorithm the scale of the recording, and the size of ROIs you are trying to extract. We recommend as a first run to try the pipeline after setting the diameter option. Depending on the results, you can come back and try changing some of the other options.  
 
 Note: some of the options are not specified in either the example master_file or the example make_db file. These are usually more specialized features.
