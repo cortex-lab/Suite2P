@@ -33,6 +33,7 @@ for i = 1:length(ops.planesToProcess)
     ops.maxNeurop    = getOr(ops0, {'maxNeurop'}, Inf); % maximum neuropil coefficient (default no max)
     ops.recomputeKernel    = getOr(ops0, {'recomputeKernel'}, 0);
     
+    ops.deconvNeuropil = 1;
     
     fprintf('Spike deconvolution, plane %d... \n', iplane)
     
@@ -48,7 +49,14 @@ for i = 1:length(ops.planesToProcess)
     ops.estimateNeuropil    = getOr(ops0, 'estimateNeuropil', 1);
     ops.runningBaseline     = 0;
 
-    [sp, ~, coefs,~, sd, ops] = wrapperDECONV(ops, Ff, Fneu);
+    if ops.deconvNeuropil
+        ops.estimateNeuropil = 0;
+        [sp, ~, coefs,~, sd, ops] = wrapperDECONV(ops, Fneu);
+        fpath = sprintf('%s/Fneu_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
+            ops.mouse_name, ops.date, iplane);
+    else
+        [sp, ~, coefs,~, sd, ops] = wrapperDECONV(ops, Ff, Fneu);
+    end
     
     stat = dat.stat;
     for j = 1:size(Ff,2)
