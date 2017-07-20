@@ -16,7 +16,7 @@ stat = getNonOverlapROIs(stat, Ny, Nx);
 [stat, cellPix, cellMasks] = createCellMasks(stat, Ny, Nx);
 
 % create surround neuropil masks
-neuropMasks=createNeuropilMasks(ops, stat, cellPix);
+[ops, neuropMasks] = createNeuropilMasks(ops, stat, cellPix);
 
 % add surround neuropil masks to stat
 for k = 1:Nk
@@ -45,10 +45,10 @@ while 1
     %
     data = reshape(data, Ly, Lx, []);
     data = data(ops.yrange, ops.xrange, :);
-    data = double(data);
     NT   = size(data,3);
     data = reshape(data, [], NT);
-    
+    data = double(data);
+        
     % process the data
     %data = my_conv2(data, ops.sig, [1 2]);
     

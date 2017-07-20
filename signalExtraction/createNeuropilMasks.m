@@ -1,4 +1,4 @@
-function neuropMasks=createNeuropilMasks(ops, stat, cellPix)
+function [ops, neuropMasks]=createNeuropilMasks(ops, stat, cellPix)
 %
 % createNeuropilMasks compute the a ring-like shape around a cell mask to
 % determine the neuropil contamination. The mask excludes any mask
@@ -24,13 +24,16 @@ function neuropMasks=createNeuropilMasks(ops, stat, cellPix)
 Ly = ops.Ly;
 Lx = ops.Lx;
 
+ops.innerNeuropil  = getOr(ops, 'innerNeuropil', 1); % padding around cell to exclude from neuropil
+ops.outerNeuropil  = getOr(ops,'outerNeuropil', Inf); % radius of neuropil surround
+%
 
 outRadius  = ops.outerNeuropil;
 inRadius   = ops.innerNeuropil;
 
 if isinf(outRadius)
-    ops.minNeuropilPixels = getOr(ops, 'minNeuropilPixels', 400); 
-    ops.ratioNeuropil     = getOr(ops, 'ratioNeuropil', 5);
+    ops.minNeuropilPixels = getOr(ops, 'minNeuropilPixels', 350); 
+    ops.ratioNeuropil     = getOr(ops, 'ratioNeuropil', 4);
 end
 
 
