@@ -28,6 +28,11 @@ Lx = ops.Lx;
 outRadius  = ops.outerNeuropil;
 inRadius   = ops.innerNeuropil;
 
+if isinf(outRadius)
+    ops.minNeuropilPixels = getOr(ops, 'minNeuropilPixels', 400); 
+    ops.ratioNeuropil     = getOr(ops, 'ratioNeuropil', 5);
+end
+
 
 [Ny, Nx]=size(cellPix);
 
