@@ -47,6 +47,17 @@ for iplane = ipl
     opsZ.RegFile              = sprintf('%s_Z.bin',dat.ops.RegFile(1:end-4));
     [~, ~, FcellZ, FcellNeuZ] = extractSignalsSurroundNeuropil(opsZ, dat.stat);   
     
+    %% make sure correction won't push signals below zero
+    mZ    = zeros(size(dat.Fcell{1},1),1);
+    for j = 1:length(dat.Fcell)
+        mZ = min(mZ, min(dat.Fcell{j} - FcellZ{j}, [], 2));
+        mZ = min(mZ, min(dat.FcellNeu{j} - FcellNeuZ{j}, [], 2));
+    end
+    for j = 1:length(dat.Fcell)
+        FcellZ{j} = max(0, bsxfun(@minus, FcellZ{j}, -1*mZ));
+        FcellNeuZ{j} = max(0, bsxfun(@minus, FcellNeuZ{j}, -1*mZ));
+    end
+    %%
     % save FcellZ and FcellNeuZ
     dat.FcellZ    = FcellZ;
     dat.FcellNeuZ = FcellNeuZ;
