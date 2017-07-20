@@ -128,7 +128,9 @@ If you don't want to use this folder structure, see the make_db_example file for
 
 The output is a struct called dat which is saved into a mat file in ResultsSavePath using the same subfolder structure, under a name formatted like F_M150329_MP009_2015-04-29_plane1. It contains all the information collected throughout the processing, and contains the fluorescence traces in dat.Fcell and whether a given ROI is a cell or not in dat.stat(N).iscell. dat.stat contains information about each ROI and can be used to recover the corresponding pixels for each ROI N in dat.stat(N).ipix. The centroid of the ROI N is specified in dat.stat(N) as well. Here is a summary of where the important results are:
 
-# V. Options for registration
+# V. Options
+
+### Registration
 
 showTargetRegistration --- whether to show an image of the target frame immediately after it is computed. 
 
@@ -160,7 +162,7 @@ smoothBlocks --- if quadBlocks = 0, then smoothBlocks is the standard deviation 
 
 ++ Bidirectional scanning issues (frilly cells) taken care of automatically ++
 
-# VI. Options for cell detection
+### Cell detection
 
 sig --- spatial smoothing constant: smooths out the SVDs spatially. Indirectly forces ROIs to be more round. 
 
@@ -170,7 +172,7 @@ ShowCellMap --- whether to show the clustering results as an image every 10 iter
 
 getROIs --- whether to run the ROI detection algorithm after registration
 
-# VII. Options for SVD decomposition
+### SVD decomposition
 
 NavgFramesSVD --- for SVD, data has to be temporally binned. This number specifies the final number of points to be obtained after binning. In other words, datasets with many timepoints are binned in higher windows while small datasets are binned less. 
 
@@ -178,7 +180,25 @@ getSVDcomps --- whether to obtain and save to disk SVD components of the registe
 
 nSVD --- how many SVD components to keep.
 
-# VIII. Options for spike deconvolution 
+### Signal extraction
+
+signalExtraction --- how should the fluorescence be extracted? Both 'raw' and 'regression' mean that a generative model is used to compute the neuropil and the cell fluorescence. The 'raw' option restricts cells to be non-overlapping, 'regression' option allows cell overlaps. The neuropil model in this generative model is a set of spatial basis functions that tile the FOV. The 'surround' option means that the cell's activity is the weighted sum of the detected pixels (weighted by lambda). The neuropil is computed as the sum of activity of surrounding pixels (excluding other cells in the computation).
+
+### Neuropil options
+
+ops.ratioNeuropil --- used for both spatial basis functions and surround neuropil - the spatial extent of the neuropil as a factor times the radius of the cells (ops.ratioNeuropil * cell radius = neuropil radius)
+
+if using surround neuropil
+
+ops.innerNeuropil --- padding in pixels around cell to exclude from neuropil
+
+ops.outerNeuropil --- radius of neuropil surround (set to Inf to use ops.ratioNeuropil)
+
+ops.minNeuropilPixels --- minimum number of pixels necessary in neuropil surround
+
+
+
+### Spike deconvolution 
 
 imageRate --- imaging rate per plane. 
 
@@ -188,7 +208,7 @@ maxNeurop --- neuropil contamination coef has to be less than this (sometimes go
 
 deconvType --- which type of deconvolution to use (either 'L0' or 'OASIS') 
 
-# IX. Measures used by classifier
+### Measures used by classifier
 
 The Suite2p classifier uses a number of features of each ROI to assign cell labels to ROIs. The classifier uses a naive Bayes approach for each feature, and models the distribution of each feature with a non-parametric, adaptively binned empirical distribution. The classifier is initialized with some standard distributions for these features, but is updated continuously with new data samples as the user refines the output manually in the GUI. 
 
