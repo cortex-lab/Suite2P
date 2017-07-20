@@ -1,3 +1,5 @@
+% creates cell masks for fluorescence computation
+% also creates exclusion mask for neuropil (cellPix)
 function [stat, cellPix, cellMasks] = createCellMasks(stat, Ny, Nx)
 
 Nk = length(stat);

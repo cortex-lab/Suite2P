@@ -1,12 +1,6 @@
+% creates surround neuropil masks which exclude the cells
 function [ops, neuropMasks]=createNeuropilMasks(ops, stat, cellPix)
 %
-% createNeuropilMasks compute the a ring-like shape around a cell mask to
-% determine the neuropil contamination. The mask excludes any mask
-% belonging to other cells.
-%
-% INPUTS:
-% allField: [Ny x Nx] matrix identify different cell masks with an integer
-% index
 % ops.innerNeuropil: distance between cell mask and inner boundary of neuropil
 % mask (in pixels), default is 3 pixels
 % IF NEUROPIL FUNCTION OF CELL SIZE
@@ -16,13 +10,11 @@ function [ops, neuropMasks]=createNeuropilMasks(ops, stat, cellPix)
 % ops.outerNeuropil: outer radius of Neuropil mask -- if set to Inf then
 % neuropil is a function of the cell size
 %
-% OUTPUTS:
-% neuropMasks: [Ly x Lx] matrix identify different neuropil masks with an
+% OUTPUT:
+% neuropMasks: [Nk x Ny x Nx] matrix identify different neuropil masks with an
 % integer index
 %
 
-Ly = ops.Ly;
-Lx = ops.Lx;
 
 ops.innerNeuropil  = getOr(ops, 'innerNeuropil', 1); % padding around cell to exclude from neuropil
 ops.outerNeuropil  = getOr(ops,'outerNeuropil', Inf); % radius of neuropil surround
@@ -54,8 +46,10 @@ for k = 1:length(stat)
     if isinf(ops.outerNeuropil)
         radiusCell         = stat(k).radius;
         outRadius          = ops.ratioNeuropil * radiusCell;
+        outRadius          = max(outRadius, sqrt(ops.minNeuropilPixels/pi));
         totPix             = 0;
-        while totPix < ops.minNeuropilPixels        
+        its                = 0;
+        while totPix < ops.minNeuropilPixels 
             neuropRegion       = sqrt((xx_np-centerCell(1)).^2 + ...
                 (yy_np-centerCell(2)).^2)<=outRadius;
             neuropNoCells      = neuropRegion - expandedGeneralMask > 0;
