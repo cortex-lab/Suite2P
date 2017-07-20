@@ -27,5 +27,5 @@ for k = 1:Nk
     cellPix = cellPix + (temp > 0);
     
     % put cell mask into cellMasks for computing fluorescence
-    cellMasks(k, ipix) = lam / mean(lam);
+    cellMasks(k, ipix) = lam;
 end
