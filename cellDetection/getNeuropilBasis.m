@@ -4,7 +4,7 @@ function S = getNeuropilBasis(ops, Ly, Lx, type)
 ops.ratioNeuropil = getOr(ops, 'ratioNeuropil', 6);
 
 TileFactor = getOr(ops, {'TileFactor'}, 1); % this option can be overwritten by the user
-nTiles = ceil(TileFactor * (Ly+Lx)/2 / (ops.neuropilRange * ops.diameter/2)); % neuropil is modelled as nTiles by nTiles
+nTiles = ceil(TileFactor * (Ly+Lx)/2 / (ops.ratioNeuropil * ops.diameter/2)); % neuropil is modelled as nTiles by nTiles
 nTiles = getOr(ops, 'nTiles', nTiles);
 % for ops.diameter = 8 and 512x512 FOV, default is 22 x 22 tiles
 
