@@ -14,16 +14,6 @@ ops0.signalExtraction               = getOr(ops0, 'signalExtraction', 'raw');
 ops0.interpolateAcrossPlanes        = getOr(ops0, 'interpolateAcrossPlanes', 0);
 ops0.maxNeurop                      = getOr(ops0, 'maxNeurop', 1.5);
 
-% neuropil options for surround neuropil computation
-if strcmp(ops.signalExtraction, 'surround')
-    ops.innerNeuropil = getOr(ops, 'innerNeuropil', 1);
-    ops.outerNeuropil = getOr(ops, 'outerNeuropil', Inf);
-    if isinf(ops.outerNeuropil)
-        ops.minNeuropilPixels = getOr(ops, 'minNeuropilPixels', 400);
-        ops.ratioNeuropil     = getOr(ops, 'ratioNeuropil', 5);
-    end
-end
-
 
 ops                                 = build_ops3(db, ops0);
 if isfield(ops, 'numBlocks') && ~isempty(ops.numBlocks)

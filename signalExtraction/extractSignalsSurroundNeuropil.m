@@ -1,18 +1,7 @@
 % computes cell and neuropil fluorescence for surround model of neuropil
 function [ops, stat, Fcell, FcellNeu] = extractSignalsSurroundNeuropil(ops, stat)
 
-% IF NEUROPIL FUNCTION OF CELL SIZE
-% ops.minNeuropilPixels: minimum number of pixels in neuropil surround
-% ops.ratioNeuropil: radius of surround / radius of cell
-% IF NEUROPIL FIXED SIZE
-% ops.outerNeuropil: outer radius of Neuropil mask -- if set to Inf then
-% neuropil is a function of the cell size
-ops.innerNeuropil = getOr(ops, 'innerNeuropil', 1);
-ops.outerNeuropil = getOr(ops, 'outerNeuropil', Inf);
-if isinf(ops.outerNeuropil)
-    ops.minNeuropilPixels = getOr(ops, 'minNeuropilPixels', 400);
-    ops.ratioNeuropil     = getOr(ops, 'ratioNeuropil', 5);
-end
+
 
 Nk       = numel(stat); % all ROIs
 
