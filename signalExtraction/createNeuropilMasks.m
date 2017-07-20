@@ -33,7 +33,7 @@ inRadius   = ops.innerNeuropil;
 
 if isinf(outRadius)
     ops.minNeuropilPixels = getOr(ops, 'minNeuropilPixels', 350); 
-    ops.ratioNeuropil     = getOr(ops, 'ratioNeuropil', 4);
+    ops.ratioNeuropil     = getOr(ops, 'ratioNeuropil', 5);
 end
 
 
@@ -64,12 +64,13 @@ for k = 1:length(stat)
         end
         
         % embed neuropil masks in full FOV (LyU x LxU)        
-        neuropMasks(k,:,:) = neuropNoCells;
+        neuropMasks(k,:,:) = single(neuropNoCells)/totPix;
     else
         neuropRegion       = sqrt((xx_np-centerCell(1)).^2 + ...
             (yy_np-centerCell(2)).^2)<=outRadius;
         neuropNoCells      = neuropRegion - expandedGeneralMask > 0;
-        neuropMasks(k,:,:) = neuropNoCells;
+        totPix             = sum(neuropNoCells(:));
+        neuropMasks(k,:,:) = single(neuropNoCells)/totPix;
     end
 end
 
