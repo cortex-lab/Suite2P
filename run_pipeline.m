@@ -92,6 +92,8 @@ for i = 1:numel(ops1) %[1:2 4:numel(ops1)]
                 [ops, stat, Fcell, FcellNeu] = extractSignalsNoOverlaps(ops, model, stat);
             case 'regression'
                 [ops, stat, Fcell, FcellNeu] = extractSignals(ops, model, stat);
+            case 'surround'
+                [ops, stat, Fcell, FcellNeu] = extractSignalsSurroundNeuropil(ops, stat);
         end
 
         % apply user-specific clustrules to infer stat.iscell

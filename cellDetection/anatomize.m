@@ -27,16 +27,7 @@ d2p0 = d2p0(isort, isort);
 rd = zeros(size(mPix,2), 1);
 rd0 = zeros(size(mPix,2), 1);
 
-%% neighbors for obtaining exterior of ROIs
-Ly     = length(ops.yrange);
-Lx     = length(ops.xrange);
-ipts   = [1:Ly*Lx]';
-ineigh = [ipts-1 ipts+1 ipts-Ly ipts+Ly];
-ineigh(ineigh<1 | ineigh > Ly*Lx) = NaN;
-
-
-%%
-
+%% compute compactness and aspect ratio
 for j = 1:size(mPix,2)
     
     lam  = mLam(:,j);

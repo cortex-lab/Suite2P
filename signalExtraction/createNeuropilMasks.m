@@ -1,62 +1,67 @@
-function neuropMasks=createNeuropilMasks(cellFields,allField,xPU,yPU,opt)
+function neuropMasks=createNeuropilMasks(ops, stat, cellPix)
 %
 % createNeuropilMasks compute the a ring-like shape around a cell mask to
 % determine the neuropil contamination. The mask excludes any mask
 % belonging to other cells.
 %
 % INPUTS:
-% cellFields: binary [nCells x nY x nX] matrix containining cell masks
-% allField: [nY x nX] matrix identify different cell masks with an integer
+% allField: [Ny x Nx] matrix identify different cell masks with an integer
 % index
-% xPU: pixels per micrometers (horizontal axis)
-% yPU: pixels per micrometers (vertical axis)
-% opt.inNeurop: distance between cell mask and inner bondary of neuropil
-% mask (in um), default is 3 um
-% opt.outNeurop: outer radio of Neuropil mask (in um), default is 20 um
+% ops.innerNeuropil: distance between cell mask and inner boundary of neuropil
+% mask (in pixels), default is 3 pixels
+% IF NEUROPIL FUNCTION OF CELL SIZE
+% ops.minNeuropilPixels: minimum number of pixels in neuropil surround
+% ops.ratioNeuropil: radius of surround / radius of cell
+% IF NEUROPIL FIXED SIZE
+% ops.outerNeuropil: outer radius of Neuropil mask -- if set to Inf then
+% neuropil is a function of the cell size
 %
 % OUTPUTS:
-% allNeurop: [nY x nX] matrix identify different neuropil masks with an
+% neuropMasks: [Ly x Lx] matrix identify different neuropil masks with an
 % integer index
 %
-% 2015.06.11 Mario Dipoppa - Created
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-if nargin<3 || ~isfield(opt, 'inNeurop')
-    inNeurop=3;
-else
-    inNeurop=opt.inNeurop;
-end
-if nargin<3 || ~isfield(opt, 'outNeurop')
-    outNeurop=20;
-else
-    outNeurop=opt.outNeurop;
-end
-
-inRadius=ceil(inNeurop*sqrt(xPU*yPU));
-outRadius=outNeurop*sqrt(xPU*yPU);
-
-[hp,wp]=size(allField);
+Ly = ops.Ly;
+Lx = ops.Lx;
 
 
-[xx_np, yy_np] = meshgrid((1:wp),(1:hp));
+outRadius  = ops.outerNeuropil;
+inRadius   = ops.innerNeuropil;
 
-nCells=size(cellFields,1);
+
+[Ny, Nx]=size(cellPix);
+
+[xx_np, yy_np] = ndgrid((1:Ny),(1:Nx));
 
 %compute the inner border of the ring-like shaped surrounding neuropils
 se = strel('disk',inRadius);
-expandedGeneralMask=sign(imdilate(allField,se));
+expandedGeneralMask = sign(imdilate(cellPix,se));
+neuropMasks         = zeros(length(stat), Ny, Nx,'single');
 
-neuropMasks=zeros(nCells,hp,wp);
-
+%%
 %compute the mask of each surrounding neuropils
-for iCell=1:nCells
-    stat = regionprops(squeeze(cellFields(iCell,:,:)),'centroid');
-    if isempty(stat)
-        continue
-    end
-    centerCell=round(stat.Centroid);
+for k = 1:length(stat)
+    centerCell   = [stat(k).med(1) stat(k).med(2)];
     
-    neuropCircle = sqrt((xx_np-centerCell(1)).^2+(yy_np-centerCell(2)).^2)<=outRadius;
-    neuropMasks(iCell,:,:)=(neuropCircle-expandedGeneralMask).*((neuropCircle-expandedGeneralMask)>0);
+    if isinf(ops.outerNeuropil)
+        radiusCell         = stat(k).radius;
+        outRadius          = ops.ratioNeuropil * radiusCell;
+        totPix             = 0;
+        while totPix < ops.minNeuropilPixels        
+            neuropRegion       = sqrt((xx_np-centerCell(1)).^2 + ...
+                (yy_np-centerCell(2)).^2)<=outRadius;
+            neuropNoCells      = neuropRegion - expandedGeneralMask > 0;
+            totPix             = sum(neuropNoCells(:));
+            outRadius          = outRadius * 1.25;
+        end
+        
+        % embed neuropil masks in full FOV (LyU x LxU)        
+        neuropMasks(k,:,:) = neuropNoCells;
+    else
+        neuropRegion       = sqrt((xx_np-centerCell(1)).^2 + ...
+            (yy_np-centerCell(2)).^2)<=outRadius;
+        neuropNoCells      = neuropRegion - expandedGeneralMask > 0;
+        neuropMasks(k,:,:) = neuropNoCells;
+    end
 end
 
