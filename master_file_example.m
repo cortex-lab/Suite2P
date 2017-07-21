@@ -78,14 +78,15 @@ ops0.maxNeurop              = 1; % for the neuropil contamination to be less tha
 ops0.redthres               = 1.5; % the higher the thres the less red cells
 ops0.redmax                 = 1; % the higher the max the more NON-red cells
 
-%% RUN THE PIPELINE HERE
 db0 = db;
+%% RUN THE PIPELINE HERE
 
 for iexp = 1 %[3:length(db) 1:2]
-    run_pipeline(db(iexp), ops0);
+    db = db0(iexp);
+    run_pipeline(db, ops0);
     
     % deconvolved data into st, and neuropil subtraction coef in stat
-    add_deconvolution(ops0, db0(iexp));
+    add_deconvolution(ops0, db);
     
     % add red channel information (if it exists)
     if isfield(db0,'expred') && ~isempty(db0(iexp).expred)
