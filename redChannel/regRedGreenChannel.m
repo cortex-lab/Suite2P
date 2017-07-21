@@ -1,4 +1,4 @@
-function [mimgR,mimgG] = red_channel_mean3(ops)
+function [mimgR,mimgG] = regRedGreenChannel(ops)
 
 % numPlanes = length(ops.planesToProcess);
 

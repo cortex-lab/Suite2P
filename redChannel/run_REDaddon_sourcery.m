@@ -4,13 +4,13 @@ mimgG = [];
 ops = build_ops3(db(iexp), ops0);
 
 if sum(ops.expts==ops.expred)>0
-    mimgR = red_channel_mean(ops);
+    mimgR = regRedChannelExpts(ops);
 else
     if ops.nchannels_red==2
         % return green mean image from recording
-        [mimgR,mimgG] = red_channel_mean3(ops);
+        [mimgR,mimgG] = regRedGreenChannel(ops);
     else
-        mimgR = red_channel_mean2(ops);
+        mimgR = regRedChannelOnly(ops);
     end
 end
 

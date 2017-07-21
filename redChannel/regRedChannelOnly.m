@@ -1,4 +1,4 @@
-function mimgR = red_channel_mean2(ops)
+function mimgR = regRedChannelOnly(ops)
 
 % numPlanes = length(ops.planesToProcess);
 
