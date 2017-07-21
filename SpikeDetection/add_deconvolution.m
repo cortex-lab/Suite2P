@@ -24,6 +24,17 @@ for i = 1:length(ops.planesToProcess)
         dat = dat.dat; % just in case...
     end
     
+    % if z-drift computed, apply correction
+    for j = 1:length(dat.Fcell)
+        if isfield(dat, 'FcellZ')
+            Fcell{j}    = dat.Fcell{j} - dat.FcellZ{j};
+            FcellNeu{j} = dat.FcellNeu{j} - dat.FcellNeuZ{j};
+        else
+            Fcell{j}    = dat.Fcell{j};
+            FcellNeu{j} = dat.FcellNeu{j};
+        end
+    end
+    
     % overwrite fields of ops with those saved to file
     ops = addfields(ops, dat.ops);
     
@@ -35,16 +46,16 @@ for i = 1:length(ops.planesToProcess)
     ops.maxNeurop    = getOr(ops0, {'maxNeurop'}, Inf); % maximum neuropil coefficient (default no max)
     ops.recomputeKernel    = getOr(ops0, {'recomputeKernel'}, 0);
     
-    ops.deconvNeuropil = 1;
+    ops.deconvNeuropil = 0;
     
     fprintf('Spike deconvolution, plane %d... \n', iplane)
     
     % construct Ff and Fneu
     Ff = [];
     Fneu = [];
-    for j = 1:numel(dat.Fcell)
-        Ff   = cat(1, Ff, dat.Fcell{j}');
-        Fneu = cat(1,Fneu, dat.FcellNeu{j}');
+    for j = 1:numel(Fcell)
+        Ff   = cat(1, Ff, Fcell{j}');
+        Fneu = cat(1,Fneu, FcellNeu{j}');
     end
     
     ops.fs                  = ops.imageRate/ops.nplanes;

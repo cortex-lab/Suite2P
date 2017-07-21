@@ -1,8 +1,12 @@
 % fit 2D gaussian to cell with lam pixel weights
-function params = FitMVGaus(iy, ix, lam, thres)
+function params = FitMVGaus(iy, ix, lam0, thres)
+
+if nargin < 4
+    thres = 2.5;
+end
 
 % normalize pixel weigths
-lam     = lam / sum(lam);
+lam     = lam0 / sum(lam0);
 
 mu      = [sum(lam.*iy) sum(lam.*ix)];
 
@@ -13,7 +17,7 @@ sigxy   = xy' * xy;
 
 params.mu = mu;
 params.sig = sigxy;
-[evec,eval]=eig(2.5*params.sig);
+[evec,eval]=eig(thres*params.sig);
 eval = real(eval);
 
 % compute pts surrounding ellipse

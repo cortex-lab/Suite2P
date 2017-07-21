@@ -50,7 +50,21 @@ ops0.ShowCellMap            = 1; % during optimization, show a figure of the clu
 ops0.sig                    = 0.5;  % spatial smoothing length in pixels; encourages localized clusters
 ops0.nSVDforROI             = 1000; % how many SVD components for cell clustering
 ops0.NavgFramesSVD          = 5000; % how many (binned) timepoints to do the SVD based on
-ops0.signalExtraction       = 'raw'; % how to extract ROI and neuropil signals: 'raw', 'regression'
+ops0.signalExtraction       = 'raw'; % how to extract ROI and neuropil signals: 
+%  'raw' (no cell overlaps), 'regression' (allows cell overlaps), 
+%  'surround' (no cell overlaps, surround neuropil model)
+
+% neuropil options (if 'surround' option)
+% all are in measurements of pixels
+ops0.innerNeuropil  = 1; % padding around cell to exclude from neuropil
+ops0.outerNeuropil  = Inf; % radius of neuropil surround
+% if infinity, then neuropil surround radius is a function of cell size
+if isinf(ops0.outerNeuropil)
+    ops0.minNeuropilPixels = 400; % minimum number of pixels in neuropil surround
+    ops0.ratioNeuropil     = 5; % ratio btw neuropil radius and cell radius
+    % radius of surround neuropil = ops0.ratioNeuropil * (radius of cell)
+end
+
 
 % spike deconvolution and neuropil subtraction options
 ops0.imageRate              = 30;   % imaging rate (cumulative over planes!). Approximate, for initialization of deconvolution kernel.

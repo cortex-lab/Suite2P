@@ -14,6 +14,7 @@ ops0.signalExtraction               = getOr(ops0, 'signalExtraction', 'raw');
 ops0.interpolateAcrossPlanes        = getOr(ops0, 'interpolateAcrossPlanes', 0);
 ops0.maxNeurop                      = getOr(ops0, 'maxNeurop', 1.5);
 
+
 ops                                 = build_ops3(db, ops0);
 if isfield(ops, 'numBlocks') && ~isempty(ops.numBlocks)
     if numel(ops.numBlocks) == 1
@@ -92,6 +93,8 @@ for i = 1:numel(ops1) %[1:2 4:numel(ops1)]
                 [ops, stat, Fcell, FcellNeu] = extractSignalsNoOverlaps(ops, model, stat);
             case 'regression'
                 [ops, stat, Fcell, FcellNeu] = extractSignals(ops, model, stat);
+            case 'surround'
+                [ops, stat, Fcell, FcellNeu] = extractSignalsSurroundNeuropil(ops, stat);
         end
 
         % apply user-specific clustrules to infer stat.iscell

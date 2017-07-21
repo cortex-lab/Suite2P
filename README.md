@@ -8,7 +8,7 @@ Algorithmic details in [http://biorxiv.org/content/early/2016/06/30/061507](http
 
 This code was written by Marius Pachitariu and members of the cortexlab (Kenneth Harris and Matteo Carandini). It is provided here with no warranty. For support, please open an issue directly on github. 
 
-### I. Introduction ###
+# I. Introduction
 
 This is a complete, automated pipeline for processing two-photon Calcium imaging recordings. It is simple, fast and yields a large set of active ROIs. A GUI further provides point-and-click capabilities for refining the results in minutes. The pipeline includes the following steps
 
@@ -27,17 +27,60 @@ This is a complete, automated pipeline for processing two-photon Calcium imaging
 7) Neuropil subtraction --- coefficient is estimated iteratively together with spike deconvolution to minimize the residual of spike deconvolution. The user is encouraged to also try varying this coefficient, to make sure that any scientific results do not depend crucially on it. 
 
 
-### II. Getting started ###
+# II. Getting started
 
-The toolbox runs in Matlab (+ one mex file) and currently only supports tiff file inputs. To begin using the toolbox, you will need to make local copies (in a separate folder) of two included files: master_file and make_db. It is important that you make local copies of these files, otherwise updating the repository will overwrite them (and you can lose your files). The make_db file assembles a database of experiments that you would like to be processed in batch. It also adds per-session specific information that the algorithm requires such as the number of imaged planes and channels. The master_file sets general processing options that are applied to all sessions included in make_db, UNLESS the option is over-ridden in the make_db file. The global and session-specific options are described in detail below. 
+The toolbox runs in Matlab and currently only supports tiff file inputs. To begin using the toolbox, you will need to make local copies (in a separate folder) of two included files: master_file and make_db. It is important that you make local copies of these files, otherwise updating the repository will overwrite them (and you can lose your files). The make_db file assembles a database of experiments that you would like to be processed in batch. It also adds per-session specific information that the algorithm requires such as the number of imaged planes and channels. The master_file sets general processing options that are applied to all sessions included in make_db, UNLESS the option is over-ridden in the make_db file. 
 
-For spike deconvolution, you need to run mex -largeArrayDims SpikeDetection/deconvL0.c (or .cpp under Linux/Mac). If you're on Windows, you will need to install Visual Studio Community in order to mex files in matlab.
+### Example database entry
+Look into make_db_example for more detailed examples.
 
+The following is a typical database entry in the local make_db file, which can be modelled after make_db_example. The folder structure assumed is RootStorage/mouse_name/date/expts(k) for all entries in expts(k).
+```
+i = i+1; 
+db(i).mouse_name = 'M150329_MP009'; 
+db(i).date = '2015-04-27'; 
+db(i).expts = [5 6]; % which experiments to process together
+```
+Other (hidden) options are described in make_db_example.m, and at the top of run_pipeline.m (set to reasonable defaults).
+
+### Running the pipeline
+Run the top part of make_db_example.m to create the db0 and ops0 variables.
+
+Build the ops structure
+```
+iexp = 1; % which experiment you are processing in db file
+db   = db0(iexp);
+ops = build_ops3(db, ops0);
+```
+and then run the main function
+```
+run_pipeline(db, ops);
+```
+
+### Spike deconvolution
+
+For spike deconvolution, you need to download the OASIS github (https://github.com/zhoupc/OASIS_matlab) and add the path to this folder on your computer to the top of your master_file 
+```
+addpath(genpath('pathtoOASIS')))
+```
+To run spike deconvolution (after running the pipeline), run
+```
+add_deconvolution(ops0, db);
+```
+
+For L0 spike deconvolution, you need to run mex -largeArrayDims SpikeDetection/deconvL0.c (or .cpp under Linux/Mac). If you're on Windows, you will need to install Visual Studio Community in order to mex files in matlab. To choose this deconvolution method, set  
+```
+ops0.deconvType = 'L0';
+```
+
+See this paper comparing spike deconvolution methods for more information: http://www.biorxiv.org/content/early/2017/06/27/156786
+
+----------
 Below we describe the outputs of the pipeline first, and then describe the options for setting it up, and customizing it. Importantly, almost all options have pre-specified defaults. Any options specified in master_file in ops0 overrides these defaults. Furthermore, any option specified in the make_db file (experiment specific) overrides both the defaults and the options set in master_file. This allows for flexibility in processing different experiments with different options. The only critical option that you'll need to set is ops0.diameter, or db(N).diameter. This gives the algorithm the scale of the recording, and the size of ROIs you are trying to extract. We recommend as a first run to try the pipeline after setting the diameter option. Depending on the results, you can come back and try changing some of the other options.  
 
 Note: some of the options are not specified in either the example master_file or the example make_db file. These are usually more specialized features.
 
-### III. Outputs. ###
+# III. Outputs.
 
 The output is a struct called dat which is saved into a mat file in ResultsSavePath using the same subfolder structure, under a name formatted like F_M150329_MP009_2015-04-29_plane1. It contains all the information collected throughout the processing, and contains the ROI and neuropil traces in Fcell and FcellNeu, and whether each ROI j is a cell or not in stat(j).iscell. stat(j) contains information about each ROI j and can be used to recover the corresponding pixels for each ROI in stat.ipix. The centroid of the ROI is specified in stat as well. Here is a summary of where the important results are:
 
@@ -65,7 +108,7 @@ blockstarts: the cumulative number of frames per block. Clould be useful for con
 
 footprint, mrs, mrs0, cmpct, aspec_ratio, ellipse, mimgProj, skew, std, maxMinusMed, top5pcMinusMed: these are used by the automated classifier to label an ROI as cell or not. see section IX for details.
 
-### IV. Input-output file paths ###
+# IV. Input-output file paths
 
 RootStorage --- the root location where the raw tiff files are  stored.
 
@@ -85,7 +128,9 @@ If you don't want to use this folder structure, see the make_db_example file for
 
 The output is a struct called dat which is saved into a mat file in ResultsSavePath using the same subfolder structure, under a name formatted like F_M150329_MP009_2015-04-29_plane1. It contains all the information collected throughout the processing, and contains the fluorescence traces in dat.Fcell and whether a given ROI is a cell or not in dat.stat(N).iscell. dat.stat contains information about each ROI and can be used to recover the corresponding pixels for each ROI N in dat.stat(N).ipix. The centroid of the ROI N is specified in dat.stat(N) as well. Here is a summary of where the important results are:
 
-### V. Options for registration ###
+# V. Options
+
+### Registration
 
 showTargetRegistration --- whether to show an image of the target frame immediately after it is computed. 
 
@@ -117,7 +162,7 @@ smoothBlocks --- if quadBlocks = 0, then smoothBlocks is the standard deviation 
 
 ++ Bidirectional scanning issues (frilly cells) taken care of automatically ++
 
-### VI. Options for cell detection ###
+### Cell detection
 
 sig --- spatial smoothing constant: smooths out the SVDs spatially. Indirectly forces ROIs to be more round. 
 
@@ -127,7 +172,7 @@ ShowCellMap --- whether to show the clustering results as an image every 10 iter
 
 getROIs --- whether to run the ROI detection algorithm after registration
 
-### VII. Options for SVD decomposition ###
+### SVD decomposition
 
 NavgFramesSVD --- for SVD, data has to be temporally binned. This number specifies the final number of points to be obtained after binning. In other words, datasets with many timepoints are binned in higher windows while small datasets are binned less. 
 
@@ -135,7 +180,25 @@ getSVDcomps --- whether to obtain and save to disk SVD components of the registe
 
 nSVD --- how many SVD components to keep.
 
-### VIII. Options for spike deconvolution ###
+### Signal extraction
+
+signalExtraction --- how should the fluorescence be extracted? The 'raw' option restricts cells to be non-overlapping, 'regression' option allows cell overlaps. The neuropil model is a set of spatial basis functions that tile the FOV. The 'surround' option means that the cell's activity is the weighted sum of the detected pixels (weighted by lambda). The neuropil is computed as the sum of activity of surrounding pixels (excluding other cells in the computation).
+
+### Neuropil options
+
+ops.ratioNeuropil --- used for both spatial basis functions and surround neuropil - the spatial extent of the neuropil as a factor times the radius of the cells (ops.ratioNeuropil * cell radius = neuropil radius)
+
+if using surround neuropil
+
+ops.innerNeuropil --- padding in pixels around cell to exclude from neuropil
+
+ops.outerNeuropil --- radius of neuropil surround (set to Inf to use ops.ratioNeuropil)
+
+ops.minNeuropilPixels --- minimum number of pixels necessary in neuropil surround
+
+
+
+### Spike deconvolution 
 
 imageRate --- imaging rate per plane. 
 
@@ -143,7 +206,9 @@ sensorTau --- decay timescale.
 
 maxNeurop --- neuropil contamination coef has to be less than this (sometimes good to impose a ceiling at 1, i.e. for interneurons)
 
-### IX. Measures used by classifier ###
+deconvType --- which type of deconvolution to use (either 'L0' or 'OASIS') 
+
+### Measures used by classifier
 
 The Suite2p classifier uses a number of features of each ROI to assign cell labels to ROIs. The classifier uses a naive Bayes approach for each feature, and models the distribution of each feature with a non-parametric, adaptively binned empirical distribution. The classifier is initialized with some standard distributions for these features, but is updated continuously with new data samples as the user refines the output manually in the GUI. 
 
@@ -155,19 +220,5 @@ cmpct --- mean distance of pixels from ROI center, normalized to the same measur
 footprint --- spatial extent of correlation between ROI trace and nearby pixels  
 mimgProjAbs --- whether this ROI shape is correlated to the shape on the mean image  
 aspect_ratio --- of an ellipse fit to the ROI  
-
-### X. Example database entry ###
-
-Look into make_db_example for more detailed examples.
-
-The following is a typical database entry in the local make_db file, which can be modelled after make_db_example. The folder structure assumed is RootStorage/mouse_name/date/expts(k) for all entries in expts(k). 
-
-i = i+1;
-db(i).mouse_name    = 'M150329_MP009'; 
-db(i).date          = '2015-04-27';
-db(i).expts         = [5 6]; % which experiments to process together
-
-Other (hidden) options are described in make_db_example.m, and at the top of run_pipeline.m (set to reasonable defaults). 
-
 
 

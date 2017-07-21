@@ -113,7 +113,7 @@ um2pix=infoPixUm(opt.totPixels,opt.zoomMicro,opt.microID);
 xPU=um2pix.xPU;
 yPU=um2pix.yPU;
 if opt.getNeuropil
-    neuropMasks=createNeuropilMasks(cellFields,allField,xPU,yPU,opt);
+    neuropMasks=createNeuropilMasksMD(cellFields,allField,xPU,yPU,opt);
 
     mCell=0;
     for k=useCells
