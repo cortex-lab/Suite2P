@@ -44,7 +44,7 @@ db(i).expts = [5 6]; % which experiments to process together
 Other (hidden) options are described in make_db_example.m, and at the top of run_pipeline.m (set to reasonable defaults).
 
 ### Running the pipeline
-Change paths in master_file to the paths to your local toolbox and to your data. The master_file creates the ops0 variable and the db0 variable, and then runs the main pipeline:
+Change paths in master_file to the paths to your local toolbox and to your data. Then run this function. The master_file creates the ops0 variable and the db0 variable, and runs the main pipeline:
 
 ```
 run_pipeline(db, ops);
