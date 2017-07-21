@@ -182,7 +182,7 @@ nSVD --- how many SVD components to keep.
 
 ### Signal extraction
 
-signalExtraction --- how should the fluorescence be extracted? Both 'raw' and 'regression' mean that a generative model is used to compute the neuropil and the cell fluorescence. The 'raw' option restricts cells to be non-overlapping, 'regression' option allows cell overlaps. The neuropil model in this generative model is a set of spatial basis functions that tile the FOV. The 'surround' option means that the cell's activity is the weighted sum of the detected pixels (weighted by lambda). The neuropil is computed as the sum of activity of surrounding pixels (excluding other cells in the computation).
+signalExtraction --- how should the fluorescence be extracted? The 'raw' option restricts cells to be non-overlapping, 'regression' option allows cell overlaps. The neuropil model is a set of spatial basis functions that tile the FOV. The 'surround' option means that the cell's activity is the weighted sum of the detected pixels (weighted by lambda). The neuropil is computed as the sum of activity of surrounding pixels (excluding other cells in the computation).
 
 ### Neuropil options
 
