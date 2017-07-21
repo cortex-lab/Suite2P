@@ -65,8 +65,8 @@ for i = 1:length(ops.planesToProcess)
     if ops.deconvNeuropil
         ops.estimateNeuropil = 0;
         [sp, ~, coefs,~, sd, ops] = wrapperDECONV(ops, Fneu);
-        fpath = sprintf('%s/Fneu_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
-            ops.mouse_name, ops.date, iplane);
+%         fpath = sprintf('%s/Fneu_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
+%             ops.mouse_name, ops.date, iplane);
     else
         [sp, ~, coefs,~, sd, ops] = wrapperDECONV(ops, Ff, Fneu);
     end
