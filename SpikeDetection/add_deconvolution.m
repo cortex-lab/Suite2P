@@ -44,9 +44,8 @@ for i = 1:length(ops.planesToProcess)
     ops.sameKernel   = getOr(ops0, {'sameKernel'}, 1); % 1 for same kernel per plane, 0 for individual kernels (not recommended)
     ops.sameKernel   = getOr(ops0, {'sameKernel'}, 1);
     ops.maxNeurop    = getOr(ops0, {'maxNeurop'}, Inf); % maximum neuropil coefficient (default no max)
-    ops.recomputeKernel    = getOr(ops0, {'recomputeKernel'}, 0);
-    
-    ops.deconvNeuropil = 0;
+    ops.recomputeKernel    = getOr(ops0, {'recomputeKernel'}, 0);    
+    ops.deconvNeuropil = getOr(ops0, {'deconvNeuropil'}, 0);   % whether to deconvolve the neuropil as well
     
     fprintf('Spike deconvolution, plane %d... \n', iplane)
     
@@ -62,13 +61,11 @@ for i = 1:length(ops.planesToProcess)
     ops.estimateNeuropil    = getOr(ops0, 'estimateNeuropil', 1);
     ops.runningBaseline     = 0;
 
+    [sp, ~, coefs,~, sd, ops] = wrapperDECONV(ops, Ff, Fneu);
+    
     if ops.deconvNeuropil
         ops.estimateNeuropil = 0;
-        [sp, ~, coefs,~, sd, ops] = wrapperDECONV(ops, Fneu);
-%         fpath = sprintf('%s/Fneu_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
-%             ops.mouse_name, ops.date, iplane);
-    else
-        [sp, ~, coefs,~, sd, ops] = wrapperDECONV(ops, Ff, Fneu);
+        spNeu = wrapperDECONV(ops, Fneu);
     end
     
     stat = dat.stat;
@@ -80,18 +77,18 @@ for i = 1:length(ops.planesToProcess)
     nCum = 0;
     for j = 1:length(dat.Fcell)
        dat.sp{j} = sp(nCum + [1:size(dat.Fcell{j},2)], :)'; 
+       if ops.deconvNeuropil
+           dat.spNeu{j} = spNeu(nCum + [1:size(dat.Fcell{j},2)], :)';
+       end
        nCum = nCum + size(dat.Fcell{j},2);
     end
-    
     
     % compute neuropil coefficient and run deconvolution on
     % neuropil-corrected trace
     %     stat = run_deconvolution3(ops, dat);
     
-    
-    dat.stat = stat;
-    
+    dat.stat = stat;    
+        
     save(fpath, '-struct', 'dat')
-    
 end
 %
