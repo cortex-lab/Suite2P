@@ -78,13 +78,13 @@ for k = 1:length(fs)
             for iplane = 1:length(ops.planesToProcess)
                 ifr0 = iplane0(ops.planesToProcess(iplane));
                 indframes = ifr0:ops.nplanes:size(data,3);
-                pdata     = data(:,:,indframes);
-                nt        = size(pdata,3);
+                dataR0    = data(:,:,indframes);
+                nt        = size(dataR0,3);
                 pframes   = ops1{iplane}.Nframes;
                 
                 ds        = DSexp{iplane}(ix0(iplane)+[1:nt], :);
                 
-                dreg      = register_movie(pdata, ops, ds);
+                dreg      = register_movie(dataR0, ops, ds);
                 ix0(iplane) = ix0(iplane) + nt;
                 
                 mimgR(:,:,iplane) = mimgR(:,:,iplane) + mean(dreg, 3);            
