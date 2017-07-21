@@ -1,4 +1,4 @@
-% function  run_pipeline(db, ops0)
+function  run_pipeline(db, ops0)
 
 % ops0.TileFactor (or db(iexp).TileFactor) can be set to multiply the number of default tiles for the neuropil
 
@@ -76,11 +76,6 @@ for i = 1:numel(ops1) %[1:2 4:numel(ops1)]
     if getOr(ops, {'getSVDcomps'}, 0)
         % extract and write to disk SVD comps (raw data)
         ops    = get_svdcomps(ops);
-    end
-    
-    if ops.getROIs || getOr(ops, {'writeSVDroi'}, 0)
-        % extract and/or write to disk SVD comps (normalized data)
-        [ops, U, model]    = get_svdForROI(ops);
     end
         
     if ops.getROIs

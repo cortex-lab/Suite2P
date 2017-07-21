@@ -1,11 +1,13 @@
 % run cell detection on spatial masks U
-function [ops, stat, model] = sourcery(ops, U, model)
+function [ops, stat, model] = sourcery(ops)
 
+[ops, U0, model]    = get_svdForROI(ops);
+ 
 ops.fig         = getOr(ops, 'fig', 1);
 ops.ThScaling   = getOr(ops, 'ThScaling', 1);
 
 % reshape U to be (nMaps x Y x X)
-U0 =  reshape(U, [], size(U,ndims(U)))';
+U0 =  reshape(U0, [], size(U0,ndims(U0)))';
 Ly = numel(ops.yrange);
 Lx = numel(ops.xrange);
 [nSVD, Npix] = size(U0);
