@@ -44,17 +44,10 @@ db(i).expts = [5 6]; % which experiments to process together
 Other (hidden) options are described in make_db_example.m, and at the top of run_pipeline.m (set to reasonable defaults).
 
 ### Running the pipeline
-Run the top part of make_db_example.m to create the db0 and ops0 variables.
+Change paths in master_file to the paths to your local toolbox and to your data. The master_file creates the ops0 variable and the db variable, and then runs the main pipeline:
 
-Build the ops structure
 ```
-iexp = 1; % which experiment you are processing in db file
-db   = db0(iexp);
-ops = build_ops3(db, ops0);
-```
-and then run the main function
-```
-run_pipeline(db, ops);
+run_pipeline(db(iexp), ops);
 ```
 
 ### Spike deconvolution
