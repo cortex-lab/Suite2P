@@ -55,63 +55,47 @@ for i = 1:length(ops.planesToProcess)
     
     % save to dat for GUI
     dat.ops.mimgREDcorrected = zeros(dat.ops.Ly, dat.ops.Lx);
-    dat.ops.mimgREDcorrected(dat.ops.yrange, dat.ops.xrange);
-    %%
+    dat.ops.mimgREDcorrected(dat.ops.yrange, dat.ops.xrange) = mimgR0;
+    %
     
-    %%%%% compute overlap with pixel map
+    %%
+    %%%% compute red pixels in cell and in area around cell
     % (exclude pixels from other cells (cellPix))
-    icell  = find(iscell);
-    cellPix = false(numel(mimgR),1);
-    for j = icell
-        cellPix(dat.stat(j).ipix) = 1;
+    % (use surround neuropil masks to compute red around cell)
+    ops.ratioNeuropil     = 4;
+    ops.minNeuropilPixels = 80;
+    [dat.stat, cellPix, ~]       = createCellMasks(dat.stat, Ny, Nx);
+    [~, neuropMasks] = createNeuropilMasks(ops, dat.stat, cellPix);
+    
+    %
+    redSum = zeros(length(dat.stat),2);
+    for k = 1:numel(dat.stat)
+        ipix                 = dat.stat(k).ipix;
+        rpix                 = mimgR0(ipix) .* dat.stat(k).lam/sum(dat.stat(k).lam);
+        % rescale by lam? .*(dat.stat(j).lambda'/sum(dat.stat(j).lambda));
+        extpix               = squeeze(neuropMasks(k,:,:));
+        extpix               = find(extpix~=0);
+        ext_rpix             = mimgR0(extpix);
+        redSum(k,:)          = [sum(rpix) mean(ext_rpix)];
     end
+    redSum = redSum - min(redSum(:));
     
-    [ops, neuropMasks] = createNeuropilMasks(ops, stat, cellPix);
-    
-    redPix = zeros(length(dat.stat),2);
-    [xx,yy] = meshgrid([1:size(mimgR0,1)],[1:size(mimgR0,2)]);
-    xx=xx(:); yy=yy(:);
-    xy2 = xx.^2+yy.^2;
-    
-    for j = 1:numel(dat.stat)
-        ipix                 = dat.stat(j).ipix;
-        imgpix               = false(size(mimgR0));
-        imgpix(ipix)         = 1;
-        rpix                 = mimgR0(ipix);%.*(dat.stat(j).lambda'/sum(dat.stat(j).lambda));
-        [ix,iy]              = ind2sub(size(mimgR0),ipix);
-        params               = FitCircle(ix,iy);
-        cellradius           = params.ra;
-        yc                   = params.xc;
-        xc                   = params.yc;
-        icircle              = (xy2 - 2*xc*xx - 2*yc*yy + xc^2 + yc^2) < (cellradius+15)^2;
-        extpix               = icircle & ~imgpix(:) & ~cellPix;
-        ext_rpix             = mimgR0(extpix);%/length(extpix);
-        redPix(j,:)          = [mean(rpix) mean(ext_rpix)];
-    end
-    redPix = redPix - min(redPix(:));
-    %     redpix(~dat.cl.isroi,:) = NaN;
-    %%
-
     % set threshold for redpix
     if isfield(ops,'redthres')
         redthres = ops.redthres;
     else
         redthres = 1.5;
     end
-    if isfield(ops,'redmax')
-        redmax = ops.redmax;
-    else
-        redmax = 1;
-    end
-    rrat = redPix(:,1)./(redPix(:,2)+redPix(:,1));
+    
+    rrat = redSum(:,1)./(redSum(:,2)+redSum(:,1));
     redcell  = rrat > nanmean(rrat)+redthres*nanstd(rrat);
     notred   = rrat <= nanmean(rrat) + redmax*nanstd(rrat);
+  
     
     fprintf('plane %d  reds %d\n',iplane,sum(redcell(:)&iscell(:)));
     
-%     dat.cl.redcell = redcell(:);
-%     dat.cl.notred  = notred(:);
 
+    %%
     for j = 1:length(dat.stat)
         dat.stat(j).redcell = redcell(j);
         dat.stat(j).redprob = rrat(j);
@@ -121,7 +105,28 @@ for i = 1:length(ops.planesToProcess)
 end
 
 
-
+  
+    
+%%
+if 0
+    [~,ix] = sort(rrat, 'descend');
+    for k = ix(:)'
+        clf;
+        cent = round(dat.stat(k).med);
+        yl = cent(1) + [-20:20];
+        yl(yl<1 | yl > Ny) = [];
+        xl = cent(2) + [-20:20];
+        xl(xl<1 | xl > Nx) = [];
+        imagesc(mimgR0)
+        hold all;
+        plot(cent(2),cent(1),'k*');
+        axis([xl(1) xl(end) yl(1) yl(end)]);
+        title([rrat(k) redcell(k)]);
+        drawnow;
+        pause;
+    end
+end
+    %
 
 
 

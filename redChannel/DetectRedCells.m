@@ -84,6 +84,7 @@ for i = 1:length(ops.planesToProcess)
     end
     dat.ops.mimgREDcorrected = mimgR0;
     
+    %%
     mimgR0 = normalize_image(mimgR0);
     %%%%% compute overlap with pixel map
     % (exclude pixels from other cells (cellpix))
@@ -125,7 +126,7 @@ for i = 1:length(ops.planesToProcess)
     rrat = redpix(:,1)./(redpix(:,2)+redpix(:,1));
     redcell  = rrat > nanmean(rrat)+redthres*nanstd(rrat);
     notred   = rrat <= nanmean(rrat) + redmax*nanstd(rrat);
-    
+    %%
     fprintf('plane %d  reds %d\n',iplane,sum(redcell(:)&iscell(:)));
     
 %     dat.cl.redcell = redcell(:);
