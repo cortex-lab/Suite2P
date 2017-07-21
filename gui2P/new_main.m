@@ -170,7 +170,11 @@ elseif isfield(ops, 'AlignToRedChannel') && ops.AlignToRedChannel == 1 && ...
 end
 h.dat.maxmap = h.dat.maxmap + 1;
 if isfield(ops, 'mimgREDcorrected') && ~isempty(ops.mimgREDcorrected)
-    h.dat.mimg(:,:,h.dat.maxmap) = ops.mimgREDcorrected;
+    if sum(size(ops.mimgREDcorrected)==[ops.Ly ops.Lx]) == 2
+        h.dat.mimg(:,:,h.dat.maxmap) = ops.mimgREDcorrected(ops.yrange, ops.xrange);
+    else
+        h.dat.mimg(:,:,h.dat.maxmap) = ops.mimgREDcorrected;
+    end
     h.dat.mimg_proc(:,:,h.dat.maxmap) = normalize_image(h.dat.mimg(:,:,h.dat.maxmap));
 end
 h.dat.maxmap = h.dat.maxmap + 1;
