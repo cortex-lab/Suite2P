@@ -52,12 +52,10 @@ ops0.nSVDforROI             = 1000; % how many SVD components for cell clusterin
 ops0.NavgFramesSVD          = 5000; % how many (binned) timepoints to do the SVD based on
 ops0.signalExtraction       = 'raw'; % how to extract ROI and neuropil signals: 'raw', 'regression'
 
-% spike deconvolution options
+% spike deconvolution and neuropil subtraction options
 ops0.imageRate              = 30;   % imaging rate (cumulative over planes!). Approximate, for initialization of deconvolution kernel.
 ops0.sensorTau              = 2; % decay half-life (or timescale). Approximate, for initialization of deconvolution kernel.
 ops0.maxNeurop              = 1; % for the neuropil contamination to be less than this (sometimes good, i.e. for interneurons)
-ops0.recomputeKernel        = 1; % whether to re-estimate kernel during optimization (default kernel is "reasonable", if you give good timescales)
-ops0.sameKernel             = 1; % whether the same kernel should be estimated for all neurons (robust, only set to 0 if SNR is high and recordings are long)
 
 % red channel options
 % redratio = red pixels inside / red pixels outside
