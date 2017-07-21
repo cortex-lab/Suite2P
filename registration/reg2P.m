@@ -169,6 +169,11 @@ tic
 % if two consecutive files have as many bytes, they have as many frames
 nbytes = 0;
 for k = 1:length(fs)
+    if ismember(ops.expts(k), ops.expred)
+        nchannels_expt = ops.nchannels_red;
+    else
+        nchannels_expt = ops.nchannels;
+    end
     % initialize frame count
     for i = 1:numel(ops1)
          ops1{i}.Nframes(k)     = 0;
@@ -185,9 +190,9 @@ for k = 1:length(fs)
         
         iplane0 = mod(iplane0-1, numPlanes) + 1;
         if red_align
-            ichanset = [rchannel; nFr; nchannels];
+            ichanset = [rchannel; nFr; nchannels_expt];
         else
-            ichanset = [ichannel; nFr; nchannels];
+            ichanset = [ichannel; nFr; nchannels_expt];
         end
         % only load frames of registration channel
         data = loadFramesBuff(fs{k}(j).name, ichanset(1), ichanset(2), ...
@@ -206,10 +211,10 @@ for k = 1:length(fs)
                     % if aligning by the red channel, data needs to be reloaded as the
                     % green channel
                     %                 nFr = nFramesTiff(fs{k}(j).name);
-                    if mod(nFr, nchannels) ~= 0
+                    if mod(nFr, nchannels_expt) ~= 0
                         fprintf('  WARNING: number of frames in tiff (%d) is NOT a multiple of number of channels!\n', j);
                     end
-                    ichanset = [ichannel; nFr; nchannels];
+                    ichanset = [ichannel; nFr; nchannels_expt];
                     data = loadFramesBuff(ops.temp_tiff, ichanset(1), ichanset(2), ichanset(3), ops.temp_tiff);
                     % shift green channel by same bidiphase offset
                     if abs(BiDiPhase) > 0
@@ -242,7 +247,7 @@ for k = 1:length(fs)
             fprintf('Set %d, tiff %d done in time %2.2f \n', k, j, toc)            
         end
         
-        iplane0 = iplane0 - nFr/nchannels;
+        iplane0 = iplane0 - nFr/nchannels_expt;
     end    
 end
 
