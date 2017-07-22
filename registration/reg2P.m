@@ -169,7 +169,7 @@ tic
 % if two consecutive files have as many bytes, they have as many frames
 nbytes = 0;
 for k = 1:length(fs)
-    if ismember(ops.expts(k), ops.expred)
+    if ismember(ops.expts(k), getOr(ops, 'expred', []))
         nchannels_expt = ops.nchannels_red;
     else
         nchannels_expt = ops.nchannels;
