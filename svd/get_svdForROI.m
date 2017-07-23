@@ -17,48 +17,8 @@ nt0 = ceil(ntotframes / ops.NavgFramesSVD);
 ops.NavgFramesSVD = floor(ntotframes/nt0);
 nimgbatch = nt0 * floor(2000/nt0);
 
-ix = 0;
-fid = fopen(ops.RegFile, 'r');
+mov = loadAndBin(ops, Ly, Lx, nimgbatch, nt0);
 
-mov = zeros(numel(ops.yrange), numel(ops.xrange), ops.NavgFramesSVD, 'single');
-
-ij = 0;
-while 1
-    % load frames
-    data = fread(fid,  Ly*Lx*nimgbatch, '*int16');
-    if isempty(data)
-        break;
-    end
-    data = single(data);
-    data = reshape(data, Ly, Lx, []);
-    
-    % ignore bad frames
-    badi = ops.badframes(ix + [1:size(data,3)]);
-    data(:,:, badi) = [];
-    
-    % subtract off the mean of this batch
-    if nargin==1
-        data = bsxfun(@minus, data, mean(data,3));
-    end
-    %     data = bsxfun(@minus, data, ops.mimg1);
-    
-    nSlices = nt0*floor(size(data,3)/nt0);
-    if nSlices~=size(data,3)
-        data = data(:,:, 1:nSlices);
-    end
-    
-    % bin data
-    data = reshape(data, Ly, Lx, nt0, []);
-    davg = squeeze(mean(data,3));
-    
-    mov(:,:,ix + (1:size(davg,3))) = davg(ops.yrange, ops.xrange, :);
-    
-    ix = ix + size(davg,3);
-    ij = ij + 1;
-end
-fclose(fid);
-
-mov = mov(:, :, 1:ix);
 % mov = mov - repmat(mean(mov,3), 1, 1, size(mov,3));
 %% SVD options
 if nargin==1 || ~strcmp(clustModel, 'CNMF')
@@ -113,6 +73,9 @@ if nargin==1 || ~strcmp(clustModel, 'CNMF')
     end
     
     % compute spatial masks (U = mov * V)
+%     mov = loadAndBin(ops, Ly, Lx, nimgbatch, nt0);
+%     mov             = reshape(mov, [], size(mov,3));
+    
     if ops.useGPU
         U               = gpuBlockXY(mov, V);
     else
@@ -122,8 +85,7 @@ if nargin==1 || ~strcmp(clustModel, 'CNMF')
     % reshape U to frame size
     U = reshape(U, numel(ops.yrange), numel(ops.xrange), []);
     
-    
-    
+
     % write SVDs to disk
     if ~exist(ops.ResultsSavePath, 'dir')
         mkdir(ops.ResultsSavePath);

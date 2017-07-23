@@ -2,6 +2,7 @@
 function [ops, stat, model] = sourcery(ops)
 
 [ops, U0, model]    = get_svdForROI(ops);
+%  U0 = my_conv2(U0, ops.sig, [1 2]);
  
 ops.fig         = getOr(ops, 'fig', 1);
 ops.ThScaling   = getOr(ops, 'ThScaling', 1);
