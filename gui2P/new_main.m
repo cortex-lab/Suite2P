@@ -759,17 +759,18 @@ msg{7} = ['Statistics shown are same variables as used in "mask color" section.'
 msgbox(msg, 'Fluorescence instructions');
 
 function pushbutton106_Callback(hObject, eventdata, handles)
-msg{1} = ['IF ROI (Q) IS SELECTED, THEN CELLS ARE PSEUDOCOLORED'];
+msg{1} = ['This applies only if you select "ROIs" under "background".'];
 msg{3} = ['RANDOM: color chosen randomly - RED cells labelled in red (if secondary channel)'];
 msg{5} = ['*** middle mouse-click on an ROI to switch RED label ON/OFF ***'];
-msg{7} = ['for all other selections, color/hue for each ROI varies purple to yellow:'];
-msg{9} = ['CLASSIFIER: probability assigned by classifier'];
+msg{7} = ['for all other selections, color/hue for each ROI varies purple to yellow'];
+msg{8} = ['(scale bar for colors shown below buttons):'];
+msg{10} = ['CLASSIFIER: probability assigned by classifier'];
 msg{11} = ['SKEW: skewness of activity, after neuropil correction and some smoothing'];
-msg{13} = ['MEANIMG: weighting of activity mask onto mean image'];
-msg{15} = ['CMPCT: compactness of ROI pixels. Smallest is 1, for disks.'];
-msg{17} = ['FOOT: "footprint" of ROI; ~ number of correlated neighboring pixels'];
-msg{19} = ['RED: probability of being a red-tagged cell, assigned by algorithm'];
-msg{21} = ['hint: the letters in paranthesis are keyboard shortcuts.'];
+msg{12} = ['MEANIMG: weighting of activity mask onto mean image'];
+msg{13} = ['CMPCT: compactness of ROI pixels. Smallest is 1, for disks.'];
+msg{14} = ['FOOT: "footprint" of ROI; ~ number of correlated neighboring pixels'];
+msg{15} = ['RED: probability of being a red-tagged cell, assigned by algorithm'];
+msg{17} = ['hint: the letters in paranthesis are keyboard shortcuts.'];
 
 msgbox(msg, 'Mask color instructions');
 
