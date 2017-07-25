@@ -223,7 +223,7 @@ function pushbutton84_Callback(hObject, eventdata, h)
 % save proc file and rules file
 h.dat.F.trace = [];
 dat = h.dat;
-save([h.dat.filename(1:end-4) '_proc.mat'], 'dat')
+save([h.dat.filename(1:end-4) '_proc.mat'], '-struct', 'dat')
 %
 h.st0(:,1) = double([h.dat.stat.iscell]);
 %
