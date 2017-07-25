@@ -86,7 +86,7 @@ else
 %     h.dat.res.lambda = reshape(h.dat.res.lambda, h.dat.cl.Ly, h.dat.cl.Lx);
     
     h.dat.ops.Nk = numel(h.dat.stat);
-    h.dat.cl.rands_orig   = .1 + .8 * rand(1, h.dat.ops.Nk);
+    h.dat.cl.rands_orig   = .1 + .7 * rand(1, h.dat.ops.Nk);
     h.dat.cl.rands        = h.dat.cl.rands_orig;
     
     if isfield(h.dat.ops, 'clustrules')
@@ -223,7 +223,7 @@ function pushbutton84_Callback(hObject, eventdata, h)
 % save proc file and rules file
 h.dat.F.trace = [];
 dat = h.dat;
-save([h.dat.filename(1:end-4) '_proc.mat'], '-struct', 'dat')
+save([h.dat.filename(1:end-4) '_proc.mat'], 'dat')
 %
 h.st0(:,1) = double([h.dat.stat.iscell]);
 %
@@ -465,7 +465,9 @@ end
 
 function pushbutton102_Callback(hObject, eventdata, h)
 hval = [h.dat.stat.mimgProjAbs];
-h.dat.cl.rands   = .1 + .8 * min(1, hval/nanmean(hval));
+hval             = hval - min(hval);
+hval             = hval / nanmean(hval);
+h.dat.cl.rands   = .7 * (1 - min(2*nanstd(hval)+1, hval)/(nanstd(hval)*2 + 1)) ;
 h.dat.cl.rands_orig = h.dat.cl.rands;
 redraw_figure(h);
 set_maskCcolor(h, 4);
@@ -478,22 +480,25 @@ set_Bcolor(h, 2);
 guidata(hObject,h);
 
 function pushbutton96_Callback(hObject, eventdata, h)
-hval = [h.dat.stat.skew];
-h.dat.cl.rands   = .1 + .8 * min(1, hval/nanmean(hval));
+hval             = [h.dat.stat.skew];
+hval             = hval - min(hval);
+hval             = hval / nanmean(hval);
+h.dat.cl.rands   = .7 * (1 - min(2*nanstd(hval)+1, hval)/(nanstd(hval)*2 + 1)) ;
+%h.dat.cl.rands   =  1 - .8 * min(1, hval/nanmean(hval));%.1 + .8 * min(1, hval/nanmean(hval));
 h.dat.cl.rands_orig = h.dat.cl.rands;
 redraw_figure(h);
 set_maskCcolor(h, 3);
 guidata(hObject,h);
 
 function pushbutton95_Callback(hObject, eventdata, h)
-h.dat.cl.rands   = .1 + .8 * [h.dat.stat.cellProb];
+h.dat.cl.rands   = .75 * (1 - [h.dat.stat.cellProb]);
 h.dat.cl.rands_orig = h.dat.cl.rands;
 redraw_figure(h);
 set_maskCcolor(h, 2);
 guidata(hObject,h);
 
 function pushbutton98_Callback(hObject, eventdata, h)
-h.dat.cl.rands   = .1 + .8 * rand(1, h.dat.ops.Nk);
+h.dat.cl.rands   = .1 + .8*rand(length(h.dat.stat), 1);
 h.dat.cl.rands(logical([h.dat.stat.redcell])) = 0;
 h.dat.cl.rands_orig = h.dat.cl.rands;
 redraw_figure(h);
@@ -501,9 +506,12 @@ set_maskCcolor(h, 1);
 guidata(hObject,h);
 
 function pushbutton99_Callback(hObject, eventdata, h)
-hval = max(0, [h.dat.stat.cmpct]-1);
+hval             = [h.dat.stat.cmpct];
+hval             = hval - min(hval);
+hval             = hval / nanmean(hval);
+h.dat.cl.rands   = .7 * (1 - min(2*nanstd(hval)+1, hval)/(nanstd(hval)*2 + 1)) ;
 % hval = max(0, [h.dat.stat.aspect_ratio]-1);
-h.dat.cl.rands   = .1 + .8 * min(1, .5 * hval/nanmean(hval));
+%h.dat.cl.rands   = .1 + .8 * min(1, .5 * hval/nanmean(hval));
 h.dat.cl.rands_orig = h.dat.cl.rands;
 redraw_figure(h);
 set_maskCcolor(h, 5);
@@ -511,21 +519,21 @@ guidata(hObject,h);
 
 function pushbutton100_Callback(hObject, eventdata, h)
 hval = [h.dat.stat.footprint];
-h.dat.cl.rands   = .1 + .8 * min(1, .5 * hval/nanmean(hval));
+hval             = hval - min(hval);
+hval             = hval / nanmean(hval);
+h.dat.cl.rands   = .7 * (1 - min(2*nanstd(hval)+1, hval)/(nanstd(hval)*2 + 1)) ;
 h.dat.cl.rands_orig = h.dat.cl.rands;
 redraw_figure(h);
 set_maskCcolor(h, 6);
 guidata(hObject,h);
 
-% --- Executes on button press in pushbutton104.
+% --- red channel
 function pushbutton104_Callback(hObject, eventdata, h)
-hval = [h.dat.stat.redprob];
-if sum([h.dat.stat.redcell]) > 0
-   Th = min(hval(logical([h.dat.stat.redcell])));
-else
-    Th = 1;
-end
-h.dat.cl.rands   = max(0, min(1, .7 - .7*hval/Th));
+hval             = [h.dat.stat.redprob];
+hval             = hval - min(hval);
+hval             = hval / nanmean(hval);
+h.dat.cl.rands   = (1 - min(2*nanstd(hval)+1, hval)/(nanstd(hval)*2 + 1)) ;
+%h.dat.cl.rands(logical([h.dat.stat.redcell])) = 0;
 h.dat.cl.rands_orig = h.dat.cl.rands;
 redraw_figure(h);
 set_maskCcolor(h, 7);

@@ -1,6 +1,12 @@
 % creates cell masks for fluorescence computation
 % also creates exclusion mask for neuropil (cellPix)
-function [stat, cellPix, cellMasks] = createCellMasks(stat, Ny, Nx)
+function [stat, cellPix, cellMasks] = createCellMasks(stat, Ny, Nx, allow_overlap)
+
+if nargin > 3
+    aov = allow_overlap;
+else
+    aov = 0;
+end
 
 Nk = length(stat);
 cellPix = zeros(Ny, Nx);
@@ -8,10 +14,18 @@ cellMasks = zeros(Nk, Ny, Nx, 'single');
 for k = 1:Nk
     % only use non-overlapping pixels of cell
     temp = zeros(Ny, Nx);
-    ipix = stat(k).ipix(stat(k).isoverlap==0);
-    ypix = stat(k).ypix(stat(k).isoverlap==0);
-    xpix = stat(k).xpix(stat(k).isoverlap==0);
-    lam  = stat(k).lam(stat(k).isoverlap==0);
+    if aov
+        ipix = stat(k).ipix(stat(k).isoverlap==0);
+        ypix = stat(k).ypix(stat(k).isoverlap==0);
+        xpix = stat(k).xpix(stat(k).isoverlap==0);
+        lam  = stat(k).lam(stat(k).isoverlap==0);
+    else
+        ipix = stat(k).ipix;
+        ypix = stat(k).ypix;
+        xpix = stat(k).xpix;
+        lam  = stat(k).lam;
+    end
+    
     temp(ipix)  = lam;
     
     % fit MV gaussian to cell mask
@@ -35,3 +49,5 @@ for k = 1:Nk
         stat(k).radius = 0;
     end
 end
+
+cellPix = min(1, cellPix);
