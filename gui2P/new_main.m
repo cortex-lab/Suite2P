@@ -465,7 +465,7 @@ end
 
 function pushbutton102_Callback(hObject, eventdata, h)
 hval = [h.dat.stat.mimgProjAbs];
-h.dat.cl.rands   = .1 + .8 * min(1, hval/mean(hval));
+h.dat.cl.rands   = .1 + .8 * min(1, hval/nanmean(hval));
 h.dat.cl.rands_orig = h.dat.cl.rands;
 redraw_figure(h);
 set_maskCcolor(h, 4);
@@ -479,7 +479,7 @@ guidata(hObject,h);
 
 function pushbutton96_Callback(hObject, eventdata, h)
 hval = [h.dat.stat.skew];
-h.dat.cl.rands   = .1 + .8 * min(1, hval/mean(hval));
+h.dat.cl.rands   = .1 + .8 * min(1, hval/nanmean(hval));
 h.dat.cl.rands_orig = h.dat.cl.rands;
 redraw_figure(h);
 set_maskCcolor(h, 3);
@@ -503,7 +503,7 @@ guidata(hObject,h);
 function pushbutton99_Callback(hObject, eventdata, h)
 hval = max(0, [h.dat.stat.cmpct]-1);
 % hval = max(0, [h.dat.stat.aspect_ratio]-1);
-h.dat.cl.rands   = .1 + .8 * min(1, .5 * hval/mean(hval));
+h.dat.cl.rands   = .1 + .8 * min(1, .5 * hval/nanmean(hval));
 h.dat.cl.rands_orig = h.dat.cl.rands;
 redraw_figure(h);
 set_maskCcolor(h, 5);
@@ -511,7 +511,7 @@ guidata(hObject,h);
 
 function pushbutton100_Callback(hObject, eventdata, h)
 hval = [h.dat.stat.footprint];
-h.dat.cl.rands   = .1 + .8 * min(1, .5 * hval/mean(hval));
+h.dat.cl.rands   = .1 + .8 * min(1, .5 * hval/nanmean(hval));
 h.dat.cl.rands_orig = h.dat.cl.rands;
 redraw_figure(h);
 set_maskCcolor(h, 6);

@@ -16,18 +16,22 @@ for k = 1:Nk
     
     % fit MV gaussian to cell mask
     % define cell as all pixels within 2 std's of lambda
-    params      = FitMVGaus(ypix, xpix, lam, 2);
-    % cell radius
-    stat(k).radius = sqrt(mean(params.eval));
-    xy          = max(1, min(repmat([Ny Nx],size(params.xy,1),1), round(params.xy)));
-    ithres      = sub2ind([Ny Nx], xy(:,1), xy(:,2));
-    lamthres    = mean(temp(ithres));
-    temp        = zeros(Ny, Nx);
-    temp(ipix(lam > lamthres))  = lam(lam > lamthres);
+    if ~isempty(ypix)
+        params      = FitMVGaus(ypix, xpix, lam, 2);
+        % cell radius
+        stat(k).radius = sqrt(mean(params.eval));
+        xy          = max(1, min(repmat([Ny Nx],size(params.xy,1),1), round(params.xy)));
+        ithres      = sub2ind([Ny Nx], xy(:,1), xy(:,2));
+        lamthres    = mean(temp(ithres));
+        temp        = zeros(Ny, Nx);
+        temp(ipix(lam > lamthres))  = lam(lam > lamthres);
     
-    % input thresholded pixels to cellPix to exclude in neuropil computation
-    cellPix = cellPix + (temp > 0);
+        % input thresholded pixels to cellPix to exclude in neuropil computation
+        cellPix = cellPix + (temp > 0);
     
-    % put cell mask into cellMasks for computing fluorescence
-    cellMasks(k, ipix) = lam / sum(lam);
+        % put cell mask into cellMasks for computing fluorescence
+        cellMasks(k, ipix) = lam / sum(lam);
+    else
+        stat(k).radius = 0;
+    end
 end
