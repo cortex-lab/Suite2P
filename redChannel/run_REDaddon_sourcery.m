@@ -1,4 +1,5 @@
-function run_REDaddon_sourcery(ops)
+function run_REDaddon_sourcery(db, ops0)
+ops = build_ops3(db, ops0);
 % red channel addon to already processed data
 mimgG = [];
 

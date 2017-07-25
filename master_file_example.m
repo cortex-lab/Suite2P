@@ -50,7 +50,7 @@ ops0.ShowCellMap            = 1; % during optimization, show a figure of the clu
 ops0.sig                    = 0.5;  % spatial smoothing length in pixels; encourages localized clusters
 ops0.nSVDforROI             = 1000; % how many SVD components for cell clustering
 ops0.NavgFramesSVD          = 5000; % how many (binned) timepoints to do the SVD based on
-ops0.signalExtraction       = 'raw'; % how to extract ROI and neuropil signals: 
+ops0.signalExtraction       = 'surround'; % how to extract ROI and neuropil signals: 
 %  'raw' (no cell overlaps), 'regression' (allows cell overlaps), 
 %  'surround' (no cell overlaps, surround neuropil model)
 
@@ -81,7 +81,7 @@ ops0.redmax                 = 1; % the higher the max the more NON-red cells
 db0 = db;
 %% RUN THE PIPELINE HERE
 
-for iexp = 1 %[3:length(db) 1:2]
+for iexp = 1 %[1:length(db0)]
     db = db0(iexp);
     run_pipeline(db, ops0);
     
@@ -89,12 +89,13 @@ for iexp = 1 %[3:length(db) 1:2]
     add_deconvolution(ops0, db);
     
     % add red channel information (if it exists)
-    if isfield(db0,'expred') && ~isempty(db0(iexp).expred)
-        ops0.nchannels_red = db0(iexp).nchannels_red;
+    if isfield(db,'expred') && ~isempty(db.expred)
+        % creates mean red channel image aligned to green channel
+        run_REDaddon_sourcery(db, ops0) ; 
         
-        run_REDaddon(iexp, db0, ops0) ; % create redcell array
-        
-        DetectRedCells; % fills dat.cl.redcell and dat.cl.notred
+        % identify red cells in mean red channel image
+        % fills dat.stat.redcell, dat.stat.notred, dat.stat.redprob
+        identify_redcells_sourcery(db, ops0); 
     end
     
 end

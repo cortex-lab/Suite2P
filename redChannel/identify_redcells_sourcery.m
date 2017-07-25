@@ -1,4 +1,6 @@
-function identify_redcells_sourcery(ops)
+function identify_redcells_sourcery(db, ops0)
+
+ops = build_ops3(db, ops0);
 
 redcells = [];
 
@@ -81,24 +83,22 @@ for i = 1:length(ops.planesToProcess)
     redSum = redSum - min(redSum(:));
     
     % set threshold for redpix
-    if isfield(ops,'redthres')
-        redthres = ops.redthres;
-    else
-        redthres = 1.5;
-    end
+    ops.redthres = getOr(ops, 'redthres', 1.5);
+    ops.notredthres   = getOr(ops, 'notredthres', 1.25);
     
     rrat = redSum(:,1)./(redSum(:,2)+redSum(:,1));
-    redcell  = rrat > nanmean(rrat)+redthres*nanstd(rrat);
-    notred   = rrat <= nanmean(rrat) + redmax*nanstd(rrat);
+    redcell  = rrat > nanmean(rrat) + ops.redthres*nanstd(rrat);
+    notred   = rrat <= nanmean(rrat) + ops.notredthres*nanstd(rrat);
   
     
-    fprintf('plane %d  reds %d\n',iplane,sum(redcell(:)&iscell(:)));
+    fprintf('plane %d  reds %d\n',iplane,sum(redcell(:)));
     
 
     %%
     for j = 1:length(dat.stat)
         dat.stat(j).redcell = redcell(j);
         dat.stat(j).redprob = rrat(j);
+        dat.stat(j).notred  = notred(j);
     end
 
     save(fname, '-struct', 'dat')
