@@ -95,7 +95,8 @@ for iexp = 1 %[1:length(db0)]
         
         % identify red cells in mean red channel image
         % fills dat.stat.redcell, dat.stat.notred, dat.stat.redprob
-        identify_redcells_sourcery(db, ops0); 
+        %identify_redcells_sourcery(db, ops0); 
+        DetectRedCells(db, ops0);
     end
     
 end
