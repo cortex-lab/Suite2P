@@ -759,10 +759,10 @@ msg{7} = ['Statistics shown are same variables as used in "mask color" section.'
 msgbox(msg, 'Fluorescence instructions');
 
 function pushbutton106_Callback(hObject, eventdata, handles)
-msg{1} = ['This applies only if you select "ROIs" under "background".'];
-msg{3} = ['Selection determines the color/hue for each ROI, between 0.1 and 0.9.'];
-msg{5} = ['Reds are reserved to indicate labels made on the red/secondary color channel (middle mouse-click on an ROI to switch ON/OFF).'];
-msg{7} = ['RANDOM: color chosen randomly'];
+msg{1} = ['IF ROI (Q) IS SELECTED, THEN CELLS ARE PSEUDOCOLORED'];
+msg{3} = ['RANDOM: color chosen randomly - RED cells labelled in red (if secondary channel)'];
+msg{5} = ['*** middle mouse-click on an ROI to switch RED label ON/OFF ***'];
+msg{7} = ['for all other selections, color/hue for each ROI varies purple to yellow:'];
 msg{9} = ['CLASSIFIER: probability assigned by classifier'];
 msg{11} = ['SKEW: skewness of activity, after neuropil correction and some smoothing'];
 msg{13} = ['MEANIMG: weighting of activity mask onto mean image'];
