@@ -45,8 +45,11 @@ end
 % approx angle between z-stack and planes
 % default is ratio between number of planes in z-stack vs imaging
 % angle in radians
-if 
-ang = -1 * atan(ops.Zplanes/ops.nplanes / size(Bimg{wpl(1)},1));
+if numel(wpl) > 1
+    ang = -1 * atan(ops.Zplanes/ops.nplanes / size(Bimg{wpl(1)},1));
+else
+    ang = 0;
+end
 
 [cx1, ix1, cZ1] = ZtoPlanes(Aq, Bimg, ang, ops.useGPU);
 
