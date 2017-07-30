@@ -50,7 +50,7 @@ ops0.ShowCellMap            = 1; % during optimization, show a figure of the clu
 ops0.sig                    = 0.5;  % spatial smoothing length in pixels; encourages localized clusters
 ops0.nSVDforROI             = 1000; % how many SVD components for cell clustering
 ops0.NavgFramesSVD          = 5000; % how many (binned) timepoints to do the SVD based on
-ops0.signalExtraction       = 'surround'; % how to extract ROI and neuropil signals: 
+ops0.signalExtraction       = 'raw'; % how to extract ROI and neuropil signals: 
 %  'raw' (no cell overlaps), 'regression' (allows cell overlaps), 
 %  'surround' (no cell overlaps, surround neuropil model)
 
