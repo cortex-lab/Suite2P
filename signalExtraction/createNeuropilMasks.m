@@ -44,29 +44,33 @@ neuropMasks         = zeros(length(stat), Ny, Nx,'single');
 %compute the mask of each surrounding neuropils
 for k = 1:length(stat)
     centerCell   = [stat(k).med(1) stat(k).med(2)];
-    
-    if isinf(ops.outerNeuropil)
-        radiusCell         = stat(k).radius;
-        outRadius          = ops.ratioNeuropil * radiusCell;
-        outRadius          = max(outRadius, sqrt(ops.minNeuropilPixels/pi));
-        totPix             = 0;
-        its                = 0;
-        while totPix < ops.minNeuropilPixels 
+
+    if stat(k).radius > 0
+        
+        if isinf(ops.outerNeuropil)
+            radiusCell         = stat(k).radius;
+            outRadius          = ops.ratioNeuropil * radiusCell;
+            outRadius          = max(outRadius, sqrt(ops.minNeuropilPixels/pi));
+            totPix             = 0;
+            its                = 0;
+            while totPix < ops.minNeuropilPixels
+                neuropRegion       = sqrt((xx_np-centerCell(1)).^2 + ...
+                    (yy_np-centerCell(2)).^2)<=outRadius;
+                neuropNoCells      = neuropRegion - expandedGeneralMask > 0;
+                totPix             = sum(neuropNoCells(:));
+                outRadius          = outRadius * 1.25;
+            end
+            
+            % embed neuropil masks in full FOV (LyU x LxU)
+            neuropMasks(k,:,:) = single(neuropNoCells)/totPix;
+        else
             neuropRegion       = sqrt((xx_np-centerCell(1)).^2 + ...
                 (yy_np-centerCell(2)).^2)<=outRadius;
             neuropNoCells      = neuropRegion - expandedGeneralMask > 0;
             totPix             = sum(neuropNoCells(:));
-            outRadius          = outRadius * 1.25;
+            neuropMasks(k,:,:) = single(neuropNoCells)/totPix;
         end
         
-        % embed neuropil masks in full FOV (LyU x LxU)        
-        neuropMasks(k,:,:) = single(neuropNoCells)/totPix;
-    else
-        neuropRegion       = sqrt((xx_np-centerCell(1)).^2 + ...
-            (yy_np-centerCell(2)).^2)<=outRadius;
-        neuropNoCells      = neuropRegion - expandedGeneralMask > 0;
-        totPix             = sum(neuropNoCells(:));
-        neuropMasks(k,:,:) = single(neuropNoCells)/totPix;
     end
 end
 
