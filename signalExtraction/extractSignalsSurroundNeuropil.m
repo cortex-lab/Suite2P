@@ -1,8 +1,6 @@
 % computes cell and neuropil fluorescence for surround model of neuropil
 function [ops, stat, Fcell, FcellNeu] = extractSignalsSurroundNeuropil(ops, stat)
 
-
-
 Nk       = numel(stat); % all ROIs
 
 Ny = numel(ops.yrange);
@@ -42,7 +40,6 @@ while 1
         break;
     end
     
-    %
     data = reshape(data, Ly, Lx, []);
     data = data(ops.yrange, ops.xrange, :);
     NT   = size(data,3);
@@ -53,13 +50,11 @@ while 1
     %data = my_conv2(data, ops.sig, [1 2]);
     
     % compute cell fluorescence
-    % each mask is weighted by lam (mean 1)
-    Ftemp            = cellMasks * data;
-    F(:,ix + (1:NT)) = Ftemp;
+    % each mask is weighted by lam (SUM TO 1)
+    F(:,ix + (1:NT)) = cellMasks * data;
     
     % compute neuropil fluorescence
-    Ftemp               = neuropMasks * data;
-    Fneu(:,ix + (1:NT)) = Ftemp;
+    Fneu(:,ix + (1:NT)) = neuropMasks * data;
     
     ix = ix + NT;
     if rem(ix, 3*NT)==0

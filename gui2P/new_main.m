@@ -407,7 +407,7 @@ if x>=1 && y>=1 && x<=h.dat.cl.Lx && y<=h.dat.cl.Ly && h.dat.res.iclust(y,x)>0
     guidata(hObject,h);
     
     str = [];
-    labels = [h.statLabels(2:end), {'iscell'}, {'redcell'},{'redprob'}];
+    labels = [h.statLabels(2:end), {'iscell'}, {'redcell'},{'redprob'}, {'neuropilCoefficient'}, {'baseline'}];
     for j =1:length(labels)
        if isfield(h.dat.stat, labels{j})
            sl = eval(sprintf('h.dat.stat(ichosen).%s', labels{j}));

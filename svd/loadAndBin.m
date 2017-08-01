@@ -1,5 +1,8 @@
+% needs ops.RegFile, ops.xrange, ops.yrange, ops.NavgFramesSVD
+% Ly, Lx are the size of each frame. nimgbatch: the number of frames loaded per batch
+% nt0 is the number of timepoints to bin over. If a sixth argument is
+% present, it does not subtract the mean of each batch. 
 function mov = loadAndBin(ops, Ly, Lx, nimgbatch, nt0, clustModel)
-
 
 ix = 0;
 fid = fopen(ops.RegFile, 'r');

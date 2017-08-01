@@ -1,10 +1,10 @@
-function [sp, ca, coefs, B, sd, ops] = wrapperDECONV(ops, F, N)
+function [sp, ca, coefs, B, sd, ops, baselines] = wrapperDECONV(ops, F, N)
 
 % maximum neuropil coefficient
 ops.maxNeurop = getOr(ops, 'maxNeurop', 1);
 
 if getOr(ops, 'estimateNeuropil', 0)
-    niter = 5;
+    niter = 10;
 else
     niter = 1;
 end
@@ -15,8 +15,8 @@ F = bsxfun(@rdivide, F, sd);
 
 if nargin>2
     N = bsxfun(@rdivide, N, sd);
-    F(:, isnan(sum(N,1))) = nanmean(F,2) * ones(1,sum(isnan(sum(F,1))));
-    N(:, isnan(sum(N,1))) = nanmean(N,2) * ones(1,sum(isnan(sum(N,1))));
+    N(:, isnan(sum(F,1))) = nanmean(N,2) * ones(1,sum(isnan(sum(F,1))));
+    F(:, isnan(sum(F,1))) = nanmean(F,2) * ones(1,sum(isnan(sum(F,1))));    
 else
     niter = 1;
 end
@@ -52,16 +52,22 @@ for k = 1:niter
         
         % given the spike trace, infer the baseline and the neuropil contribution
         for j = 1:NN
-            X = cat(2, ones(NT,1)/1e2, N(:,j));
+            % baseline should be order one, just like N and F
+            X = cat(2, ones(NT,1), N(:,j));
             B(:, j) = ((X'*X)/size(X,1) + 1e-3 * eye(size(X,2))) \ ...
                 ((X'*Y(:,j))/size(X,1));
         end
         
         B(isnan(B)) = 1;
         coefs       = min(B(2,:), ops.maxNeurop);
+        
+        mean(coefs)
     end
 end
 
 % rescale the calcium and deconvolved
-sd = sd.*sd2;
 ca = bsxfun(@times, ca, sd);
+sp = bsxfun(@times, sp, sd);
+baselines = bsxfun(@times, B(1,:), sd);
+
+sd = sd.*sd2;

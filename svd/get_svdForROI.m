@@ -1,6 +1,6 @@
 % compute SVD and project onto normalized data
 % save if ops.writeSVDroi
-function [ops, U, model] = get_svdForROI(ops, clustModel)
+function [ops, U, model, U2] = get_svdForROI(ops, clustModel)
 
 % iplane = ops.iplane;
 U = []; Sv = []; V = []; Fs = []; sdmov = [];
@@ -72,10 +72,7 @@ if nargin==1 || ~strcmp(clustModel, 'CNMF')
         Sv              = single(diag(Sv));
     end
     
-    % compute spatial masks (U = mov * V)
-%     mov = loadAndBin(ops, Ly, Lx, nimgbatch, nt0);
-%     mov             = reshape(mov, [], size(mov,3));
-    
+
     if ops.useGPU
         U               = gpuBlockXY(mov, V);
     else
@@ -86,6 +83,20 @@ if nargin==1 || ~strcmp(clustModel, 'CNMF')
     U = reshape(U, numel(ops.yrange), numel(ops.xrange), []);
     
 
+    % compute spatial masks (U = mov * V)
+    mov = loadAndBin(ops, Ly, Lx, nimgbatch, nt0);
+    mov             = reshape(mov, [], size(mov,3));
+    
+    if ops.useGPU
+        U2               = gpuBlockXY(mov, V);
+    else
+        U2               = mov * V;
+    end
+    U2               = single(U2);    
+    % reshape U to frame size
+    U2 = reshape(U2, numel(ops.yrange), numel(ops.xrange), []);
+
+    
     % write SVDs to disk
     if ~exist(ops.ResultsSavePath, 'dir')
         mkdir(ops.ResultsSavePath);

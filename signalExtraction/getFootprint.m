@@ -1,5 +1,5 @@
 % computes "footprint" of ROI and populates stat with cell locations
-function stat = getFootprint(ops, codes, Ucell, mPix, mLam, mLam0, stat)
+function stat = getFootprint(ops, codes, Ucell, mPix, mLam, stat)
 
 d0   = ceil(ops.diameter); % expected cell diameter
 dx = repmat([-2*d0:2*d0], 4*d0+1, 1);
@@ -25,9 +25,11 @@ for j = 1:size(mPix,2)
     stat(j).ypix    = ypix;
     stat(j).xpix    = xpix;
     stat(j).lam     = mLam(ipos,j);
-    stat(j).lambda  = mLam0(ipos,j);
+    stat(j).lambda  = mLam(ipos,j);
     stat(j).npix    = numel(ipix);
     stat(j).med     = [median(stat(j).ypix) median(stat(j).xpix)];
+    stat(j).neuropilCoefficient = 0.7;
+    stat(j).baseline            = 0;
     
     % compute "footprint" length of ROI
     y0 = ceil(stat(j).med(1));

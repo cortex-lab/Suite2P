@@ -61,7 +61,7 @@ for i = 1:length(ops.planesToProcess)
     ops.estimateNeuropil    = getOr(ops0, 'estimateNeuropil', 1);
     ops.runningBaseline     = 0;
 
-    [sp, ~, coefs,~, sd, ops] = wrapperDECONV(ops, Ff, Fneu);
+    [sp, ~, coefs,~, sd, ops, baselines] = wrapperDECONV(ops, Ff, Fneu);
     
     if ops.deconvNeuropil
         ops.estimateNeuropil = 0;
@@ -72,6 +72,7 @@ for i = 1:length(ops.planesToProcess)
     for j = 1:size(Ff,2)
         stat(j).neuropilCoefficient = coefs(j);
         stat(j).noiseLevel          = sd(j);  
+        stat(j).baseline           = baselines(j);
     end
     
     nCum = 0;

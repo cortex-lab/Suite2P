@@ -61,7 +61,7 @@ else
 end
 % keyboard;
 %%
-for i = 1:numel(ops1) %[1:2 4:numel(ops1)]
+for i = [1:numel(ops1)] %[1:2 4:numel(ops1)]
     ops         = ops1{i};    
   
     ops.iplane  = i;
@@ -81,9 +81,10 @@ for i = 1:numel(ops1) %[1:2 4:numel(ops1)]
     if ops.getROIs
         % get sources in stat, and clustering images in res
         [ops, stat, model]           = sourcery(ops);
-        
+
         % extract dF
-        switch ops.signalExtraction
+        %         ops.signalExtraction = 'surround';
+        switch getOr(ops, 'signalExtraction', 'surround')
             case 'raw'
                 [ops, stat, Fcell, FcellNeu] = extractSignalsNoOverlaps(ops, model, stat);
             case 'regression'
@@ -91,7 +92,7 @@ for i = 1:numel(ops1) %[1:2 4:numel(ops1)]
             case 'surround'
                 [ops, stat, Fcell, FcellNeu] = extractSignalsSurroundNeuropil(ops, stat);
         end
-
+        
         % apply user-specific clustrules to infer stat.iscell
         stat                         = classifyROI(stat, ops.clustrules);
         
