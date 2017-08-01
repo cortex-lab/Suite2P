@@ -61,7 +61,7 @@ for k = 1:niter
         B(isnan(B)) = 1;
         coefs       = min(B(2,:), ops.maxNeurop);
         
-        mean(coefs)
+%         mean(coefs)
     end
 end
 
