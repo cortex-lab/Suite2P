@@ -84,7 +84,7 @@ ops0.redmax                 = 1; % the higher the max the more NON-red cells
 db0 = db;
 %% RUN THE PIPELINE HERE
 
-for iexp = 1 %[3:length(db) 1:2]
+for iexp = 1 %[1:length(db0)]
     db = db0(iexp);
     run_pipeline(db, ops0);
     
@@ -92,12 +92,14 @@ for iexp = 1 %[3:length(db) 1:2]
     add_deconvolution(ops0, db);
     
     % add red channel information (if it exists)
-    if isfield(db0,'expred') && ~isempty(db0(iexp).expred)
-        ops0.nchannels_red = db0(iexp).nchannels_red;
+    if isfield(db,'expred') && ~isempty(db.expred)
+        % creates mean red channel image aligned to green channel
+        run_REDaddon_sourcery(db, ops0) ; 
         
-        run_REDaddon(iexp, db0, ops0) ; % create redcell array
+        % identify red cells in mean red channel image
+        % fills dat.stat.redcell, dat.stat.notred, dat.stat.redprob
+        identify_redcells_sourcery(db, ops0); 
         
-        DetectRedCells; % fills dat.cl.redcell and dat.cl.notred
     end
     
 end
