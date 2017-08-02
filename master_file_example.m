@@ -1,5 +1,8 @@
 %% SET ALL DEFAULT OPTIONS HERE
 
+% UPDATE end-of-summer 2017: default neuropil extraction is now "surround"
+% and it's very fast. Cell extraction is on the raw data (no pixel-scaling or smoothing). 
+
 % UPDATE summer 2017: default spike deconvolution changed to a customized version of
 % OASIS (due to our results in this paper http://www.biorxiv.org/content/early/2017/06/27/156786). Please
 % Please download the OASIS code from https://github.com/zhoupc/OASIS_matlab, and
@@ -24,7 +27,7 @@ end
 
 % mex -largeArrayDims SpikeDetection/deconvL0.c (or .cpp) % MAKE SURE YOU COMPILE THIS FIRST FOR DECONVOLUTION
 
-ops0.useGPU                 = 1; % if you can use an Nvidia GPU in matlab this accelerates registration approx 3 times. You only need the Nvidia drivers installed (not CUDA).
+ops0.useGPU                 = 0; % if you can use an Nvidia GPU in matlab this accelerates registration approx 3 times. You only need the Nvidia drivers installed (not CUDA).
 ops0.fig                    = 1; % turn off figure generation with 0
 % ops0.diameter               = 12; % most important parameter. Set here, or individually per experiment in make_db file
 

@@ -10,7 +10,7 @@ ops0.registrationUpsample           = getOr(ops0, {'registrationUpsample'}, 1); 
 ops0.getROIs                        = getOr(ops0, {'getROIs'}, 1);   % whether to run the optimization
 ops0.getSVDcomps                    = getOr(ops0, {'getSVDcomps'}, 0);   % whether to save SVD components to disk for later processing
 ops0.nSVD                           = getOr(ops0, {'nSVD'}, 1000);   % how many SVD components to save to disk
-ops0.signalExtraction               = getOr(ops0, 'signalExtraction', 'surround');
+ops0.signalExtraction               = getOr(ops0, 'signalExtraction', 'raw');
 ops0.interpolateAcrossPlanes        = getOr(ops0, 'interpolateAcrossPlanes', 0);
 ops0.maxNeurop                      = getOr(ops0, 'maxNeurop', 1.5);
 
@@ -61,7 +61,7 @@ else
 end
 % keyboard;
 %%
-for i = 1:numel(ops1) %[1:2 4:numel(ops1)]
+for i = [1:numel(ops1)] %[1:2 4:numel(ops1)]
     ops         = ops1{i};    
   
     ops.iplane  = i;
@@ -81,9 +81,10 @@ for i = 1:numel(ops1) %[1:2 4:numel(ops1)]
     if ops.getROIs
         % get sources in stat, and clustering images in res
         [ops, stat, model]           = sourcery(ops);
-        
+
         % extract dF
-        switch ops.signalExtraction
+        %         ops.signalExtraction = 'surround';
+        switch getOr(ops, 'signalExtraction', 'surround')
             case 'raw'
                 [ops, stat, Fcell, FcellNeu] = extractSignalsNoOverlaps(ops, model, stat);
             case 'regression'
@@ -91,7 +92,7 @@ for i = 1:numel(ops1) %[1:2 4:numel(ops1)]
             case 'surround'
                 [ops, stat, Fcell, FcellNeu] = extractSignalsSurroundNeuropil(ops, stat);
         end
-
+        
         % apply user-specific clustrules to infer stat.iscell
         stat                         = classifyROI(stat, ops.clustrules);
         

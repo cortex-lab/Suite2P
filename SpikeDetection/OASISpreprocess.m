@@ -122,6 +122,7 @@ else
 end
 
 ca   = bsxfun(@times, ca, sd);
+sp   = bsxfun(@times, sp, sd);
 F1   = bsxfun(@times, F1, sd);
 
 end

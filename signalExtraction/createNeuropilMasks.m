@@ -36,6 +36,8 @@ end
 %compute the inner border of the ring-like shaped surrounding neuropils
 se = strel('disk',inRadius);
 expandedGeneralMask = sign(imdilate(cellPix,se));
+% expandedGeneralMask = sign(cellPix);
+
 neuropMasks         = zeros(length(stat), Ny, Nx,'single');
 
 %%
