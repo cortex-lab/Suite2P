@@ -1,5 +1,3 @@
-Preliminary instructions for a typical cell sorting session.
-
 1) Run new_main from the command line in the gui2P folder. 
 
 2) Load single to load a single result file. Find a file formatted as F_M150329_MP009_2015-04-29_plane1_Nk650 in your results path. 
