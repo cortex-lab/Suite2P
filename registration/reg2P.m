@@ -109,7 +109,7 @@ if ops.doRegistration
     end
     
     % display target image
-    if ops.showTargetRegistration   
+    if ops.fig   
         PlotRegMean(ops1,ops);
         drawnow
     end
@@ -243,7 +243,7 @@ for k = 1:length(fs)
             end
         end
         
-        if rem(j,5)==1
+        if 1 %rem(j,5)==1
             fprintf('Set %d, tiff %d done in time %2.2f \n', k, j, toc)            
         end
         
