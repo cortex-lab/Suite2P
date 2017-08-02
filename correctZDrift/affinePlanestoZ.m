@@ -96,6 +96,7 @@ for j = 1:length(Bimg)
     PtoZ{j} = [];
 end
 for iplane = ipl
+    %%
     [Ly, Lx]  = size(Bimg{iplane});
     
     npatch = 8;
@@ -186,6 +187,22 @@ for iplane = ipl
     Taff   = PtoZ{iplane};
     Bi     = Bimg{iplane};
     
+    [Ly, Lx]  = size(Bimg{iplane});
+    
+    npatch = 8;
+    pixy   = floor(Ly/npatch);
+    pixx   = floor(Lx/npatch);
+    
+    % patch coordinates in plane
+    y0     = floor(pixy/2) + 1 + [0:pixy:pixy*(npatch-1)];
+    x0     = floor(pixx/2) + 1 + [0:pixx:pixx*(npatch-1)];
+    yc      = repmat(y0, npatch, 1);
+    yc      = yc(:);
+    xc      = repmat(x0, 1, npatch);
+    xc      = xc(:);
+    % make yx patches with centers at (yc, xc) and size (pixy, pixx)
+    ipix0 = patchXY(Ly, Lx, yc, xc, pixy, pixx);
+        
     Zp     = zeros(Ly, Lx);
     for j = 1:npatch^2
         zcoord = round(Taff * [yc(j); xc(j); 1]);

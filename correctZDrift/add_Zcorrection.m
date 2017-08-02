@@ -61,7 +61,7 @@ for iplane = ipl
     % save FcellZ and FcellNeuZ
     dat.FcellZ    = FcellZ;
     dat.FcellNeuZ = FcellNeuZ;
-    
+    dat.zpos      = zpos(:,iplane);
     save(planefile, '-struct', 'dat')
 end
 

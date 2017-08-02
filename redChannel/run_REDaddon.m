@@ -3,7 +3,7 @@ function run_REDaddon(iexp, db, ops0)
 mimgG = [];
 ops = build_ops3(db(iexp), ops0);
 
-if sum(ops.expts==ops.expred)>0
+if sum(ismember(ops.expts, ops.expred)) == numel(ops.expts)
     mimgR = red_channel_mean(ops);
 else
     if ops.nchannels_red==2
