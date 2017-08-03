@@ -1,6 +1,6 @@
 function [zpos] = zposPlane(ops, Taff, MimgZ, subpixel)
 
-% use registered binary files from suite2P
+% use Z-stack and registered binary files from suite2P to compute Z-position of plane
 % make sure that ops.DeleteBin = 0
 
 zpos   = zeros(sum(ops.Nframes), 1,'single');
@@ -39,7 +39,9 @@ m1 = m1./(abs(m1)+eps0);
 Zwhite = real(ifft(ifft(m1, [], 1), [], 2));
 clear m1;
 Zwhite = reshape(Zwhite, [], size(Zwhite,3));
-Zwhite = gpuArray(single(Zwhite));
+if ops.useGPU
+    Zwhite = gpuArray(single(Zwhite));
+end
         
 % check mean image
 clf;
@@ -73,6 +75,8 @@ while ix0 < NT
     data  = data(ops.yrange, ops.xrange, :);
     if ops.useGPU
         data = gpuArray(single(data));
+    else
+        data = single(data);
     end
     
     % whiten data
