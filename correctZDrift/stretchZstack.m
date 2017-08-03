@@ -2,7 +2,7 @@
 % imaged planes
 % zpos is position of each plane in zstack
 % angle is in radians
-function MimgR = stretchZstack(Mimg, ang, useGPU)
+function MimgR = stretchZstack(Mimg, ang)
 
 [Ly Lx Lz] = size(Mimg);
 
@@ -10,11 +10,7 @@ dZ         = Ly * tan(ang);
 [X Z]      = ndgrid([1:Lx], [1:Lz]);
 X2         = X;
 
-if useGPU==1
-    MimgR = gpuArray.zeros(size(Mimg),'single');
-else
-    MimgR = zeros(size(Mimg),'single');
-end
+MimgR = zeros(size(Mimg),'single');
 
 for i = 1:Ly
     Z2 = Z - (dZ/Ly)*(i-1);
