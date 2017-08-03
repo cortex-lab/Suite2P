@@ -2,7 +2,7 @@
 % allows for rotations and translation
 % returns transformation PtoZ, z-stack matrix Aq
 % Zpatch are z-stack patches aligned to mean images Bimg using PtoZ
-function [PtoZ, Aq, Zpatch, Bimg] = affinePlanestoZ(ops)
+function [PtoZ, A0, Zpatch, Bimg] = affinePlanestoZ(ops)
 
 zfile = sprintf('%s/stack_%s_%s.mat', ops.ZstackSavePath, ops.mouse_name, ops.date);
 load(zfile);
@@ -15,7 +15,7 @@ A = Mimg0(:,:,3:Zplanes);
 % make A into correct zoom
 Aq = [];
 if ops.Zzoom ~= ops.zoom
-    zoom = ops.zoom / ops.zzoom;
+    zoom = ops.zoom / ops.Zzoom;
     [x,y]   = meshgrid([1:size(A,1)]);
     [xq,yq] = meshgrid(linspace(1, size(A,1), size(A,1)*zoom));
     for j = 1:size(A,3)
@@ -95,13 +95,18 @@ z1 = [];
 for j = 1:length(Bimg)
     PtoZ{j} = [];
 end
+ny        = 30;
+nx        = 30;
+A0        = pad3Dzeros(Aq, ny, nx, 0);
 for iplane = ipl
     %%
-    [Ly, Lx]  = size(Bimg{iplane});
+    [Ny, Nx]  = size(Bimg{iplane});
+    
+    
     
     npatch = 8;
-    pixy   = floor(Ly/npatch);
-    pixx   = floor(Lx/npatch);
+    pixy   = floor(Ny/npatch);
+    pixx   = floor(Nx/npatch);
     
     % patch coordinates in plane
     y0     = floor(pixy/2) + 1 + [0:pixy:pixy*(npatch-1)];
@@ -112,7 +117,7 @@ for iplane = ipl
     xc      = xc(:);
     
     % make yx patches with centers at (yc, xc) and size (pixy, pixx)
-    ipix0 = patchXY(Ly, Lx, yc, xc, pixy, pixx);
+    ipix0 = patchXY(Ny, Nx, yc, xc, pixy, pixx);
     
     % fft of patches
     Bi = Bimg{iplane};
@@ -122,11 +127,11 @@ for iplane = ipl
     m2 = m2./(eps0 + abs(m2));
     
     % patches of z-stack
-    [Ny Nx Np] = size(Aq);
+    [ny nx Np] = size(A0);
     zspread = 15;
     % recentering
-    ry = - floor(Ly/2) + floor(Ny/2);
-    rx = - floor(Lx/2) + floor(Nx/2);
+    ry = - floor(Ny/2) + floor(ny/2);
+    rx = - floor(Nx/2) + floor(nx/2);
     
     % initialized patch coordinates in z-stack
     yxz    = [(yc+ry)  (xc+rx)  -(yc+ry+ix1(iplane,1))*tan(ang)];
@@ -139,12 +144,12 @@ for iplane = ipl
     for it = [1:niter]
         yxz0  = yxz;
         epsit0 = epsit;
-        ipixz = patchXY(Ny, Nx, yxz0(:,1), yxz0(:,2), pixy, pixx);
+        ipixz = patchXY(ny, nx, yxz0(:,1), yxz0(:,2), pixy, pixx);
         
         % make patches of z-stack with z depth of 2*zspread + 1
         zz    = yxz0(:,3);
-        Ai = reshape(Aq, [], size(Aq,3));
-        Ai = reshape(Ai(ipixz(:),:), pixy, pixx, npatch^2, size(Aq,3));
+        Ai = reshape(A0, [], Np);
+        Ai = reshape(Ai(ipixz(:),:), pixy, pixx, npatch^2, Np);
         Az = NaN*zeros(size(Ai,1),size(Ai,2),size(Ai,3),zspread*2 + 1);
         for j = 1:npatch^2
             zinds      = max(1,floor(zz(j))-zspread) : min(Np,floor(zz(j))+zspread);
@@ -187,11 +192,11 @@ for iplane = ipl
     Taff   = PtoZ{iplane};
     Bi     = Bimg{iplane};
     
-    [Ly, Lx]  = size(Bimg{iplane});
+    [Ny, Nx]  = size(Bimg{iplane});
     
     npatch = 8;
-    pixy   = floor(Ly/npatch);
-    pixx   = floor(Lx/npatch);
+    pixy   = floor(Ny/npatch);
+    pixx   = floor(Nx/npatch);
     
     % patch coordinates in plane
     y0     = floor(pixy/2) + 1 + [0:pixy:pixy*(npatch-1)];
@@ -201,12 +206,12 @@ for iplane = ipl
     xc      = repmat(x0, 1, npatch);
     xc      = xc(:);
     % make yx patches with centers at (yc, xc) and size (pixy, pixx)
-    ipix0 = patchXY(Ly, Lx, yc, xc, pixy, pixx);
+    ipixz = patchXY(ny, nx, yc+ry, xc+rx, pixy, pixx);
         
-    Zp     = zeros(Ly, Lx);
+    Zp     = zeros(Ny, Nx);
     for j = 1:npatch^2
         zcoord = round(Taff * [yc(j); xc(j); 1]);
-        zpatch = Aq(zcoord(1) - floor(pixy/2) + [0:pixy-1],...
+        zpatch = A0(zcoord(1) - floor(pixy/2) + [0:pixy-1],...
             zcoord(2) - floor(pixx/2) + [0:pixx-1],zcoord(3));
         Zp(ipix0(:,j)) = zpatch;
     end
