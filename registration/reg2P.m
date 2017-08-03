@@ -144,10 +144,10 @@ for i = 1:numPlanes
         fid{i,j}              = fopen(ops1{i,j}.RegFile, 'w');
         
         
-        ops1{i,j}.RegFile = fullfile(ops.RegFileRoot, ...
+        ops1{i,j}.RegFile2 = fullfile(ops.RegFileRoot, ...
             sprintf('%s_%s_%s_plane%d_RED.bin', ops.mouse_name, ops.date, ...
             ops.CharSubDirs, i + (j-1)*numPlanes));
-%         fidRED{i,j}              = fopen(ops1{i,j}.RegFile, 'w');
+%         fidRED{i,j}              = fopen(ops1{i,j}.RegFile2, 'w');
         
         ops1{i,j}.DS          = [];
         ops1{i,j}.CorrFrame   = [];
