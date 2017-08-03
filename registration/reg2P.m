@@ -142,6 +142,13 @@ for i = 1:numPlanes
         
         % open bin file for writing
         fid{i,j}              = fopen(ops1{i,j}.RegFile, 'w');
+        
+        
+        ops1{i,j}.RegFile = fullfile(ops.RegFileRoot, ...
+            sprintf('%s_%s_%s_plane%d_RED.bin', ops.mouse_name, ops.date, ...
+            ops.CharSubDirs, i + (j-1)*numPlanes));
+%         fidRED{i,j}              = fopen(ops1{i,j}.RegFile, 'w');
+        
         ops1{i,j}.DS          = [];
         ops1{i,j}.CorrFrame   = [];
         ops1{i,j}.mimg1       = zeros(ops1{i,j}.Ly, ops1{i,j}.Lx);
@@ -224,6 +231,11 @@ for k = 1:length(fs)
                 end
                 % align the frames according to the registration offsets
                 dreg = RegMovie(data, ops1, dsall, yFOVs, xFOVs);
+                
+%                 ichanset = [rchannel; nFr; nchannels_expt];
+%                 data = loadFramesBuff(ops.temp_tiff, ichanset(1), ichanset(2), ichanset(3));
+%                 data = ShiftBiDi(BiDiPhase, data, Ly, Lx);
+%                 dreg2 = RegMovie(data, ops1, dsall, yFOVs, xFOVs);
             end
         else
             dreg = data;
@@ -238,12 +250,15 @@ for k = 1:length(fs)
                     dwrite = dreg(yFOVs(:,l),xFOVs(:,l),indframes);
                     fwrite(fid{i,l}, dwrite, class(data));
                     
+%                     dwrite = dreg2(yFOVs(:,l),xFOVs(:,l),indframes);
+%                     fwrite(fidRED{i,l}, dwrite, class(data));
+                    
                     ops1{i,l}.mimg1 = ops1{i,l}.mimg1 + sum(dwrite,3);
                 end
             end
         end
         
-        if 1 %rem(j,5)==1
+        if rem(j,5)==1
             fprintf('Set %d, tiff %d done in time %2.2f \n', k, j, toc)            
         end
         
@@ -268,6 +283,7 @@ end
 % write registered tiffs to disk if ~isempty(ops.RegFileTiffLocation)
 for i = 1:numel(ops1)    
     fclose(fid{i});
+    
     fid{i}           = fopen(ops1{i}.RegFile, 'r');
     
     if ~isempty(ops.RegFileTiffLocation)

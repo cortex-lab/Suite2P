@@ -72,6 +72,11 @@ if ~isempty(targetImage)
 else
     for k = 1:length(ops.SubDirs)
         iplane0 = 1;
+        if ismember(ops.expts(k), getOr(ops, 'expred', []))
+            nchannels = ops.nchannels_red;
+        else
+            nchannels = ops.nchannels;
+        end
         for j = 1:length(fs{k})
             % compute number of frames in tiff if size different from previous
             if abs(nbytes - fs{k}(j).bytes)>1e3
