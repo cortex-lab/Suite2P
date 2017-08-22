@@ -1,5 +1,20 @@
 function [sp, ca, coefs, B, sd, ops, baselines] = wrapperDECONV(ops, F, N)
 
+% F contains the NT by NN somatic traces
+% optional: N contains the NT by NN neuropil traces
+
+% IMPORTANT: specify in ops the following options
+%       ops.fs = sampling rate
+%       ops.sensorTau  = timescale of sensor, if recomputeKernel = 0
+%       ops.estimateNeuropil = 0 or 1 (default is 1, if N is given as input)
+
+% outputs:
+%     sp: the deconvolved traces
+%     ca: the reconstructed calcium
+%     coefs: the neuropil coefficients, if inferred
+%     B,sd,ops: for Suite2p use
+%     baselines: inferred baselines
+
 % maximum neuropil coefficient
 ops.maxNeurop = getOr(ops, 'maxNeurop', 1);
 
