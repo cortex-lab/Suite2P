@@ -55,9 +55,8 @@ Click "Save analysis..." to save registered ROIs (and targets) for subsequent an
 - targets.idcs = n * 3 matrix where n is the number of targets that you imported, columns 1 and 2 are the two time-points and column 3 is 0 | 1 depending on whether the target has overlapping ROIs across the 2 time-points (1) or only has an ROI on one/other/neither time-point (0). Elements in the first 2 columns are NaN if no ROI overlapped with that target, or indices of raw Suite2P ROIs not parsed by the iscell classifier (see roi.idcs above) if an ROI did.
 - targets.iscell_idcs = n * 3 matrix where n is the number of targets that you imported, columns 1 and 2 are the two time-points and column 3 is 0 | 1 depending on whether the target has overlapping ROIs across the 2 time-points (1) or only has an ROI on one/other/neither time-point (0). Elements in the first 2 columns are NaN if no ROI overlapped with that target, or indices of Suite2P ROIs after they have been parsed with the iscell classifier (see roi.iscell_idcs above) if an ROI did.
 
-Click "Save transform..." to save transform between two timepoints. This can subsequently be reloaded and applied to the same/new datasets of the same FOVs by clicking "Load Transform".
-
-Click "Save session" to save data in the middle of processing for reloading/modifying later (by clicking "Load session"). NB the format of data saved out in this way is not easily parsable so this should only be used if you want to temporarily stop analysis and come back to it later. To save out the final overlapping ROIs see "Save analysis..." section above.
+- Click "Save transform..." to save transform between two timepoints. This can subsequently be reloaded and applied to the same/new datasets of the same FOVs by clicking "Load Transform".
+- Click "Save session" to save data in the middle of processing for reloading/modifying later (by clicking "Load session"). The format of data saved out in this way is not easily parsable so this should only be used if you want to temporarily stop analysis and come back to it later. To save out the final overlapping ROIs see "Save analysis..." section above.
 ---
 
 ### 7. Controls ###
