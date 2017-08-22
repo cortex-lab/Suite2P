@@ -78,6 +78,6 @@ Click "Save session" to save data in the middle of processing for reloading/modi
 - Contrast slider: sets contrast of each image independently. Contrast values for each image are maintained in the registration step.
 ---
 
-### 7. Additional functions ###
+### 8. Additional functions ###
 - cat_overlap: Allows daisy-chaining of multiple registers2p regi variables. NB all must have been registered to the same time-point 1. See function description for details of inputs and outputs.
 - find_consistent_rois: sub-function of cat_overlap, essentially similar functionality but takes a cell array constructed from sub-fields of regi structures instead of the regi structures themselves.
