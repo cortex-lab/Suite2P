@@ -57,6 +57,7 @@ Click "Save analysis..." to save registered ROIs (and targets) for subsequent an
 
 Click "Save transform..." to save transform between two timepoints:
 - This can subsequently be reloaded and applied to the same/new datasets of the same FOVs by clicking "Load Transform".
+
 Click "Save session" to save data in the middle of processing for reloading/modifying later (by clicking "Load session"):
 - The format of data saved out in this way is not easily parsable so this should only be used if you want to temporarily stop analysis and come back to it later. To save out the final overlapping ROIs see "Save analysis..." section above.
 ---
