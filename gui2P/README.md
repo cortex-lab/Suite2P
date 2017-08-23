@@ -1,5 +1,4 @@
 # How to use
-## there are help buttons in the GUI too (DON'T PANIC and HELP buttons in red) 
 
 1) Run new_main from the command line in the gui2P folder. 
 
@@ -10,6 +9,8 @@
 The most important capability of the GUI is the ability to point and click on a pixel in either of the two views to select its cluster. The fluorescence trace will then be displayed. Right-clicking on an ROI in the left window pushes that ROI to the right window and viceversa. This allows quick manual sorting of the detected clusters and is the main function provided by this GUI. For RED cell classification, use the middle click (the mouse wheel) to change a cell from RED to NOTRED and viceversa.
 
 4) Once you are done clicking on cells, press "Save"  to save the results back into a new file, identical to the file you have loaded from with a '_proc' at the end of the file name, and with a new field iscell in the stat structure, which indicates the result of the GUI. A few other settings of the GUI are saved, so that the session can be resumed at a later time. 
+
+## there are help buttons in the GUI too (DON'T PANIC and HELP buttons in red) 
 
 # GUI FEATURES
 ## Classifier
