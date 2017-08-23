@@ -1,4 +1,5 @@
 # How to use
+## (there are help buttons in the GUI too (DON'T PANIC and HELP buttons in red) )##
 
 1) Run new_main from the command line in the gui2P folder. 
 
