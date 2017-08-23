@@ -1,5 +1,5 @@
 # How to use
-## (there are help buttons in the GUI too (DON'T PANIC and HELP buttons in red) )##
+## there are help buttons in the GUI too (DON'T PANIC and HELP buttons in red) 
 
 1) Run new_main from the command line in the gui2P folder. 
 
@@ -11,7 +11,8 @@ The most important capability of the GUI is the ability to point and click on a 
 
 4) Once you are done clicking on cells, press "Save"  to save the results back into a new file, identical to the file you have loaded from with a '_proc' at the end of the file name, and with a new field iscell in the stat structure, which indicates the result of the GUI. A few other settings of the GUI are saved, so that the session can be resumed at a later time. 
 
-# Classifier
+# GUI FEATURES
+## Classifier
 
 The classifier builds a non-parametric model of the cell/non-cell parameters (compactness, skewness, size etc.). The model is updated after every user manual session (after you press save). You can have different classifiers for different types of data (i.e. somas, dendrites, boutons, different brain areas, calcium indicators, or zoom levels). The classifier assigns the initial "iscell" labels to the ROIs. Initially, it might not work very well, but will improve as you make choices in the GUI (and save the "proc" files). 
 
@@ -22,7 +23,7 @@ As you process datasets, a database of your cells is built, and the classifier i
 The prior counts for about 300 cells, so your choices will start making a difference after a few hundred manually validated cells.
 
 
-# Background
+## Background
 
 ROI: shows the masks identified by Suite2p, colored according to the property selected under "mask color"
 
@@ -39,7 +40,7 @@ PROC: switch to toggle image contrast normalization
    hint: the letters in paranthesis are keyboard shortcuts
 
 
-# Mask Colors
+## Mask Colors
 
 This applies only if you select "ROIs" under "background"
 
@@ -63,7 +64,7 @@ RED: probability of being a red-tagged cell, assigned by algorithm in identify_r
 
    hint: the letters in paranthesis are keyboard shortcuts
 
-# Mask Brightness
+## Mask Brightness
 
 The Mask Brightness can be used to switch between different ways of displaying the masks. The algorithm returns continuous valued masks that are normalized to 1 per ROI. 
 
@@ -71,7 +72,7 @@ MaskBrightness= UnitVectors encodes the mask weights into the brightness/value o
 
 MaskBrightness = VarianceExp uses the global variance explained of each pixel by its ROIs. This setting can be used to see the global magnitude of variance in each ROI. Bright ROIs will have a lot of variance and transients. Importantly, the variance is computed on high-pass filtered data, so ROIs with drifting fluorescence will not appear to have a lot of variance. 
 
-# ZOOM
+## ZOOM
 
 The quadrant view allows you to zoom into pre-specified 3 by 3 quadrants of the image. All the options of the GUI are available in the zoomed view. 
 
