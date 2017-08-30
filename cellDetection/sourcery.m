@@ -199,7 +199,7 @@ while 1
         drawnow
     end
     
-     if numel(ind)<Nfirst * getOr(ops, 'stopSourcery', 1/20)
+     if numel(ind)<Nfirst * getOr(ops, 'stopSourcery', 1/10)
         break;
     end
 end
