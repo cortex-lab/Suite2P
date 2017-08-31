@@ -89,6 +89,9 @@ for k = 1:length(fs)
                 
                 mimgR(:,:,iplane) = mimgR(:,:,iplane) + mean(dreg, 3);            
             end
+            
+            iplane0 = iplane0 - nFr/ops.nchannels;
+             
             ntf0 = ntf0 + 1;
             disp(ntf0);
         end
