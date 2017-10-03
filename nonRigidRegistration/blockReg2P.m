@@ -236,7 +236,7 @@ for i = 1:numPlanes
     end
     
     mimg = zeros(size(ops1{i}.mimg1));
-    for ib = 1:numBlocks
+    for ib = 1:prod(numBlocks)
         mimg(ops1{i}.yBL{ib}, ops1{i}.xBL{ib}) = ops1{i}.mimgB{ib};
     end
     ops1{i}.mimg = mimg;
