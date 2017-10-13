@@ -105,7 +105,7 @@ footprint, mrs, mrs0, cmpct, aspec_ratio, ellipse, mimgProj, skew, std, maxMinus
 
 RootStorage --- the root location where the raw tiff files are  stored.
 
-RegFileRoot --- location on local disk where to keep the registered movies in binary format. This will be loaded several times so it should ideally be an SSD drive. 
+RegFileRoot --- location on local disk where to keep the registered movies in binary format. This will be loaded several times so it should ideally be an SSD drive. (to view registered movies use script "view_registered_binaries.m" in main folder)
 
 ResultsSavePath --- where to save the final results. 
 
@@ -119,11 +119,13 @@ All of these filepaths are completed with separate subfolders per animal and exp
 
 If you don't want to use this folder structure, see the make_db_example file for alternatives. The make_db_example file also shows how to group together tiffs from different experiments (i.e. different subfolders within this folder structure).
 
-The output is a struct called dat which is saved into a mat file in ResultsSavePath using the same subfolder structure, under a name formatted like F_M150329_MP009_2015-04-29_plane1. It contains all the information collected throughout the processing, and contains the fluorescence traces in dat.Fcell and whether a given ROI is a cell or not in dat.stat(N).iscell. dat.stat contains information about each ROI and can be used to recover the corresponding pixels for each ROI N in dat.stat(N).ipix. The centroid of the ROI N is specified in dat.stat(N) as well. Here is a summary of where the important results are:
+The output is a struct called dat which is saved into a mat file in ResultsSavePath using the same subfolder structure, under a name formatted like F_M150329_MP009_2015-04-29_plane1. It contains all the information collected throughout the processing, and contains the fluorescence traces in dat.Fcell and whether a given ROI is a cell or not in dat.stat(N).iscell. dat.stat contains information about each ROI and can be used to recover the corresponding pixels for each ROI N in dat.stat(N).ipix. The centroid of the ROI N is specified in dat.stat(N) as well.
 
 # V. Options
 
 ### Registration
+
+AlignToRedChannel --- perform registration to red channel (non-functional channel) rather than green channel
 
 showTargetRegistration --- whether to show an image of the target frame immediately after it is computed. 
 
