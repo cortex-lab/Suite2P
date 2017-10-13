@@ -29,7 +29,7 @@ for j = 1:ops.Zplanes
         ifirst = ifirst - nFr;
         
         if j==1 && i==1
-            Mimg = zeros(size(I,1), size(I,2), ops.Zplanes*ops.Zchannels);
+            Mimg = zeros(size(I,1), size(I,2), ops.Zplanes);
         end
     end
     ops.Ly = size(I,1);

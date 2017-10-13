@@ -11,6 +11,7 @@ Nx    =  numel(ops.xrange);
 
 mimg  = ops.mimg1(ops.yrange, ops.xrange);
 
+%%
 zspread  = 10;
 Zaligned = cutZstack(MimgZ, Taff, Ny, Nx, zspread);
 

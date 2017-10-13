@@ -4,6 +4,8 @@
 
 Allows users to import two Suite2P output structures (F...proc.mat files) generated from a single FOV across 2 time-points (e.g. > 1 day) and semi-automatically register the two images of the FOV and the corresponding Suite2P ROIs. It also has the optional functionality of loading in user-defined target centroids which can then be mapped onto Suite2P ROIs (and overlapped across days). Allows quick and easy manual curation of overlaps. Use cat_overlap.m function provided to daisy-chain registered ROIs recorded at multiple time-points which have all been registered to one reference time-point.
 
+Written by Henry Dalgleish 2017 (hwpdalgleish@gmail.com, https://github.com/hwpdalgleish)
+
 ---
 
 ### 1. Image window (left) ###
@@ -49,9 +51,15 @@ Allows users to import two Suite2P output structures (F...proc.mat files) genera
 ### 6. Outputs ###
 Click "Save analysis..." to save registered ROIs (and targets) for subsequent analysis in a variable called regi with fields:
 - rois.idcs = n * 2 matrix where n is the number of overlapping rois and columns correspond to the 2 time-points. Elements are the indices of raw Suite2P ROIs in the F...proc.mat file, not parsed by the iscell classifer. I.e. an element that equals 10 in rois.idcs is truly ROI 10 in F...proc.mat. Use this to index directly into dat.Fcell/dat.FcellNeu.
-- rois.iscell_idcs = n * 2 matrix where n is the number of overlapping rois and columns correspond to the 2 time-points. Elements are the indices of Suite2P ROIs in the F...proc.mat file after being parsed by the iscell classifier. If you are only importing positively classified ROIs (iscell == 1) then use this to index into your resulting matrix directly: classfied_cells(rois.iscell_idcs,:). If you are importing all ROIs (iscell==1 | iscell == 0) then index into this matrix using the non-negative indices of iscell: nn_idcs = find(iscell); nonclassified_cells(nn_idcs(rois.iscell_idcs),:).
+- rois.iscell_idcs = n * 2 matrix where n is the number of overlapping rois and columns correspond to the 2 time-points. Elements are the indices of Suite2P ROIs in the F...proc.mat file after being parsed by the iscell classifier. If you are only importing positively classified ROIs (iscell == 1) then use this to index into your resulting matrix directly: classfied_cells(rois.iscell_idcs,:). If you are importing all ROIs (iscell==1 | iscell == 0) then index into this matrix using the non-zero indices of iscell: nn_idcs = find(iscell); nonclassified_cells(nn_idcs(rois.iscell_idcs),:).
 - targets.idcs = n * 3 matrix where n is the number of targets that you imported, columns 1 and 2 are the two time-points and column 3 is 0 | 1 depending on whether the target has overlapping ROIs across the 2 time-points (1) or only has an ROI on one/other/neither time-point (0). Elements in the first 2 columns are NaN if no ROI overlapped with that target, or indices of raw Suite2P ROIs not parsed by the iscell classifier (see roi.idcs above) if an ROI did.
 - targets.iscell_idcs = n * 3 matrix where n is the number of targets that you imported, columns 1 and 2 are the two time-points and column 3 is 0 | 1 depending on whether the target has overlapping ROIs across the 2 time-points (1) or only has an ROI on one/other/neither time-point (0). Elements in the first 2 columns are NaN if no ROI overlapped with that target, or indices of Suite2P ROIs after they have been parsed with the iscell classifier (see roi.iscell_idcs above) if an ROI did.
+
+Click "Save transform..." to save transform between two timepoints:
+- This can subsequently be reloaded and applied to the same/new datasets of the same FOVs by clicking "Load Transform".
+
+Click "Save session" to save data in the middle of processing for reloading/modifying later (by clicking "Load session"):
+- The format of data saved out in this way is not easily parsable so this should only be used if you want to temporarily stop analysis and come back to it later. To save out the final overlapping ROIs see "Save analysis..." section above.
 ---
 
 ### 7. Controls ###
@@ -61,14 +69,15 @@ Click "Save analysis..." to save registered ROIs (and targets) for subsequent an
 - A: Display ROIs (left-display) and highlight ROIs (right-display) from dataset 1
 - S: Display ROIs (left-display) and highlight ROIs (right-display) from dataset 2 
 - P: Toggle processing on currently displayed mask (left-display)
-- 1 - 5: Displays number mask (listed above image display) of currently displayed dataset (left-display)
+- 1 - 6: Displays number mask (listed above image display) of currently displayed dataset (left-display)
 - Enter: When user-imported centroid targets are selected this deselects them (leaving them where they currently are)
 - D: When user-imported centroid targets are selected this returns them to their default location
 - Arrow keys: When user-imported centroid targets are selected this will nudge them around the image
 - Left-click (left-display): click once to open a lasso tool to select user-imported target centroids (if present). The cursor will switch to a cross-hair. Subsequently click and drag to define the lasso area around targets you want to select. Double-click to finish defining area. Selected targets within the area will turn from red to yellow. Subsequent clicks and drags will move targets around. Hit Enter to de-select targets and leave them where you have dragged them.
 - Left-click (right-display): toggle the overlap state of selected ROIs that have >0 pixel overlap with each other.
+- Contrast slider: sets contrast of each image independently. Contrast values for each image are maintained in the registration step.
 ---
 
-### 7. Additional functions ###
+### 8. Additional functions ###
 - cat_overlap: Allows daisy-chaining of multiple registers2p regi variables. NB all must have been registered to the same time-point 1. See function description for details of inputs and outputs.
 - find_consistent_rois: sub-function of cat_overlap, essentially similar functionality but takes a cell array constructed from sub-fields of regi structures instead of the regi structures themselves.

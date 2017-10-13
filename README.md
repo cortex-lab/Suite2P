@@ -20,7 +20,7 @@ This is a complete, automated pipeline for processing two-photon Calcium imaging
 
 4) Signal extraction --- by default, all overlapping pixels are discarded when computing the signal inside each ROI, to avoid using "demixing" approaches, which can be biased. The neuropil signal is also computed independently for each ROI, as a weighted pixel average, pooling from a large area around each ROI, but excluding all pixels assigned to ROIs during cell detection. 
 
-5) Automatic and manual curation --- the output of the cell detection algorithm can be visualized and further refined using the included GUI. The GUI is designed to make cell sorting a fun and enjoyable experience. It also includes an automatic classifier that gradually refines itself based on the manual labelling provided by the user. This allows the automated classifier to adapt for different types of data, acquired under different conditions. 
+5) Automatic and manual curation --- the output of the cell detection algorithm can be visualized and further refined using the included GUI. The GUI is designed to make cell sorting a fun and enjoyable experience. It also includes an automatic classifier that gradually refines itself based on the manual labelling provided by the user. This allows the automated classifier to adapt for different types of data, acquired under different conditions. (README FOR GUI AT https://github.com/cortex-lab/Suite2P/blob/master/gui2P/README.md)
 
 6) Spike deconvolution --- cell and neuropil traces are further processed to obtain an estimate of spike times and spike "amplitudes". The amplitudes are proportional to the number of spikes in a burst/bin. Even under low SNR conditions, where transients might be hard to identify, the deconvolution is still useful for temporally-localizing responses. The cell traces are baselined using the minimum of the (overly) smoothed trace. 
 
@@ -105,7 +105,7 @@ footprint, mrs, mrs0, cmpct, aspec_ratio, ellipse, mimgProj, skew, std, maxMinus
 
 RootStorage --- the root location where the raw tiff files are  stored.
 
-RegFileRoot --- location on local disk where to keep the registered movies in binary format. This will be loaded several times so it should ideally be an SSD drive. 
+RegFileRoot --- location on local disk where to keep the registered movies in binary format. This will be loaded several times so it should ideally be an SSD drive. (to view registered movies use script "view_registered_binaries.m" in main folder)
 
 ResultsSavePath --- where to save the final results. 
 
@@ -119,11 +119,13 @@ All of these filepaths are completed with separate subfolders per animal and exp
 
 If you don't want to use this folder structure, see the make_db_example file for alternatives. The make_db_example file also shows how to group together tiffs from different experiments (i.e. different subfolders within this folder structure).
 
-The output is a struct called dat which is saved into a mat file in ResultsSavePath using the same subfolder structure, under a name formatted like F_M150329_MP009_2015-04-29_plane1. It contains all the information collected throughout the processing, and contains the fluorescence traces in dat.Fcell and whether a given ROI is a cell or not in dat.stat(N).iscell. dat.stat contains information about each ROI and can be used to recover the corresponding pixels for each ROI N in dat.stat(N).ipix. The centroid of the ROI N is specified in dat.stat(N) as well. Here is a summary of where the important results are:
+The output is a struct called dat which is saved into a mat file in ResultsSavePath using the same subfolder structure, under a name formatted like F_M150329_MP009_2015-04-29_plane1. It contains all the information collected throughout the processing, and contains the fluorescence traces in dat.Fcell and whether a given ROI is a cell or not in dat.stat(N).iscell. dat.stat contains information about each ROI and can be used to recover the corresponding pixels for each ROI N in dat.stat(N).ipix. The centroid of the ROI N is specified in dat.stat(N) as well.
 
 # V. Options
 
 ### Registration
+
+AlignToRedChannel --- perform registration to red channel (non-functional channel) rather than green channel
 
 showTargetRegistration --- whether to show an image of the target frame immediately after it is computed. 
 

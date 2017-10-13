@@ -45,6 +45,7 @@ ops0.showTargetRegistration = 1; % shows the image targets for all planes to be 
 ops0.PhaseCorrelation       = 1; % set to 0 for non-whitened cross-correlation
 ops0.SubPixel               = Inf; % 2 is alignment by 0.5 pixel, Inf is the exact number from phase correlation
 ops0.NimgFirstRegistration  = 500; % number of images to include in the first registration pass 
+ops0.nimgbegend             = 0; % frames to average at beginning and end of blocks
 ops0.dobidi                 = 1; % infer and apply bidirectional phase offset
 
 % cell detection options

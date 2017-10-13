@@ -7,7 +7,7 @@ function   [cMAX, ix, cZ0] = ZtoPlanes(A0, B, ang, useGPU)
 [nX, nY, nZ] = size(A0);
 
 if abs(ang) > 1e-4
-    Ap = stretchZstack(A0, ang, useGPU); % around axis of tissue
+    Ap = stretchZstack(A0, ang); % around axis of tissue
 else
     Ap = A0;
 end
@@ -40,7 +40,7 @@ for j = 1:numel(B)
         m2 = m2./(abs(m2)+eps0);
     
         
-        [c1,ix1,cz1] = ZRegPlane(m1,m2,[1:sum(inZ)],useGPU);
+        [c1,ix1,cz1] = ZRegPlane(m1,m2,[1:size(m1,3)],useGPU);
     
         cMAX(j) = c1;
         ix(j,:) = ix1;

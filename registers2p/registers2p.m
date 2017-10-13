@@ -1,3 +1,13 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% RegisterS2P %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Semi-automatic cross-day ROI registration for calcium imaging data
+% processed through Suite2P (written by Marius Pachitariu). For more
+% information see readme.
+%
+% Written by Henry Dalgleish 2017.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function varargout = registers2p(varargin)
 % REGISTERS2P MATLAB code for registers2p.fig
 %      REGISTERS2P, by itself, creates a new REGISTERS2P or raises the existing
@@ -22,7 +32,7 @@ function varargout = registers2p(varargin)
 
 % Edit the above text to modify the response to help registers2p
 
-% Last Modified by GUIDE v2.5 26-May-2017 15:46:35
+% Last Modified by GUIDE v2.5 09-Aug-2017 16:56:55
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -54,6 +64,7 @@ function registers2p_OpeningFcn(hObject, eventdata, handles, varargin)
 
 % Choose default command line output for registers2p
 handles.output = hObject;
+addlistener(handles.contrast_slider,'ContinuousValueChange',@(hObject, event) adjust_contrast(hObject, event));
 num_ims = 2;
 handles.image_display = [];
 handles.roi_display = [];
@@ -75,7 +86,7 @@ handles.mask_field_nums = cellfun(@(x) str2num(x(strfind(x,'text')+4:end)),handl
 for i = 1:num_ims
     handles.files(i).filepath = [];
     % Variables
-    handles.files(i).num_masks = 5;
+    handles.files(i).num_masks = 6;
     handles.files(i).image{1} = zeros(512,512,handles.files(i).num_masks);
     handles.files(i).image{2} = handles.files(i).image{1};
     handles.files(i).dims = size(handles.files(i).image{1});
@@ -380,11 +391,25 @@ function register_button_Callback(hObject, eventdata, handles)
 if handles.files(1).loaded && handles.files(2).loaded 
     order = handles.tform_direction+1;
     moving_im  = double(handles.files(order(2)).default_image{handles.proc_flag}(:,:,handles.displayed_mask));
+    moving_lims = handles.files(order(2)).lims{handles.proc_flag}(handles.displayed_mask,:);
+    moving_im(moving_im>moving_lims(2)) = moving_lims(2);
+    moving_im(moving_im<moving_lims(1)) = moving_lims(1);
+    moving_im = moving_im-min(moving_im(:));
+    moving_im = moving_im ./ max(moving_im(:));
+    moving_im = uint8(moving_im*255);
+    
     static_im = double(handles.files(order(1)).default_image{handles.proc_flag}(:,:,handles.displayed_mask));
-    moving_im = moving_im - min(moving_im(:));
-    static_im = static_im - min(static_im(:));
-    moving_im  = uint8(moving_im/max(max(moving_im))*255);
-    static_im = uint8(static_im/max(max(static_im))*255);
+    static_lims = handles.files(order(1)).lims{handles.proc_flag}(handles.displayed_mask,:);
+    static_im(static_im>static_lims(2)) = static_lims(2);
+    static_im(static_im<static_lims(1)) = static_lims(1);
+    static_im = static_im-min(static_im(:));
+    static_im = static_im ./ max(static_im(:));
+    static_im = uint8(static_im*255);
+    
+    %moving_im = moving_im - min(moving_im(:));
+    %static_im = static_im - min(static_im(:));
+    %moving_im  = uint8(moving_im/max(max(moving_im))*255);
+    %static_im = uint8(static_im/max(max(static_im))*255);
     
     [movingPoints, fixedPoints] = cpselect(moving_im, static_im, 'wait',true);
     if ~isempty(movingPoints) && ~isempty(fixedPoints)
@@ -678,6 +703,29 @@ guidata(hObject,handles)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CustomFunctions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+function handles = adjust_contrast(hObject,event);
+handles = guidata(hObject);
+if handles.im_flag
+    max_cont = 10;
+    slid_cont = hObject.Value;
+    if slid_cont == 0
+        slid_cont = 0.001;
+    elseif slid_cont == 1
+        slid_cont = 0.999;
+    end
+    cont = max_cont * (1-slid_cont);
+    handles.files(handles.displayed_image).lims{handles.proc_flag}(handles.displayed_mask,:) ...
+        = get_lims(handles.files(handles.displayed_image).image{handles.proc_flag}(:,:,handles.displayed_mask),cont);
+    handles.image_display.Parent.CLim = handles.files(handles.displayed_image).lims{handles.proc_flag}(handles.displayed_mask,:);
+end
+guidata(hObject,handles)
+
+function lims = get_lims(I,cont)
+mu = median(I(:));
+sd1 = mean(abs(I(I<mu+1e-7) - mu));
+sd2 = 1e-7 + mean(abs(I(I>mu-1e-7) - mu));
+lims = mu + cont*[-sd1 sd2];
+
 function handles = load_s2p_struct(hObject,handles,idx)
 [f,d] = uigetfile('*.*');
 if f~=0
@@ -694,9 +742,11 @@ if f~=0
                 handles.files(idx).dims = size(dat.ops.mimg1);
                 handles.files(idx).dims = handles.files(idx).dims(1:2);
                 %handles.files(idx).num_masks = size(dat.mimg,3);
-                handles.files(idx).num_masks = 5;
+                handles.files(idx).num_masks = 6;
                 handles.files(idx).image{1} = zeros(handles.files(idx).dims(1),handles.files(idx).dims(2),handles.files(idx).num_masks);
                 handles.files(idx).image{2} = zeros(handles.files(idx).dims(1),handles.files(idx).dims(2),handles.files(idx).num_masks);
+                handles.files(idx).lims{1} = zeros(handles.files(idx).num_masks,2);
+                handles.files(idx).lims{2} = zeros(handles.files(idx).num_masks,2);
                 
                 [xx,yy] = meshgrid(dat.ops.xrange,dat.ops.yrange);
                 im_idcs = sub2ind(size(handles.files(idx).image{1}(:,:,1)),yy,xx);
@@ -711,22 +761,38 @@ if f~=0
                 i = 1;
                 handles.files(idx).image{1}(im_idcs + ((i-1)*pixels_per_im)) = dat.mimg(:,:,2);
                 handles.files(idx).image{2}(im_idcs + ((i-1)*pixels_per_im)) = dat.mimg_proc(:,:,2);
+                handles.files(idx).lims{1}(i,:) = get_lims(dat.mimg(:,:,2),5);
+                handles.files(idx).lims{2}(i,:) = get_lims(dat.mimg_proc(:,:,2),5);
                 % corr im
                 i = 2;
                 handles.files(idx).image{1}(im_idcs + ((i-1)*pixels_per_im)) = dat.mimg(:,:,5);
                 handles.files(idx).image{2}(im_idcs + ((i-1)*pixels_per_im)) = dat.mimg_proc(:,:,5);
+                handles.files(idx).lims{1}(i,:) = get_lims(dat.mimg(:,:,5),5);
+                handles.files(idx).lims{2}(i,:) = get_lims(dat.mimg_proc(:,:,5),5);
                 % sd im
                 i = 3;
                 handles.files(idx).image{1}(im_idcs + ((i-1)*pixels_per_im)) = dat.ops.sdmov;
                 handles.files(idx).image{2}(im_idcs + ((i-1)*pixels_per_im)) = dat.ops.sdmov;
+                handles.files(idx).lims{1}(i,:) = get_lims(dat.ops.sdmov,5);
+                handles.files(idx).lims{2}(i,:) = get_lims(dat.ops.sdmov,5);
                 % corr im
                 i = 4;
                 handles.files(idx).image{1}(im_idcs + ((i-1)*pixels_per_im)) = dat.res.iclust;
                 handles.files(idx).image{2}(im_idcs + ((i-1)*pixels_per_im)) = dat.res.iclust;
+                handles.files(idx).lims{1}(i,:) = [min(dat.res.iclust(:)) max(dat.res.iclust(:))];
+                handles.files(idx).lims{2}(i,:) = [min(dat.res.iclust(:)) max(dat.res.iclust(:))];
                 % skewness im
                 i = 5;
                 handles.files(idx).image{1}(im_idcs + ((i-1)*pixels_per_im)) = dat.res.lambda;
                 handles.files(idx).image{2}(im_idcs + ((i-1)*pixels_per_im)) = dat.res.lambda0;
+                handles.files(idx).lims{1}(i,:) = get_lims(dat.res.lambda,5);
+                handles.files(idx).lims{2}(i,:) = get_lims(dat.res.lambda0,5);
+                % red im
+                i = 6;
+                handles.files(idx).image{1}(im_idcs + ((i-1)*pixels_per_im)) = dat.mimg(:,:,3);
+                handles.files(idx).image{2}(im_idcs + ((i-1)*pixels_per_im)) = dat.mimg_proc(:,:,3);
+                handles.files(idx).lims{1}(i,:) = get_lims(dat.mimg(:,:,3),5);
+                handles.files(idx).lims{2}(i,:) = get_lims(dat.mimg_proc(:,:,3),5);
                 
                 handles.files(idx).default_image = handles.files(idx).image;
                 
@@ -1012,7 +1078,8 @@ if ~isempty(handles.files(handles.displayed_image).image)
         handles.image_display.CData = handles.files(handles.displayed_image).image{handles.proc_flag}(:,:,handles.displayed_mask);
         lims = [min(handles.image_display.CData(:)) max(handles.image_display.CData(:))];
         if lims(1) ~= lims(2)
-            handles.image_display.Parent.CLim = [min(handles.image_display.CData(:)) max(handles.image_display.CData(:))];
+            %handles.image_display.Parent.CLim = [min(handles.image_display.CData(:)) max(handles.image_display.CData(:))];
+            handles.image_display.Parent.CLim = handles.files(handles.displayed_image).lims{handles.proc_flag}(handles.displayed_mask,:);
         else
             handles.image_display.Parent.CLim = [lims(1)-1 lims(1)+1];
         end
@@ -1496,6 +1563,14 @@ if d ~= 0
     else
         sprintf(['Error loading session'])
     end
+    
+    for i = 1:numel(handles.files)
+        for j = 1:numel(handles.files(i).image,3)
+            handles.files(i).lims{1}(j,:) = get_lims(handles.files(i).image{1}(:,:,j),5);
+            handles.files(i).lims{2}(j,:) = get_lims(handles.files(i).image{2}(:,:,j),5);
+        end
+    end
+    
     [handles] = reset_targets(hObject,handles);
     initialize_displays(hObject,handles)
     update_displays(hObject,handles);
@@ -1666,3 +1741,37 @@ function target_overlap_threshold_input_ButtonDownFcn(hObject, eventdata, handle
 % hObject    handle to target_overlap_threshold_input (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on slider movement.
+function contrast_slider_Callback(hObject, eventdata, handles)
+% hObject    handle to contrast_slider (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+
+
+% --- Executes during object creation, after setting all properties.
+function contrast_slider_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to contrast_slider (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+set(hObject,'Value',0.5)
+
+
+% --- Executes on key press with focus on contrast_slider and none of its controls.
+function contrast_slider_KeyPressFcn(hObject, eventdata, handles)
+% hObject    handle to contrast_slider (see GCBO)
+% eventdata  structure with the following fields (see MATLAB.UI.CONTROL.UICONTROL)
+%	Key: name of the key that was pressed, in lower case
+%	Character: character interpretation of the key(s) that was pressed
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% handles    structure with handles and user data (see GUIDATA)
+figure1_KeyPressFcn(hObject, eventdata, handles)

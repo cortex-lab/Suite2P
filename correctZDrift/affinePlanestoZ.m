@@ -4,6 +4,23 @@
 % Zpatch are z-stack patches aligned to mean images Bimg using PtoZ
 function [PtoZ, A0, Zpatch, Bimg] = affinePlanestoZ(ops)
 
+% discard first plane from multi-plane imaging (flyback)
+if ops.nplanes > 1
+    wpl = 2:ops.nplanes;
+else
+    wpl = 1;
+end
+
+%% load mean planes from suite2p files
+clear Bimg;
+for ipl = wpl
+    planefile = sprintf('%s/F_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
+        ops.mouse_name, ops.date, ipl);
+    dat = load(planefile);
+    Bimg{ipl} = dat.ops.mimg1(dat.ops.yrange, dat.ops.xrange);
+end
+
+%% load z-stack
 zfile = sprintf('%s/stack_%s_%s.mat', ops.ZstackSavePath, ops.mouse_name, ops.date);
 load(zfile);
 
@@ -21,28 +38,18 @@ if ops.Zzoom ~= ops.zoom
     for j = 1:size(A,3)
         Aq(:,:,j) = interp2(x,y,A(:,:,j),xq,yq);
     end
+    Ly = dat.ops.Ly;
+    Lx = dat.ops.Lx;
+    ry = -floor(Ly/2) + floor(size(Aq,1)/2);
+    rx = -floor(Lx/2) + floor(size(Aq,2)/2);
+    Aq = Aq(ry+[1:Ly], rx+[1:Lx],:);
+    
 else
     Aq = A;
 end
 % Aq at same zoom as planes
 
-% discard first plane from multi-plane imaging (flyback)
-if ops.nplanes > 1
-    wpl = 2:ops.nplanes;
-else
-    wpl = 1;
-end
-
-% load mean planes from suite2p files
-clear Bimg;
-for ipl = wpl
-    planefile = sprintf('%s/F_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
-        ops.mouse_name, ops.date, ipl);
-    dat = load(planefile);
-    Bimg{ipl} = dat.ops.mimg1(dat.ops.yrange, dat.ops.xrange);
-end
-
-% approx angle between z-stack and planes
+%% approx angle between z-stack and planes
 % default is ratio between number of planes in z-stack vs imaging
 % angle in radians
 if numel(wpl) > 1
@@ -51,8 +58,9 @@ else
     ang = 0;
 end
 
+%%
 [cx1, ix1, cZ1] = ZtoPlanes(Aq, Bimg, ang, ops.useGPU);
-
+cx1
 % use Z-positions of these planes to initialize affine transformation
 
 %% which of these planes are in z-stack?
@@ -189,6 +197,7 @@ end
 
 % check out aligned images
 for iplane = ipl
+    %%
     Taff   = PtoZ{iplane};
     Bi     = Bimg{iplane};
     
