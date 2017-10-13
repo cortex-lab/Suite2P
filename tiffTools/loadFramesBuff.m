@@ -5,7 +5,7 @@ function [frames, headers] = loadFramesBuff(tiff, firstIdx, lastIdx, stride, tem
 %   or an already open Tiff object. Optionallly FIRST, LAST and STRIDE
 %   specify the range of frame indices to load.
 
-if nargin>4
+if nargin>4 && ~isempty(temp_file)
     if ~isequal(tiff, temp_file) % do not copy if already copied
         % in case copying fails (server hangs)
         iscopied = 0;

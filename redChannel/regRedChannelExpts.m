@@ -90,7 +90,7 @@ for k = 1:length(fs)
                 mimgR(:,:,iplane) = mimgR(:,:,iplane) + mean(dreg, 3);            
             end
             ntf0 = ntf0 + 1;
-            disp(ntf0);
+%             disp(ntf0);
         end
     end
 end

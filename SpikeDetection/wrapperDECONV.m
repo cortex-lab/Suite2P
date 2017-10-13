@@ -1,27 +1,34 @@
 function [sp, ca, coefs, B, sd, ops, baselines] = wrapperDECONV(ops, F, N)
 
-% maximum neuropil coefficient
-ops.maxNeurop = getOr(ops, 'maxNeurop', 1);
-
-if getOr(ops, 'estimateNeuropil', 0)
-    niter = 10;
-else
-    niter = 1;
-end
-
 sd = std(F,1,1);
 F = bsxfun(@rdivide, F, sd);
 [NT, NN] = size(F);
 
-if nargin>2
-    N = bsxfun(@rdivide, N, sd);
-    N(:, isnan(sum(F,1))) = nanmean(N,2) * ones(1,sum(isnan(sum(F,1))));
-    F(:, isnan(sum(F,1))) = nanmean(F,2) * ones(1,sum(isnan(sum(F,1))));    
+% maximum neuropil coefficient
+ops.maxNeurop = getOr(ops, 'maxNeurop', 1);
+
+runBaseSave = getOr(ops, 'runningBaseline', 0);
+
+if nargin<=2
+   ops.estimateNeuropil = 0;
+end
+if getOr(ops, 'estimateNeuropil', 0)
+    niter = 5;    
+    ops.runningBaseline = 0;    
 else
     niter = 1;
 end
 
-coefs   = min(.7, ops.maxNeurop) * ones(1, NN);
+F(:, isnan(sum(F,1))) = nanmean(F,2) * ones(1,sum(isnan(sum(F,1))));    
+if nargin>2
+    N = bsxfun(@rdivide, N, sd);
+    N(:, isnan(sum(F,1))) = nanmean(N,2) * ones(1,sum(isnan(sum(F,1))));    
+else
+    niter = 1;
+end
+
+coefs   = min(.8, ops.maxNeurop) * ones(1, NN);
+% coefs(:) = .7;
 B       = zeros(2, NN);
 
 
@@ -40,14 +47,14 @@ for k = 1:niter
                warning('Refer to instructions at top of example master file for more help.')
                error('OASIS not found.')
             end
-            [sp, ca, sd2] = OASISpreprocess(ops,  Fsub);
+            [sp, ca, sd2, Fbase] = OASISpreprocess(ops,  Fsub);
         case 'L0'
             [sp, ca, sd2] = deconvolution_standalone(ops, Fsub);
         otherwise
             error('Please choose deconvolution method as OASIS or L0')
     end
     
-    if niter>1
+    if niter>1 && k<niter
         Y = F - ca;
         
         % given the spike trace, infer the baseline and the neuropil contribution
@@ -60,14 +67,17 @@ for k = 1:niter
         
         B(isnan(B)) = 1;
         coefs       = min(B(2,:), ops.maxNeurop);
-        
-%         mean(coefs)
+        coefs       = max(0, coefs);
+       
+        disp([median(coefs) std(coefs(:))])
     end
 end
 
 % rescale the calcium and deconvolved
 ca = bsxfun(@times, ca, sd);
 sp = bsxfun(@times, sp, sd);
-baselines = bsxfun(@times, B(1,:), sd);
+baselines = bsxfun(@times, mean(Fbase,1), sd);
 
 sd = sd.*sd2;
+
+ops.runningBaseline = runBaseSave;

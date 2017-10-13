@@ -1,4 +1,4 @@
-function [sp, ca, sd, F1] = OASISpreprocess(ops, ca, neu, gt)
+function [sp, ca, sd, F1, Fbase] = OASISpreprocess(ops, ca, neu, gt)
 % takes as input the calcium and (optionally) neuropil traces,  
 % both NT by NN (number of neurons).
 
@@ -24,27 +24,38 @@ end
 [NT , ~] = size(ca);
 
 % determine and subtract the running baseline
-if getOr(ops, 'runningBaseline', 0)
-    Fbase    = ca;
-    NT      = size(Fbase,1);
-    ntBase  = 2*ceil(ops.running_baseline * ops.fs/2)+1;
-    Fbase    = cat(1, Fbase((ntBase-1)/2:-1:1, :), Fbase, Fbase(end:-1:end-(ntBase-1)/2, :));
-    Fbase   = my_conv2(Fbase, 3, 1); % medfilt1(Fneu(:), 5);
-    Fbase   = ordfilt2(Fbase, 1, true(ntBase,1));
-    
-    Fbase = Fbase((ntBase-1)/2 + [1:NT], :);
-    
-%     y = Fneu - Fbase;    
-elseif getOr(ops, 'doBaseline', 1)
-    Fsort       = my_conv2(ca, ceil(ops.fs), 1);
-    Fsort       = sort(Fsort, 1, 'ascend');
-    baselines   = Fsort(ceil(NT/20), :);
-    Fbase   = bsxfun(@times, ones(NT,1), baselines);
-else
-    Fbase = zeros(size(ca));
-end
+Fbase = zeros(size(ca), 'single');
 
-F1 = ca - Fbase;
+if getOr(ops, 'runningBaseline', 0)   
+    Fbase    = ca;
+    if getOr(ops, 'zBaseline', 0)    
+        [~, ix] = sort(ops.zdrift);
+        Fbase = Fbase(ix, :);
+    end
+    
+    ntBase  = 2*ceil(ops.runningBaseline * ops.fs/2)+1;
+    Fbase   = cat(1, Fbase((ntBase-1)/2:-1:1, :), Fbase, Fbase(end:-1:end-(ntBase-1)/2, :));
+        
+    Fbase   = my_conv2(Fbase, 1, 1); 
+    Fbase   = movmin(Fbase, ntBase,1);
+    Fbase   = movmax(Fbase, ntBase,1);
+    
+    Fbase = Fbase((ntBase-1)/2 + [1:NT], :);    
+    
+    if getOr(ops, 'zBaseline', 0)
+        Fbase(ix,:) = Fbase;     
+    end
+end
+F1          = ca - Fbase;
+
+% Fsort       = my_conv2(F1, ceil(ops.fs), 1);
+% Fsort       = sort(Fsort, 1, 'ascend');
+% baselines   = Fsort(ceil(NT/20), :);
+% Fbase2      = bsxfun(@times, ones(NT,1), baselines);
+% F1          = F1 - Fbase2;
+% Fbase       = Fbase + Fbase2; 
+
+% F1         = F1./max(std(F1,1,1), Fbase);
 
 % normalize signal
 sd   = 1/sqrt(2) * std(F1(2:end, :) - F1(1:end-1, :), [], 1);
@@ -124,6 +135,11 @@ end
 ca   = bsxfun(@times, ca, sd);
 sp   = bsxfun(@times, sp, sd);
 F1   = bsxfun(@times, F1, sd);
+
+if getOr(ops, 'zBaseline', 0)
+%     ca   = ca.*Fbase;
+    ca = ca + Fbase;
+end
 
 end
 

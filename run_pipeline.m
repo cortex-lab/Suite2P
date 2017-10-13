@@ -73,24 +73,25 @@ for i = [1:numel(ops1)] %[1:2 4:numel(ops1)]
         continue;
     end
     
-    if getOr(ops, {'getSVDcomps'}, 0)
+    if getOr(ops0, {'getSVDcomps'}, 0)
         % extract and write to disk SVD comps (raw data)
         ops    = get_svdcomps(ops);
     end
         
-    if ops.getROIs
+    if ops0.getROIs
         % get sources in stat, and clustering images in res
         [ops, stat, model]           = sourcery(ops);
 
+        figure(10); clf;
+
         % extract dF
-        %         ops.signalExtraction = 'surround';
-        switch getOr(ops, 'signalExtraction', 'surround')
+        switch getOr(ops0, 'signalExtraction', 'surround')
             case 'raw'
                 [ops, stat, Fcell, FcellNeu] = extractSignalsNoOverlaps(ops, model, stat);
             case 'regression'
                 [ops, stat, Fcell, FcellNeu] = extractSignals(ops, model, stat);
             case 'surround'
-                [ops, stat, Fcell, FcellNeu] = extractSignalsSurroundNeuropil(ops, stat);
+                [ops, stat, Fcell, FcellNeu] = extractSignalsSurroundNeuropil2(ops, stat);
         end
         
         % apply user-specific clustrules to infer stat.iscell
@@ -101,10 +102,9 @@ for i = [1:numel(ops1)] %[1:2 4:numel(ops1)]
             'Fcell', 'FcellNeu', '-v7.3')
     end
 
-    
-    if ops.DeleteBin
-        fclose('all');
-        delete(ops.RegFile);        % delete temporary bin file
+    fclose('all');
+    if ops0.DeleteBin       
+%         delete(ops.RegFile);        % delete temporary bin file
     end
 end
 

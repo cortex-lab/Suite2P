@@ -143,11 +143,13 @@ for i = 1:numPlanes
         % open bin file for writing
         fid{i,j}              = fopen(ops1{i,j}.RegFile, 'w');
         
-        
-        ops1{i,j}.RegFile2 = fullfile(ops.RegFileRoot, ...
-            sprintf('%s_%s_%s_plane%d_RED.bin', ops.mouse_name, ops.date, ...
-            ops.CharSubDirs, i + (j-1)*numPlanes));
-%         fidRED{i,j}              = fopen(ops1{i,j}.RegFile2, 'w');
+        if getOr(ops, 'REDbinary', 0)
+            ops1{i,j}.RegFile2 = fullfile(ops.RegFileRoot, ...
+                sprintf('%s_%s_%s_plane%d_RED.bin', ops.mouse_name, ops.date, ...
+                ops.CharSubDirs, i + (j-1)*numPlanes));
+            fidRED{i,j}              = fopen(ops1{i,j}.RegFile2, 'w');
+            ops1{i,j}.mimgRED       = zeros(ops1{i,j}.Ly, ops1{i,j}.Lx);
+        end
         
         ops1{i,j}.DS          = [];
         ops1{i,j}.CorrFrame   = [];
@@ -232,10 +234,12 @@ for k = 1:length(fs)
                 % align the frames according to the registration offsets
                 dreg = RegMovie(data, ops1, dsall, yFOVs, xFOVs);
                 
-%                 ichanset = [rchannel; nFr; nchannels_expt];
-%                 data = loadFramesBuff(ops.temp_tiff, ichanset(1), ichanset(2), ichanset(3));
-%                 data = ShiftBiDi(BiDiPhase, data, Ly, Lx);
-%                 dreg2 = RegMovie(data, ops1, dsall, yFOVs, xFOVs);
+                if getOr(ops, 'REDbinary', 0)
+                    ichanset = [rchannel; nFr; nchannels_expt];
+                    data = loadFramesBuff(ops.temp_tiff, ichanset(1), ichanset(2), ichanset(3));
+                    data = ShiftBiDi(BiDiPhase, data, Ly, Lx);
+                    dreg2 = RegMovie(data, ops1, dsall, yFOVs, xFOVs);
+                end
             end
         else
             dreg = data;
@@ -250,10 +254,13 @@ for k = 1:length(fs)
                     dwrite = dreg(yFOVs(:,l),xFOVs(:,l),indframes);
                     fwrite(fid{i,l}, dwrite, class(data));
                     
-%                     dwrite = dreg2(yFOVs(:,l),xFOVs(:,l),indframes);
-%                     fwrite(fidRED{i,l}, dwrite, class(data));
-                    
                     ops1{i,l}.mimg1 = ops1{i,l}.mimg1 + sum(dwrite,3);
+                    
+                    if getOr(ops, 'REDbinary', 0)
+                        dwrite = dreg2(yFOVs(:,l),xFOVs(:,l),indframes);
+                        fwrite(fidRED{i,l}, dwrite, class(data));
+                        ops1{i,l}.mimgRED = ops1{i,l}.mimgRED + sum(dwrite,3);
+                    end
                 end
             end
         end
@@ -272,7 +279,9 @@ end
 
 for i = 1:numel(ops1)
     ops1{i}.mimg1 = ops1{i}.mimg1/sum(ops1{i}.Nframes);
-    
+    if getOr(ops, 'REDbinary', 0)
+        ops1{i}.mimgRED = ops1{i}.mimgRED/sum(ops1{i}.Nframes);
+    end
     ops1{i}.badframes = false(1, size(ops1{i}.DS,1));
     if isfield(ops, 'badframes0') && ~isempty(ops.badframes0)
         ops1{i}.badframes(ops.badframes0) = true;
@@ -285,7 +294,9 @@ for i = 1:numel(ops1)
     fclose(fid{i});
     
     fid{i}           = fopen(ops1{i}.RegFile, 'r');
-    
+    if getOr(ops, 'REDbinary', 0)
+        fidRED{i}           = fopen(ops1{i}.RegFile, 'r');
+    end
     if ~isempty(ops.RegFileTiffLocation)
         ops1{i} = write_reg_to_tiff(fid{i}, ops1{i}, i);
         frewind(fid{i});

@@ -2,7 +2,7 @@
 % by default it optimizes the neuropil coefficients
 % max neuropil coefficients set in ops.maxNeurop
 
-function add_deconvolution(ops, db)
+function add_deconvolution(ops, db, iplane0)
 ops = build_ops3(db, ops);
 ops0 = ops;
 
@@ -11,8 +11,8 @@ ops0 = ops;
 
 % warning: ops0.imageRate now represents the TOTAL frame rate of the recording over all planes. This warning will be disabled in a future version.
 
-for i = 1:length(ops.planesToProcess)    
-    iplane  = ops.planesToProcess(i);
+for i =  1:length(ops.planesToProcess)    
+    iplane  = ops0.planesToProcess(i);
     
     fpath = sprintf('%s/F_%s_%s_plane%d_proc.mat', ops.ResultsSavePath, ...
         ops.mouse_name, ops.date, iplane);
@@ -30,17 +30,16 @@ for i = 1:length(ops.planesToProcess)
     
     % if z-drift computed, apply correction
     for j = 1:length(dat.Fcell)
-        if isfield(dat, 'FcellZ')
-            Fcell{j}    = dat.Fcell{j} - dat.FcellZ{j};
-            FcellNeu{j} = dat.FcellNeu{j} - dat.FcellNeuZ{j};
-        else
-            Fcell{j}    = dat.Fcell{j};
-            FcellNeu{j} = dat.FcellNeu{j};
-        end
+        Fcell{j}    = dat.Fcell{j};
+        FcellNeu{j} = dat.FcellNeu{j};
     end
     
     % overwrite fields of ops with those saved to file
-    ops = addfields(ops, dat.ops);
+    if getOr(ops, 'newops', 0)
+        ops = addfields(dat.ops, ops0); % overwrite saved ops with new
+    else
+        ops = addfields(ops0, dat.ops);% overwrite new ops with saved
+    end
     
     % set up options for deconvolution
     ops.imageRate    = getOr(ops0, {'imageRate'}, 30); % total image rate (over all planes)
@@ -63,9 +62,16 @@ for i = 1:length(ops.planesToProcess)
     
     ops.fs                  = ops.imageRate/ops.nplanes;
     ops.estimateNeuropil    = getOr(ops0, 'estimateNeuropil', 1);
-    ops.runningBaseline     = 0;
 
-    [sp, ~, coefs,~, sd, ops, baselines] = wrapperDECONV(ops, Ff, Fneu);
+    if ops.estimateNeuropil
+        [sp, ~, coefs,~, sd, ops, baselines] = wrapperDECONV(ops, Ff, Fneu);
+    else
+        if isfield(dat.stat, 'neuropilCoefficient')
+            coefs = [dat.stat.neuropilCoefficient];
+        else
+            coefs = .8 * ones(size(Ff,2), 1);
+        end
+    end
     
     if ops.deconvNeuropil
         ops.estimateNeuropil = 0;
@@ -75,6 +81,19 @@ for i = 1:length(ops.planesToProcess)
     stat = dat.stat;
     for j = 1:size(Ff,2)
         stat(j).neuropilCoefficient = coefs(j);
+    end
+    
+    ops.SpkDcnvAlignToPlane = getOr(ops, 'SpkDcnvAlignToPlane', 0);
+    if getOr(ops, 'runningBaseline', 0)
+        Ff = Ff - bsxfun(@times, Fneu, [stat.neuropilCoefficient]);
+        if ops.SpkDcnvAlignToPlane
+            ds = (ops.SpkDcnvAlignToPlane - iplane)/ops.nplanes;
+            Ff    = register_F(Ff, ds);
+        end
+        [sp, ~, ~,~, sd, ops, baselines] = wrapperDECONV(ops, Ff);
+    end
+    
+    for j = 1:size(Ff,2)
         stat(j).noiseLevel          = sd(j);  
         stat(j).baseline           = baselines(j);
     end

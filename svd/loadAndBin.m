@@ -19,7 +19,7 @@ while 1
     
     % ignore bad frames
     badi = ops.badframes(ix + [1:size(data,3)]);
-    data(:,:, badi) = [];
+%     data(:,:, badi) = [];
     
     % subtract off the mean of this batch
     if nargin<=5
