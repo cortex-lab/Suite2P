@@ -6,7 +6,7 @@ Algorithmic details in [http://biorxiv.org/content/early/2016/06/30/061507](http
 
 [![IMG](https://img.youtube.com/vi/xr-flH2Ow2Y/0.jpg)](https://www.youtube.com/watch?v=xr-flH2Ow2Y)
 
-This code was written by Marius Pachitariu and members of the cortexlab (Kenneth Harris and Matteo Carandini). It is provided here with no warranty. For support, please open an issue directly on github. 
+This code was written by Marius Pachitariu and members of the cortexlab (Kenneth Harris and Matteo Carandini). It is provided here with no warranty. For support, please open an issue directly on github. An example dataset is provided [here](https://drive.google.com/open?id=0B649boZqpYG1amlyX015SG12VU0).
 
 # I. Introduction
 
