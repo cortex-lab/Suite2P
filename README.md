@@ -6,7 +6,7 @@ Algorithmic details in [http://biorxiv.org/content/early/2016/06/30/061507](http
 
 [![IMG](https://img.youtube.com/vi/xr-flH2Ow2Y/0.jpg)](https://www.youtube.com/watch?v=xr-flH2Ow2Y)
 
-This code was written by Marius Pachitariu and members of the cortexlab (Kenneth Harris and Matteo Carandini). It is provided here with no warranty. For support, please open an issue directly on github. 
+This code was written by Marius Pachitariu and members of the cortexlab (Kenneth Harris and Matteo Carandini). It is provided here with no warranty. For support, please open an issue directly on github. An example dataset is provided [here](https://drive.google.com/open?id=0B649boZqpYG1amlyX015SG12VU0).
 
 # I. Introduction
 
@@ -65,8 +65,9 @@ For L0 spike deconvolution, you need to run mex -largeArrayDims SpikeDetection/d
 ```
 ops0.deconvType = 'L0';
 ```
+See this paper comparing spike deconvolution methods for more information on choosing deconvolution methods/parameters: http://www.biorxiv.org/content/early/2017/06/27/156786
 
-See this paper comparing spike deconvolution methods for more information: http://www.biorxiv.org/content/early/2017/06/27/156786
+You can also run spike deconvolution without running the entire pipeline by calling wrapperDECONV(ops,F,N), where F and N are the fluorescence and neuropil traces respectively, while ops specifies some deconvolution parameters like sampling rate and sensory decay timescale. See the function help for more information.
 
 ----------
 Below we describe the outputs of the pipeline first, and then describe the options for setting it up, and customizing it. Importantly, almost all options have pre-specified defaults. Any options specified in master_file in ops0 overrides these defaults. Furthermore, any option specified in the make_db file (experiment specific) overrides both the defaults and the options set in master_file. This allows for flexibility in processing different experiments with different options. The only critical option that you'll need to set is ops0.diameter, or db(N).diameter. This gives the algorithm the scale of the recording, and the size of ROIs you are trying to extract. We recommend as a first run to try the pipeline after setting the diameter option. Depending on the results, you can come back and try changing some of the other options.  
