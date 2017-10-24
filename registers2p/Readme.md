@@ -4,6 +4,8 @@
 
 Allows users to import two Suite2P output structures (F...proc.mat files) generated from a single FOV across 2 time-points (e.g. > 1 day) and semi-automatically register the two images of the FOV and the corresponding Suite2P ROIs. It also has the optional functionality of loading in user-defined target centroids which can then be mapped onto Suite2P ROIs (and overlapped across days). Allows quick and easy manual curation of overlaps. Use cat_overlap.m function provided to daisy-chain registered ROIs recorded at multiple time-points which have all been registered to one reference time-point.
 
+NB: requires MATLAB 2016a or later (using earlier versions will result in errors with the image/imagesc function).
+
 Written by Henry Dalgleish 2017 (hwpdalgleish@gmail.com, https://github.com/hwpdalgleish)
 
 ---
