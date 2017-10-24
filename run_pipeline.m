@@ -104,7 +104,7 @@ for i = [1:numel(ops1)] %[1:2 4:numel(ops1)]
 
     fclose('all');
     if ops0.DeleteBin       
-%         delete(ops.RegFile);        % delete temporary bin file
+         delete(ops.RegFile);        % delete temporary bin file
     end
 end
 
