@@ -205,11 +205,11 @@ Options are
 The Suite2p classifier uses a number of features of each ROI to assign cell labels to ROIs. The classifier uses a naive Bayes approach for each feature, and models the distribution of each feature with a non-parametric, adaptively binned empirical distribution. The classifier is initialized with some standard distributions for these features, but is updated continuously with new data samples as the user refines the output manually in the GUI. 
 
 The features used are the following (can see values for each ROI by selecting it in the GUI). 
-* std --- standard deviation of the cell trace, normalized to the size of the neuropil trace  
-* skew --- skewness of the neuropil-subtracted cell trace  
-* pct --- mean distance of pixels from ROI center, normalized to the same measuree for a perfect disk  
-* footprint --- spatial extent of correlation between ROI trace and nearby pixels  
-* mimgProjAbs --- whether this ROI shape is correlated to the shape on the mean image  
-* aspect_ratio --- of an ellipse fit to the ROI  
+* std = standard deviation of the cell trace, normalized to the size of the neuropil trace  
+* skew = skewness of the neuropil-subtracted cell trace  
+* pct = mean distance of pixels from ROI center, normalized to the same measuree for a perfect disk  
+* footprint = spatial extent of correlation between ROI trace and nearby pixels  
+* mimgProjAbs = whether this ROI shape is correlated to the shape on the mean image  
+* aspect_ratio = of an ellipse fit to the ROI  
 
 
