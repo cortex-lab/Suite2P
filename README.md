@@ -163,17 +163,32 @@ BiDiPhase --- value of bidirectional phase offset to use for computation (will n
 ### Recordings with red channel
 
 AlignToRedChannel --- perform registration to red channel (non-functional channel) rather than green channel
-*** this assumes that you have a red channel for all recordings in db.expts
+*** this assumes that you have a red channel for all recordings in db.expts ***
 
 redMeanImg --- compute mean image of red channel from experiments with red and green channel (if db.expred is not empty)
-*** you do not need to have a red channel for all db.expts, computes only from db.expred
+*** you do not need to have a red channel for all db.expts, computes only from db.expred ***
 
 REDbinary --- compute a binary file of the red channel (like the green channel binary)
 
-ops.mimgRED contains mean image (if AlignToRedChannel, redMeanImg or REDbinary = 1)
+output ops.mimgRED will contain mean image (if AlignToRedChannel, redMeanImg or REDbinary = 1)
 
+### Identifying red cells
 
+use function `identify_redcells_sourcery(db, ops0)` to identify cells with red
 
+Outputs are
+
+redratio = red pixels inside / red pixels outside
+
+redcell = redratio > mean(redratio) + redthres*std(redratio)
+
+notred = redratio < mean(redratio) + redmax*std(redratio)
+
+Options are 
+
+redthres  --- higher thres means fewer red cells (default 1.35)
+
+redmax --- the higher the max the more NON-red cells (default 1)
 
 ### Cell detection
 
@@ -208,8 +223,6 @@ ops.innerNeuropil --- padding in pixels around cell to exclude from neuropil
 ops.outerNeuropil --- radius of neuropil surround (set to Inf to use ops.ratioNeuropil)
 
 ops.minNeuropilPixels --- minimum number of pixels necessary in neuropil surround
-
-
 
 ### Spike deconvolution 
 
