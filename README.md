@@ -122,14 +122,17 @@ The output is a struct called dat which is saved into a mat file in ResultsSaveP
 ### Registration
 
 * showTargetRegistration --- whether to show an image of the target frame immediately after it is computed. 
-* PhaseCorrelation --- whether to use phase correlation (the alternative is normal cross-correlation).
-* SubPixel --- accuracy level of subpixel registration (10 = 0.1 pixel accuracy)
-* kriging --- compute shifts using kernel regression with a gaussian kernel of width 1 onto a grid of 1/SubPixel
+* PhaseCorrelation --- whether to use phase correlation (default is phase-correlation, if 0 then cross-correlation used).
+* SubPixel --- accuracy level of subpixel registration (default is 10 = 0.1 pixel accuracy)
+* kriging --- compute shifts using kernel regression with a gaussian kernel of width 1 onto a grid of 1/SubPixel (default is kriging = 1)
+* maxregshift --- maximum amount of movement allowed in FOV (default is 10% of max(y pixels, x pixels))
+* maskSlope --- slope on the taper mask applied to image (default is 2 pixel exponential decay)
 * NimgFirstRegistration --- number of randomly sampled images to do the target computation from
 * NiterPrealign --- number of iterations for the target computation (iterative re-alignment of subset of frames)
 * smooth_time_space --- convolves raw movie with a Gaussian of specified size in specified dimensions;
                       [t]: convolve in time with gauss. of std t, [t s]: convolve in time and space,
                       [t x y]: convolve in time, and in space with an ellipse rather than circle
+* nimgbegend --- number of frames over which to average at beginning and end of experiment (if worried about drift) (default is 0 frames)
                       
 **Block Registration (for high zoom/npixels)**
 
@@ -153,6 +156,10 @@ The output is a struct called dat which is saved into a mat file in ResultsSaveP
 * REDbinary --- compute a binary file of the red channel (like the green channel binary) from db.expred
 
 output ops.mimgRED will contain mean image (if AlignToRedChannel, redMeanImg or REDbinary = 1)
+
+**Splitting large tiffs if running out of memory (e.g. 2048 x 2048 pixel images)**
+
+* splitFOV --- 1x2 array specifying chunk size in y and x (default is [1 1])
 
 ### Cell detection
 
