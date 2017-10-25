@@ -126,8 +126,6 @@ The output is a struct called dat which is saved into a mat file in ResultsSaveP
 
 ### Registration
 
-AlignToRedChannel --- perform registration to red channel (non-functional channel) rather than green channel
-
 showTargetRegistration --- whether to show an image of the target frame immediately after it is computed. 
 
 PhaseCorrelation --- whether to use phase correlation (the alternative is normal cross-correlation).
@@ -144,11 +142,11 @@ smooth_time_space --- convolves raw movie with a Gaussian of specified size in s
                       [t]: convolve in time with gauss. of std t, [t s]: convolve in time and space,
                       [t x y]: convolve in time, and in space with an ellipse rather than circle
                       
-++ Block Registration (for high zoom/npixels - assumes scanning is in Y direction) ++
+### Block Registration (for high zoom/npixels)
 
 nonrigid --- set to 1 for non-rigid registration (or set numBlocks > 1)
 
-numBlocks --- number of blocks dividing y-dimension of image (default is 6)
+numBlocks --- 1x2 array denoting the number of blocks to divide image in y and x (default is [8 1]) 
 
 blockFrac --- percent of image to use per block (default is 1/(numBlocks-1))
              
@@ -156,7 +154,26 @@ quadBlocks --- interpolate block shifts to single line shifts (6 blocks -> 512 l
 
 smoothBlocks --- if quadBlocks = 0, then smoothBlocks is the standard deviation of the gaussian smoothing kernel
 
-++ Bidirectional scanning issues (frilly cells) taken care of automatically ++
+### Bidirectional scanning issues (frilly cells - default is to correct)
+
+dobidi --- compute bidirectional phase offset from images (default 1)
+
+BiDiPhase --- value of bidirectional phase offset to use for computation (will not compute bidirectional phase offset)
+
+### Recordings with red channel
+
+AlignToRedChannel --- perform registration to red channel (non-functional channel) rather than green channel
+*** this assumes that you have a red channel for all recordings in db.expts
+
+redMeanImg --- compute mean image of red channel from experiments with red and green channel (if db.expred is not empty)
+*** you do not need to have a red channel for all db.expts, computes only from db.expred
+
+REDbinary --- compute a binary file of the red channel (like the green channel binary)
+
+ops.mimgRED contains mean image (if AlignToRedChannel, redMeanImg or REDbinary = 1)
+
+
+
 
 ### Cell detection
 
