@@ -12,19 +12,19 @@ This code was written by Marius Pachitariu and members of the cortexlab (Kenneth
 
 This is a complete, automated pipeline for processing two-photon Calcium imaging recordings. It is simple, fast and yields a large set of active ROIs. A GUI further provides point-and-click capabilities for refining the results in minutes. The pipeline includes the following steps
 
-1. X-Y subpixel registration --- using a modification of the phase correlation algorithm and subpixel translation in the FFT domain. If a GPU is available, this completes in 20 minutes per 1h of recordings at 30Hz and 512x512 resolution.
+1. **X-Y subpixel registration**: using a modification of the phase correlation algorithm and subpixel translation in the FFT domain. If a GPU is available, this completes in 20 minutes per 1h of recordings at 30Hz and 512x512 resolution.
 
-1. SVD decomposition --- this provides the input to cell detection and accelerates the algorithm. 
+1. **SVD decomposition**: this provides the input to cell detection and accelerates the algorithm. 
 
-1. Cell detection --- using clustering methods in a low-dimensional space. The clustering algorithm provides a positive mask for each ROI identified, and allows for overlaps between masks. 
+1. **Cell detection**: using clustering methods in a low-dimensional space. The clustering algorithm provides a positive mask for each ROI identified, and allows for overlaps between masks. There is also an option to perform automated red cell detection.
 
-1. Signal extraction --- by default, all overlapping pixels are discarded when computing the signal inside each ROI, to avoid using "demixing" approaches, which can be biased. The neuropil signal is also computed independently for each ROI, as a weighted pixel average, pooling from a large area around each ROI, but excluding all pixels assigned to ROIs during cell detection. 
+1. **Signal extraction**: by default, all overlapping pixels are discarded when computing the signal inside each ROI, to avoid using "demixing" approaches, which can be biased. The neuropil signal is also computed independently for each ROI, as a weighted pixel average, pooling from a large area around each ROI, but excluding all pixels assigned to ROIs during cell detection. 
 
-1. Automatic and manual curation --- the output of the cell detection algorithm can be visualized and further refined using the included GUI. The GUI is designed to make cell sorting a fun and enjoyable experience. It also includes an automatic classifier that gradually refines itself based on the manual labelling provided by the user. This allows the automated classifier to adapt for different types of data, acquired under different conditions. (*README FOR GUI AT https://github.com/cortex-lab/Suite2P/blob/master/gui2P/README.md*)
+1. **Spike deconvolution**: cell and neuropil traces are further processed to obtain an estimate of spike times and spike "amplitudes". The amplitudes are proportional to the number of spikes in a burst/bin. Even under low SNR conditions, where transients might be hard to identify, the deconvolution is still useful for temporally-localizing responses. The cell traces are baselined using the minimum of the (overly) smoothed trace. 
 
-1. Spike deconvolution --- cell and neuropil traces are further processed to obtain an estimate of spike times and spike "amplitudes". The amplitudes are proportional to the number of spikes in a burst/bin. Even under low SNR conditions, where transients might be hard to identify, the deconvolution is still useful for temporally-localizing responses. The cell traces are baselined using the minimum of the (overly) smoothed trace. 
+1. **Neuropil subtraction**: coefficient is estimated iteratively together with spike deconvolution to minimize the residual of spike deconvolution. The user is encouraged to also try varying this coefficient, to make sure that any scientific results do not depend crucially on it. 
 
-1. Neuropil subtraction --- coefficient is estimated iteratively together with spike deconvolution to minimize the residual of spike deconvolution. The user is encouraged to also try varying this coefficient, to make sure that any scientific results do not depend crucially on it. 
+1. **Automatic and manual curation**: the output of the cell detection algorithm can be visualized and further refined using the included GUI. The GUI is designed to make cell sorting a fun and enjoyable experience. It also includes an automatic classifier that gradually refines itself based on the manual labelling provided by the user. This allows the automated classifier to adapt for different types of data, acquired under different conditions. (*README FOR GUI AT https://github.com/cortex-lab/Suite2P/blob/master/gui2P/README.md*)
 
 
 # II. Getting started
