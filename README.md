@@ -157,8 +157,8 @@ The output is a struct called dat which is saved into a mat file in ResultsSaveP
 
 output ops.mimgRED will contain mean image (if AlignToRedChannel, redMeanImg or REDbinary = 1)
 
-**Splitting large tiffs if running out of memory (e.g. 2048 x 2048 pixel images)**
-
+**Splitting large tiffs for registration if running out of memory (e.g. 2048 x 2048 pixel images)**
+currently only works with rigid registration, where each section of FOV is registered separately
 * splitFOV --- 1x2 array specifying chunk size in y and x (default is [1 1])
 
 ### Cell detection
@@ -167,6 +167,8 @@ output ops.mimgRED will contain mean image (if AlignToRedChannel, redMeanImg or 
 * nSVDforROI --- how many SVD components to keep for clustering. Usually ~ the number of expected cells. 
 * ShowCellMap --- whether to show the clustering results as an image every 10 iterations of the clustering
 * getROIs --- whether to run the ROI detection algorithm after registration
+* stopSourcery --- stop clustering if # of ROIs extracted < (ROIs extracted on iteration 1) x (stopSourcery) (default is 1/10)
+* maxIterRoiDetection --- maximum number of clustering iterations (default is 100)
 
 ### SVD decomposition
 
