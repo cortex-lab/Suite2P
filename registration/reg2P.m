@@ -1,4 +1,4 @@
-%function ops1 = reg2P(ops)
+function ops1 = reg2P(ops)
 %%
 if getOr(ops, 'doRegistration', 1)
     disp('running rigid registration');
