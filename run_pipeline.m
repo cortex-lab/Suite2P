@@ -12,7 +12,7 @@ if ~isfield(ops0, 'diameter') || isempty(ops0.diameter)
     warning('you have not specified mean diameter of your ROIs')
     warning('for best performance, please set db(iexp).diameter for each experiment')
 end
-ops0.diameter                        = getOr(ops0, 'diameter', 10);
+ops0.diameter                        = getOr(ops0, 'diameter', 8*ops0.zoom);
 ops0.clustrules.diameter             = ops0.diameter;
 ops0.clustrules                      = get_clustrules(ops0.clustrules);
 

@@ -147,6 +147,13 @@ try
 catch
 end
 
+if isfield(ops, 'zoomMicro')
+    ops.zoom = getOr(ops, 'zoom', ops.zoomMicro);
+else
+    ops.zoom = getOr(ops, 'zoom', 1);
+end
+
+
 if ~(isfield(ops, 'planesToProcess') && ~isempty(ops.planesToProcess))
     ops.planesToProcess = 1:ops.nplanes;
 else
