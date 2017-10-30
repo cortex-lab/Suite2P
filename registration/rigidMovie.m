@@ -1,6 +1,5 @@
-% registers frames using offsets dsall (rigid registration)
-% loops over batches of frames and over splits in frames
-function [dreg] = RegMovie(data, ops1, dsall, yFOVs, xFOVs)
+% rigid registration of frames with offsets ds
+function [dreg] = rigidMovie(data, ops1, dsall, yFOVs, xFOVs)
 
 ix0 = 0;
 Nbatch = 1000;
@@ -10,7 +9,7 @@ while ix0<size(data,3)
     indxr(indxr>size(data,3)) = [];
     for l = 1:size(xFOVs,2)
         dreg(yFOVs(:,l), xFOVs(:,l), indxr)        = ...
-            register_movie(data(yFOVs(:,l), xFOVs(:,l), indxr), ops1{1,l}, dsall(indxr,:,l));
+            rigidRegFrames(data(yFOVs(:,l), xFOVs(:,l), indxr), ops1{1,l}, dsall(indxr,:,l));
     end
     ix0 = ix0 + Nbatch;
 end

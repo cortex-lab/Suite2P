@@ -174,7 +174,7 @@ for k = 1:length(fs)
         else
             tiff_file = fs{k}(j).name;
         end
-        if abs(BiDiPhase) > 0; data = ShiftBiDi(BiDiPhase, data, Ly, Lx); end
+        if abs(BiDiPhase) > 0; data = ShiftBiDi(BiDiPhase, data, Ly, Lx); end;
         
         % get the registration offsets for each frame
         if ops.doRegistration
@@ -203,7 +203,7 @@ for k = 1:length(fs)
             % load red channel for red binary file if not already loaded for red alignment
             if red_mean_expt && ~red_align
                 data_red = loadFramesBuff(tiff_file, rchannel, nFr, nchannels_expt);
-                if abs(BiDiPhase) > 0; data_red = ShiftBiDi(BiDiPhase, data_red, Ly, Lx); end
+                if abs(BiDiPhase) >0; data_red = ShiftBiDi(BiDiPhase, data_red, Ly, Lx); end
             end
             % align the frames according to the registration offsets
             if ops.nonrigid

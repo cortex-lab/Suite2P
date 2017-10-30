@@ -1,11 +1,25 @@
+% computes registration offset of data from mean image ops.mimg
+% subpixel registration is kriging interpolation
+% inputs:
+%%% data = [ly, lx, nFrames]
+%%% ops = options
+%%% removeMean - if 1, then subtract mean offsets and realign to mean offset
+%%% (for pre-registration alignment)
+% outputs:
+%%% offsets = [nFrames, 2]
+%%% corr    = [nFrames]
+%%% regdata = [ly, lx, nFrames] (only computed if removeMean is not empty!)
+
 function [dv,corr] = regoffKriging(data, ops, removeMean)
 
 refImg = ops.mimg;
 subpixel = getOr(ops, {'subPixel' 'SubPixel'}, 10); % subpixel factor
 useGPU = getOr(ops, 'useGPU', false);
-phaseCorrelation = getOr(ops, {'phaseCorrelation' 'PhaseCorrelation'}, true);
-maxregshift = getOr(ops, 'maxregshift', round(.1*max(ops.Ly,ops.Lx)));
-maskSlope   = getOr(ops, 'maskSlope', 2); % slope on taper mask preapplied to image. was 2, then 1.2
+phaseCorrelation = getOr(ops, {'phaseCorrelation', 'PhaseCorrelation'}, true);
+% maximum shift allowed
+maxregshift = getOr(ops, 'maxregshift', round(.1*max(ops.Ly,ops.Lx))); 
+% slope on taper mask preapplied to image. was 2, then 1.2
+maskSlope   = getOr(ops, 'maskSlope', 2); 
 % SD pixels of gaussian smoothing applied to correlation map (MOM likes .6)
 smoothSigma = 1.15;
 

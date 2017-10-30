@@ -1,14 +1,18 @@
+% loops over data and computes registration offsets
+% inputs:
+%%% data = [ly, lx, nframes]
+%%% k is which expt #
+%%% j is which tiff
+%%% iplane0 is first position of each plane in tiff
+%%% ops and ops1 are options
 function [dsall, ops1] = GetRegOffsets(data, k, j, iplane0, ops, ops1)
 
-nplanes = getOr(ops, {'nplanes'}, 1);
-alignAcrossPlanes  = getOr(ops, {'alignAcrossPlanes'}, false);
-planesToInterpolate = getOr(ops, {'planesToInterpolate'}, 1:nplanes);
 % split into subsets (for high scanning resolution recordings)
 [xFOVs, yFOVs] = get_xyFOVs(ops);
 
 dsall = zeros(size(data,3), 2, size(xFOVs,2));
 for i = 1:numel(ops.planesToProcess)
-    if alignAcrossPlanes && ismember(i, planesToInterpolate) % load frames of all planes
+    if ops.alignAcrossPlanes && ismember(i, ops.planesToInterpolate) % load frames of all planes
         indframes = 1:size(data,3);
     else
         ifr0 = iplane0(ops.planesToProcess(i));

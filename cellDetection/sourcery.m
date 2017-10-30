@@ -3,6 +3,7 @@ function [ops, stat, model] = sourcery(ops)
 
 tic
 [ops, U0, model, U2]    = get_svdForROI(ops);
+        
 %  U0 = my_conv2(U0, ops.sig, [1 2]);
  
 ops.fig         = getOr(ops, 'fig', 1);
@@ -58,7 +59,7 @@ while 1
     
     % residual is smoothed at every iteration
     us = my_conv2_circ(Ucell, sig, [2 3]);
-    
+
     % compute log variance at each location
     V = sq(mean(us.^2,1));
     V = double(V);
@@ -205,6 +206,7 @@ while 1
 end
 
 % this runs only the mask re-estimation step, on non-smoothed PCs
+% (because smoothing is done during clustering to help)
 sourceryAddon;
 
 mLam  =  mLam(:, 1:icell);

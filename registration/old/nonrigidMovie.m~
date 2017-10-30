@@ -1,0 +1,10 @@
+% registers frames using offsets dsall (rigid registration)
+% loops over batches
+function [dreg, xyValid] = BlockRegMovie(data, ops, dsall, xyValid)
+
+dreg = zeros(size(data), 'like', data);
+
+[dreg(:, :, indxr),  xyVal] = ...
+    nonrigidRegFrames(data, ops.xyMask, dsall);
+    
+   

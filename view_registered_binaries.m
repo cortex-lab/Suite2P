@@ -19,7 +19,7 @@ regpath = sprintf('%s/regops_%s_%s.mat', ops.ResultsSavePath, db.mouse_name, db.
 load(regpath);
 
 %%
-iplane = 2; % which plane of the recording
+iplane = 5; % which plane of the recording
 ops = ops1{iplane};
 fid  = fopen(ops.RegFile, 'r'); % opens the registered binary
 [Ly Lx] = size(ops.mimg1);    % size of binary in x,y
@@ -36,10 +36,12 @@ while 1
   data = data(ops.yrange, ops.xrange, :);
   NT   = size(data,3);
   for j = 1:NT
-    imagesc(data(:,:,j));
+    imagesc(data(:,:,j+1)-data(:,:,j),[-2000 2000]);%,[1000 3000]);
     title(sprintf('frame %d', j+nt0));
+    axis square;
     drawnow;
-    pause(0.1);
+    
+    pause(0.25);
   end
   nt0 = nt0 + NT;
 end

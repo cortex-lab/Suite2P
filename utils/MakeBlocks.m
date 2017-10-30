@@ -15,7 +15,7 @@ bpix      = round(ops.blockFrac .* [Ly Lx]);
 
 % pixel overlap of blocks
 ops.pixoverlap    = [];
-ops.pixoverlap = round((bpix.*numBlocks-[Ly Lx])./(numBlocks-2));
+ops.pixoverlap = round((bpix.*numBlocks-[Ly Lx])./(numBlocks-1.9));
 
 % edges of blocks
 yB        = linspace(0, Ly, numBlocks(1)+1);
@@ -85,3 +85,13 @@ xyMask = xyMask./repmat(sum(xyMask, 3), 1, 1, size(xyMask, 3));
 xyMask = reshape(xyMask, Ly*Lx, nblocks);
 
 ops.xyMask    = xyMask;
+
+fprintf('--- using %d blocks in Y\n', ops.numBlocks(1));
+fprintf('--- %d pixels/block; avg pixel overlap = %d pixels\n', ...
+    round(ops.blockFrac(1)*Ly), ops.pixoverlap(1) );
+
+if ops.numBlocks(2) > 1
+    fprintf('--- using %d blocks in X\n', ops.numBlocks(2));
+    fprintf('--- %d pixels/block; avg pixel overlap = %d pixels\n', ...
+        round(ops.blockFrac(2)*Lx),  ops.pixoverlap(2));
+end

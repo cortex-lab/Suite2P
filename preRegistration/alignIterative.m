@@ -1,11 +1,6 @@
 % takes NimgFirstRegistration mean image and aligns it to itself
-% returns mean image for registration
-
-function ops = AlignIterativeKriging(data, ops)
-
-% uu = squeeze(sum(sum(data(:,:,:).^2,1),2));
-% [~, isort] = sort(uu, 'descend');
-% ops.mimg        = data(:,:,isort(50));
+% returns mean image for registration (ops.mimg)
+function ops = alignIterative(data, ops)
 
 fracImgPreAlign = getOr(ops, 'fracImgPreAlign', 1/2);
 maxImgPreAlign = round(size(data,3) * fracImgPreAlign);
@@ -17,9 +12,14 @@ dsold = zeros(size(data,3), 2);
 err = zeros(ops.NiterPrealign, 1);
 %%
 for i = 1:ops.NiterPrealign    
+  
+    if ops.kriging 
+        [dsnew, Corr]  = regoffKriging(data, ops, 1);
+    else
+        [dsnew, Corr]  = regoffLinear(data, ops, 1);
+    end
     
-    [dsnew, Corr]  = regoffKriging(data, ops, 1);
-    dreg  = register_movie(data, ops, dsnew);
+    dreg  = rigidRegFrames(data, ops, dsnew);
     [~, igood] = sort(Corr, 'descend');
     if i<floor(ops.NiterPrealign/2)        
         igood = igood(1:100);  
