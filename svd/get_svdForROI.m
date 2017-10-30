@@ -41,6 +41,7 @@ if nargin==1 || ~strcmp(clustModel, 'CNMF')
         sdmov           = mean(mov.^2,2).^.5;
     end
     sdmov           = reshape(sdmov, numel(ops.yrange), numel(ops.xrange));
+    sdmov           = max(1e-10, sdmov);
     ops.sdmov       = sdmov;
     
     % smooth the variance over space
