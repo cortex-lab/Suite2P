@@ -228,6 +228,14 @@ guidata(hObject,h);
 function pushbutton84_Callback(hObject, eventdata, h)
 % save proc file and rules file
 h.dat.F.trace = [];
+h=classifierFig(h);
+h=skewFig(h);
+h=meanimgFig(h);
+h=cmpctFig(h);
+h=footprintFig(h);
+h=redFig(h);
+h=ellipseFig(h);
+
 dat = h.dat;
 save([h.dat.filename(1:end-4) '_proc.mat'], 'dat')
 %
@@ -553,22 +561,30 @@ else
     h.dat.cl.rands   = .1 + .7*rand(length(h.dat.stat), 1);
 end
 h.dat.cl.rands(logical([h.dat.stat.redcell])) = 0;
-redraw_figure(h);
+I = redraw_figure(h);
 set_maskCcolor(h, 1);
 guidata(hObject,h);
 
 % --- classifier
 function pushbutton95_Callback(hObject, eventdata, h)
+h=classifierFig(h);
+guidata(hObject,h);
+
+function h = classifierFig(h)
 hval0            = [h.dat.stat.cellProb];
 hval             = .6 * (1 - hval0) + .15;
 h.dat.cl.rands   = hval;
 h.dat.cl.cmap    = [hval0(:) hval(:)]; 
-redraw_figure(h);
+I = redraw_figure(h);
+h.dat.cl.classifierFig = I;
 set_maskCcolor(h, 2);
-guidata(hObject,h);
 
 % --- skew
 function pushbutton96_Callback(hObject, eventdata, h)
+h = skewFig(h);
+guidata(hObject,h);
+
+function h = skewFig(h)
 hval0            = [h.dat.stat.skew];
 hval             = hval0 / nanmean(hval0);
 hval             = max(0, hval - (1 - 2*nanstd(hval))) + 1;
@@ -576,12 +592,16 @@ hval             = log(hval) / nanmean(log(hval));
 hval             = .6 * (1 - min(2*nanstd(hval)+1, hval)/(nanstd(hval)*2 + 1)) + .15;
 h.dat.cl.rands   = hval;
 h.dat.cl.cmap    = [hval0(:) hval(:)]; 
-redraw_figure(h);
+I = redraw_figure(h);
+h.dat.cl.skewFig = I;
 set_maskCcolor(h, 3);
-guidata(hObject,h);
 
 % --- ellipse
 function pushbutton112_Callback(hObject, eventdata, h)
+h=ellipseFig(h);
+guidata(hObject,h);
+
+function h=ellipseFig(h)
 hval0            = min(5, [h.dat.stat.aspect_ratio]);
 hval             = hval0;
 hval             = hval - min(hval);
@@ -589,12 +609,16 @@ hval             = hval / nanmean(hval);
 hval             = .6 * (1 - min(2*nanstd(hval)+1, hval)/(nanstd(hval)*2 + 1)) + .15;
 h.dat.cl.rands   = hval;
 h.dat.cl.cmap    = [hval0(:) hval(:)]; 
-redraw_figure(h);
+I = redraw_figure(h);
+h.dat.cl.ellipseFig = I;
 set_maskCcolor(h, 8);
-guidata(hObject,h);
 
 % --- meanimg
 function pushbutton102_Callback(hObject, eventdata, h)
+h=meanimgFig(h);
+guidata(hObject,h);
+
+function h=meanimgFig(h)
 hval0            = [h.dat.stat.mimgProjAbs];
 hval             = hval0;
 hval             = hval - min(hval);
@@ -602,12 +626,17 @@ hval             = hval / nanmean(hval);
 hval             = .6 * (1 - min(2*nanstd(hval)+1, hval)/(nanstd(hval)*2 + 1)) + .15;
 h.dat.cl.rands   = hval;
 h.dat.cl.cmap    = [hval0(:) hval(:)]; 
-redraw_figure(h);
+I = redraw_figure(h);
+h.dat.cl.meanimgFig = I;
 set_maskCcolor(h, 4);
-guidata(hObject,h);
+
 
 % --- cmpct
 function pushbutton99_Callback(hObject, eventdata, h)
+h=cmpctFig(h);
+guidata(hObject,h);
+
+function h=cmpctFig(h)
 hval0            = min(3, [h.dat.stat.cmpct]);
 hval             = hval0;
 hval             = hval - min(hval);
@@ -615,12 +644,16 @@ hval             = hval / nanmean(hval);
 hval             = .6 * (1 - min(2*nanstd(hval)+1, hval)/(nanstd(hval)*2 + 1)) + .15;
 h.dat.cl.rands   = hval;
 h.dat.cl.cmap    = [hval0(:) hval(:)]; 
-redraw_figure(h);
+I = redraw_figure(h);
+h.dat.cl.cmpctFig = I;
 set_maskCcolor(h, 5);
-guidata(hObject,h);
 
 % --- footprint
 function pushbutton100_Callback(hObject, eventdata, h)
+h=footprintFig(h);
+guidata(hObject,h);
+
+function h=footprintFig(h)
 hval0            = [h.dat.stat.footprint];
 hval             = hval0;
 hval             = hval - min(hval);
@@ -628,12 +661,17 @@ hval             = hval / nanmean(hval);
 hval             = .6 * (1 - min(2*nanstd(hval)+1, hval)/(nanstd(hval)*2 + 1)) + .15;
 h.dat.cl.rands   = hval;
 h.dat.cl.cmap    = [hval0(:) hval(:)]; 
-redraw_figure(h);
+I = redraw_figure(h);
+h.dat.cl.footprintFig = I;
 set_maskCcolor(h, 6);
-guidata(hObject,h);
+
 
 % --- red channel
 function pushbutton104_Callback(hObject, eventdata, h)
+h=redFig(h);
+guidata(hObject,h);
+
+function h=redFig(h)
 hval0            = [h.dat.stat.redprob];
 hval             = hval0;
 hval             = hval / nanmean(hval);
@@ -642,9 +680,10 @@ hval             = log(hval) / nanmean(log(hval));
 hval             = .6 * (1 - min(2*nanstd(hval)+1, hval)/(nanstd(hval)*2 + 1)) + .15;
 h.dat.cl.rands   = hval;
 h.dat.cl.cmap    = [hval0(:) hval(:)]; 
-redraw_figure(h);
+I = redraw_figure(h);
+h.dat.cl.redFig  = I;
 set_maskCcolor(h, 7);
-guidata(hObject,h);
+
 
 
 % ------------------ CLASSIFIER --------------------------%

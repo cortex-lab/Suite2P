@@ -1,5 +1,5 @@
 
-function redraw_figure(h)
+function I = redraw_figure(h)
 % 
 Sat1     =  ones(h.dat.cl.Ly, h.dat.cl.Lx);
 Sat2     =  ones(h.dat.cl.Ly, h.dat.cl.Lx);
