@@ -17,7 +17,7 @@ for i = 1:numel(ops1)
         minDsX = min(reshape(ds(:,2,ops.numBlocks(1):ops.numBlocks(1):end), [], 1));
         if ops.BiDiPhase>0
             maxDsX = max(1+ops.BiDiPhase, maxDsX);
-        elseif BiDiPhase<0
+        elseif ops.BiDiPhase<0
             minDsX = min(ops.BiDiPhase, minDsX);
         end
         ops1{i}.yrange = ceil(1 + maxDsY) : floor(ops1{i}.Ly+minDsY);
@@ -56,7 +56,7 @@ for i = 1:numel(ops1)
         disp([minDs(1) maxDs(1) minDs(2) maxDs(2)])
         if ops.BiDiPhase>0
             maxDs(2) = max(1+ops.BiDiPhase, maxDs(2));
-        elseif BiDiPhase<0
+        elseif ops.BiDiPhase<0
             minDs(2) = min(ops.BiDiPhase, minDs(2));
         end
         ops1{i}.yrange = ceil(1 + maxDs(1)) : floor(ops1{i}.Ly+minDs(1));
