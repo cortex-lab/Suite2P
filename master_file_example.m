@@ -44,6 +44,7 @@ ops0.RegFileRoot            = 'C:/DATA/';  % location for binary file
 ops0.DeleteBin              = 1; % set to 1 for batch processing on a limited hard drive
 ops0.ResultsSavePath        = 'D:/DATA/F'; % a folder structure is created inside
 ops0.RegFileTiffLocation    = []; %'D:/DATA/'; % leave empty to NOT save registered tiffs (slow)
+% if you want to save red channel tiffs, also set ops0.REDbinary = 1
 
 % ---- registration options ------------------------------------- %
 ops0.doRegistration         = 1; % skip (0) if data is already registered

@@ -70,13 +70,13 @@ See this paper comparing spike deconvolution methods for more information on cho
 You can also run spike deconvolution without running the entire pipeline by calling wrapperDECONV(ops,F,N), where F and N are the fluorescence and neuropil traces respectively, while ops specifies some deconvolution parameters like sampling rate and sensory decay timescale. See the function help for more information.
 
 ----------
-Below we describe the outputs of the pipeline first, and then describe the options for setting it up, and customizing it. Importantly, almost all options have pre-specified defaults. Any options specified in master_file in ops0 overrides these defaults. Furthermore, any option specified in the make_db file (experiment specific) overrides both the defaults and the options set in master_file. This allows for flexibility in processing different experiments with different options. The only critical option that you'll need to set is ops0.diameter, or db(N).diameter. This gives the algorithm the scale of the recording, and the size of ROIs you are trying to extract. We recommend as a first run to try the pipeline after setting the diameter option. Depending on the results, you can come back and try changing some of the other options.  
+Below we describe the outputs of the pipeline first, and then describe the options for setting it up, and customizing it. Importantly, almost all options have pre-specified defaults. Any options specified in `master_file` in ops0 overrides these defaults. Furthermore, any option specified in the `make_db` file (experiment specific) overrides both the defaults and the options set in master_file. This allows for flexibility in processing different experiments with different options. The only critical option that you'll need to set is ops0.diameter, or db(N).diameter. This gives the algorithm the scale of the recording, and the size of ROIs you are trying to extract. We recommend as a first run to try the pipeline after setting the diameter option. Depending on the results, you can come back and try changing some of the other options.  
 
-Note: some of the options are not specified in either the example master_file or the example make_db file. These are usually more specialized features.
+Note: some of the options are not specified in either the example `master_file` or the example make_db file. These are usually more specialized features.
 
 # III. Outputs.
 
-The output is a struct called dat which is saved into a mat file in ResultsSavePath using the same subfolder structure, under a name formatted like F_M150329_MP009_2015-04-29_plane1. It contains all the information collected throughout the processing, and contains the ROI and neuropil traces in Fcell and FcellNeu, and whether each ROI j is a cell or not in stat(j).iscell. stat(j) contains information about each ROI j and can be used to recover the corresponding pixels for each ROI in stat.ipix. The centroid of the ROI is specified in stat as well. Here is a summary of where the important results are:
+The output is a struct called dat which is saved into a mat file in ResultsSavePath using the same subfolder structure, under a name formatted like `F_M150329_MP009_2015-04-29_plane1`. It contains all the information collected throughout the processing, and contains the ROI and neuropil traces in Fcell and FcellNeu, and whether each ROI j is a cell or not in stat(j).iscell. stat(j) contains information about each ROI j and can be used to recover the corresponding pixels for each ROI in stat.ipix. The centroid of the ROI is specified in stat as well. Here is a summary of where the important results are:
 
 cell traces are in dat.Fcell  
 neuropil traces are in dat.FcellNeu  
@@ -103,11 +103,12 @@ There are fields for red cell detection too (see the section on **Identifying re
 
 # IV. Input-output file paths
 
-* RootStorage --- the root location where the raw tiff files are  stored.
-* RegFileRoot --- location on local disk where to keep the registered movies in binary format. This will be loaded several times so it should ideally be an SSD drive. (to view registered movies use script "view_registered_binaries.m" in main folder)
-* ResultsSavePath --- where to save the final results. 
-* DeleteBin --- deletes the binary file created to store the registered movies
-* RegFileTiffLocation --- where to save registered tiffs (if empty, does not save)
+* _RootStorage_ --- the root location where the raw tiff files are  stored.
+* _RegFileRoot_ --- location on local disk where to keep the registered movies in binary format. This will be loaded several times so it should ideally be an SSD drive. (to view registered movies use script "view_registered_binaries.m" in main folder)
+* _ResultsSavePath_ --- where to save the final results. 
+* _DeleteBin_ --- deletes the binary file created to store the registered movies
+* _RegFileTiffLocation_ --- where to save registered tiffs (if empty, does not save)
+**if you want to save red tiffs, then specify ops.RegFileTiffLocation and set ops.REDbinary = 1**
 
 All of these filepaths are completed with separate subfolders per animal and experiment, specified in the make_db file. Your data should be stored under a file tree of the form
 
@@ -121,39 +122,39 @@ The output is a struct called dat which is saved into a mat file in ResultsSaveP
 
 ### Registration
 
-* showTargetRegistration --- whether to show an image of the target frame immediately after it is computed. 
-* PhaseCorrelation --- whether to use phase correlation (default is phase-correlation, if 0 then cross-correlation used).
-* SubPixel --- accuracy level of subpixel registration (default is 10 = 0.1 pixel accuracy)
-* kriging --- compute shifts using kernel regression with a gaussian kernel of width 1 onto a grid of 1/SubPixel (default is kriging = 1)
-* maxregshift --- maximum amount of movement allowed in FOV (default is 10% of max(y pixels, x pixels))
-* maskSlope --- slope on the taper mask applied to image (default is 2 pixel exponential decay)
-* NimgFirstRegistration --- number of randomly sampled images to do the target computation from
-* NiterPrealign --- number of iterations for the target computation (iterative re-alignment of subset of frames)
-* smooth_time_space --- convolves raw movie with a Gaussian of specified size in specified dimensions;
+* _showTargetRegistration_ --- whether to show an image of the target frame immediately after it is computed. 
+* _PhaseCorrelation_ --- whether to use phase correlation (default is phase-correlation, if 0 then cross-correlation used).
+* _SubPixel_ --- accuracy level of subpixel registration (default is 10 = 0.1 pixel accuracy)
+* _kriging_ --- compute shifts using kernel regression with a gaussian kernel of width 1 onto a grid of 1/SubPixel (default is kriging = 1)
+* _maxregshift_ --- maximum amount of movement allowed in FOV (default is 10% of max(y pixels, x pixels))
+* _maskSlope_ --- slope on the taper mask applied to image (default is 2 pixel exponential decay)
+* _NimgFirstRegistration_ --- number of randomly sampled images to compute target image from
+* _NiterPrealign_ --- number of iterations for the target computation (iterative re-alignment of subset of frames)
+* _smooth_time_space_ --- convolves raw movie with a Gaussian of specified size in specified dimensions;
                       [t]: convolve in time with gauss. of std t, [t s]: convolve in time and space,
                       [t x y]: convolve in time, and in space with an ellipse rather than circle
-* nimgbegend --- number of frames over which to average at beginning and end of experiment (if worried about drift) (default is 0 frames)
+* _nimgbegend_ --- number of frames over which to average at beginning and end of experiment (if worried about drift) (default is 0 frames)
                       
 **Block Registration (for high zoom/npixels)**
 
-* nonrigid --- set to 1 for non-rigid registration (or set numBlocks > 1)
-* numBlocks --- 1x2 array denoting the number of blocks to divide image in y and x (default is [8 1]) 
-* blockFrac --- percent of image to use per block (default is 1/(numBlocks-1))          
-* quadBlocks --- interpolate block shifts to single line shifts (6 blocks -> 512 lines) by fitting a quadratic function (default is 1)
-* smoothBlocks --- if quadBlocks = 0, then smoothBlocks is the standard deviation of the gaussian smoothing kernel
+* _nonrigid_ --- set to 1 for non-rigid registration (or set numBlocks > 1)
+* _numBlocks_ --- 1x2 array denoting the number of blocks to divide image in y and x (default is [8 1]) 
+* _blockFrac_ --- percent of image to use per block (default is 1/(numBlocks-1))          
+* _quadBlocks_ --- interpolate block shifts to single line shifts (6 blocks -> 512 lines) by fitting a quadratic function (default is 1)
+* _smoothBlocks_ --- if quadBlocks = 0, then smoothBlocks is the standard deviation of the gaussian smoothing kernel
 
 **Bidirectional scanning issues (frilly cells - default is to correct)**
 
-* dobidi --- compute bidirectional phase offset from images (default 1)
-* BiDiPhase --- value of bidirectional phase offset to use for computation (will not compute bidirectional phase offset)
+* _dobidi_ --- compute bidirectional phase offset from images (default 1)
+* _BiDiPhase_ --- value of bidirectional phase offset to use for computation (will not compute bidirectional phase offset)
 
 **Recordings with red channel**
 
-* AlignToRedChannel --- perform registration to red channel (non-functional channel) rather than green channel
+* _AlignToRedChannel_ --- perform registration to red channel (non-functional channel) rather than green channel
 **(this assumes that you have a red channel for all recordings in db.expts)**
-* redMeanImg --- compute mean image of red channel from experiments with red and green channel
+* _redMeanImg_ --- compute mean image of red channel from experiments with red and green channel
 (you do not need to have a red channel for all db.expts, computes only from db.expred -- so make sure this isn't empty!!)
-* REDbinary --- compute a binary file of the red channel (like the green channel binary) from db.expred
+* _REDbinary_ --- compute a binary file of the red channel (like the green channel binary) from db.expred
 
 output ops.mimgRED will contain mean image (if AlignToRedChannel, redMeanImg or REDbinary = 1)
 
@@ -163,38 +164,41 @@ currently only works with rigid registration, where each section of FOV is regis
 
 ### Cell detection
 
-* sig --- spatial smoothing constant: smooths out the SVDs spatially. Indirectly forces ROIs to be more round. 
-* nSVDforROI --- how many SVD components to keep for clustering. Usually ~ the number of expected cells. 
-* ShowCellMap --- whether to show the clustering results as an image every 10 iterations of the clustering
-* getROIs --- whether to run the ROI detection algorithm after registration
-* stopSourcery --- stop clustering if # of ROIs extracted < (ROIs extracted on iteration 1) x (stopSourcery) (default is 1/10)
-* maxIterRoiDetection --- maximum number of clustering iterations (default is 100)
+* _sig_ --- spatial smoothing constant: smooths out the SVDs spatially. Indirectly forces ROIs to be more round. 
+* _nSVDforROI_ --- how many SVD components to keep for clustering. Usually ~ the number of expected cells. 
+* _ShowCellMap_ --- whether to show the clustering results as an image every 10 iterations of the clustering
+* _getROIs_ --- whether to run the ROI detection algorithm after registration
+* _stopSourcery_ --- stop clustering if # of ROIs extracted < (ROIs extracted on iteration 1) x (stopSourcery) (default is 1/10)
+* _maxIterRoiDetection_ --- maximum number of clustering iterations (default is 100)
 
 ### SVD decomposition
 
-* NavgFramesSVD --- for SVD, data has to be temporally binned. This number specifies the final number of points to be obtained after binning. In other words, datasets with many timepoints are binned in higher windows while small datasets are binned less. 
-* getSVDcomps --- whether to obtain and save to disk SVD components of the registered movies. Useful for pixel-level analysis and for checking the quality of the registration (residual motion will show up as SVD components). This is a separate SVD decomposition from that done for cell clustering (does not remove a running baseline of each pixel). 
-* nSVD --- how many SVD components to keep.
+* _NavgFramesSVD_ --- for SVD, data has to be temporally binned. This number specifies the final number of points to be obtained after binning. In other words, datasets with many timepoints are binned in higher windows while small datasets are binned less. 
+* _getSVDcomps_ --- whether to obtain and save to disk SVD components of the registered movies. Useful for pixel-level analysis and for checking the quality of the registration (residual motion will show up as SVD components). This is a separate SVD decomposition from that done for cell clustering (does not remove a running baseline of each pixel). 
+* _nSVDforROI_ --- how many SVD components to keep.
+* _getSVDcomps_ --- whether to obtain and save to disk SVD components of the registered movies. Useful for pixel-level analysis and for checking the quality of the registration (residual motion will show up as SVD components). This is a separate SVD decomposition from that done for cell clustering (does not remove a running baseline of each pixel). 
+* _nSVD_ --- if _getSVDcomps_=1, then _nSVD_ specifies how many components to save
+
 
 ### Signal extraction
 
-* signalExtraction --- how should the fluorescence be extracted? The 'raw' option restricts cells to be non-overlapping, 'regression' option allows cell overlaps. The neuropil model is a set of spatial basis functions that tile the FOV. The 'surround' option means that the cell's activity is the weighted sum of the detected pixels (weighted by lambda). The neuropil is computed as the sum of activity of surrounding pixels (excluding other cells in the computation).
+* _signalExtraction_ --- how should the fluorescence be extracted? The 'raw' option restricts cells to be non-overlapping, 'regression' option allows cell overlaps. The neuropil model is a set of spatial basis functions that tile the FOV. The 'surround' option means that the cell's activity is the weighted sum of the detected pixels (weighted by lambda). The neuropil is computed as the sum of activity of surrounding pixels (excluding other cells in the computation).
 
 ### Neuropil options
 
-* ratioNeuropil --- used for both spatial basis functions and surround neuropil - the spatial extent of the neuropil as a factor times the radius of the cells (ops.ratioNeuropil * cell radius = neuropil radius)
+* _ratioNeuropil_ --- used for both spatial basis functions and surround neuropil - the spatial extent of the neuropil as a factor times the radius of the cells (ops.ratioNeuropil * cell radius = neuropil radius)
 
-if using surround neuropil
-* innerNeuropil --- padding in pixels around cell to exclude from neuropil
-* outerNeuropil --- radius of neuropil surround (set to Inf to use ops.ratioNeuropil)
-* minNeuropilPixels --- minimum number of pixels necessary in neuropil surround
+if using surround neuropil (_signalExtraction_ = 'surround')
+* _innerNeuropil_ --- padding in pixels around cell to exclude from neuropil
+* _outerNeuropil_ --- radius of neuropil surround (set to Inf to use ops.ratioNeuropil)
+* _minNeuropilPixels_ --- minimum number of pixels in neuropil surround (radius will expand until this number is reached)
 
 ### Spike deconvolution 
 
-* imageRate --- imaging rate per plane. 
-* sensorTau --- decay timescale.
-* maxNeurop --- neuropil contamination coef has to be less than this (sometimes good to impose a ceiling at 1, i.e. for interneurons)
-* deconvType --- which type of deconvolution to use (either 'L0' or 'OASIS') 
+* _imageRate_ --- imaging rate per plane. 
+* _sensorTau_ --- decay timescale.
+* _maxNeurop_ --- neuropil contamination coef has to be less than this (sometimes good to impose a ceiling at 1, i.e. for interneurons)
+* _deconvType_ --- which type of deconvolution to use (either 'L0' or 'OASIS') 
 
 ### Identifying red cells
 
@@ -202,12 +206,12 @@ use function `identify_redcells_sourcery(db, ops0)` to identify cells with red
 
 Outputs are appended to stat in F.mat file
 * redratio = red pixels inside / red pixels outside
-* redcell = redratio > mean(redratio) + redthres x std(redratio)
-* notred = redratio < mean(redratio) + redmax x std(redratio)
+* redcell = redratio > mean(redratio) + _redthres_ x std(redratio)
+* notred = redratio < mean(redratio) + _redmax_ x std(redratio)
 
 Options are 
-* redthres  --- higher thres means fewer red cells (default 1.35)
-* redmax --- the higher the max the more NON-red cells (default 1)
+* _redthres_  --- higher thres means fewer red cells (default 1.35)
+* _redmax_ --- the higher the max the more NON-red cells (default 1)
 
 ### Measures used by classifier
 

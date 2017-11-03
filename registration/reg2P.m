@@ -202,7 +202,7 @@ for k = 1:length(fs)
             end
             % load red channel for red binary file if not already loaded for red alignment
             if red_mean_expt && ~red_align
-                data_red = loadFramesBuff(tiff_file, rchannel, nFr, nchannels_expt);
+                data_red = loadFramesBuff(tiff_file, rchannel, nFr, nchannels_expt, ops.temp_tiff);
                 if abs(BiDiPhase) > 0; data_red = ShiftBiDi(BiDiPhase, data_red, Ly, Lx); end
             end
             % align the frames according to the registration offsets
@@ -296,11 +296,14 @@ end
 if ~isempty(ops.RegFileTiffLocation)
     for i = 1:numel(ops1)
         fid{i}           = fopen(ops1{i}.RegFile, 'r');
-        if getOr(ops, 'REDbinary', 0)
-            fidRED{i}           = fopen(ops1{i}.RegFile, 'r');
-        end   
-        ops1{i} = write_reg_to_tiff(fid{i}, ops1{i}, i);
+        ops1{i} = write_reg_to_tiff(fid{i}, ops1{i}, i, 0);
         fclose(fid{i});
+        
+        if red_binary
+            fidRED{i}           = fopen(ops1{i}.RegFile2, 'r');
+            ops1{i} = write_reg_to_tiff(fidRED{i}, ops1{i}, i, 1);
+            fclose(fidRED{i});
+        end   
     end
 end
 
