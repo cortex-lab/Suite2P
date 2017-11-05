@@ -36,7 +36,7 @@ while 1
   data = data(ops.yrange, ops.xrange, :);
   NT   = size(data,3);
   for j = 1:NT
-    imagesc(data(:,:,j+1)-data(:,:,j),[-2000 2000]);%,[1000 3000]);
+    imagesc(data(:,:,j),[0 2000]);%,[1000 3000]);
     title(sprintf('frame %d', j+nt0));
     axis square;
     drawnow;
