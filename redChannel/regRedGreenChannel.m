@@ -18,9 +18,11 @@ else
 end
 %
 % build file list
-fsRED = dir(fullfile(ops.RootDir, subDirsRed{1}, '*.tif'));
-for k = 1:length(fsRED)
-    fsRED(k).name = fullfile(ops.RootDir, subDirsRed{1}, fsRED(k).name);
+for i = 1:length(ops.expred)
+    fsRED = dir(fullfile(ops.RootDir, subDirsRed{i}, '*.tif'));
+    for k = 1:length(fsRED)
+        fsRED(k).name = fullfile(ops.RootDir, subDirsRed{i}, fsRED(k).name);
+    end
 end
 
 root = ops.ResultsSavePath;
