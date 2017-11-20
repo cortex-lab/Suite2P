@@ -38,8 +38,8 @@ for i = 1:numel(ops.planesToProcess)
         if j==1
             ds(1,:,:) = 0;
         end
-        ops1{i,l}.DS          = cat(1, ops1{i,l}.DS, ds);
-        ops1{i,l}.CorrFrame   = cat(1, ops1{i,l}.CorrFrame, Corr);
+        ops1{i,l}.DSrigid          = cat(1, ops1{i,l}.DSrigid, ds);
+        %ops1{i,l}.CorrFrame   = cat(1, ops1{i,l}.CorrFrame, Corr);
     end
     
     

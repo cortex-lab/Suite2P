@@ -10,26 +10,25 @@
 %%% corr    = [nFrames]
 %%% regdata = [ly, lx, nFrames] (only computed if removeMean is not empty!)
 
-function [dv,corr] = regoffKriging(data, ops, removeMean)
+function [dv,corr, ccl] = regoffKriging(data, ops, removeMean)
+[ly lx nFrames] = size(data);
 
 refImg = ops.mimg;
 subpixel = getOr(ops, {'subPixel' 'SubPixel'}, 10); % subpixel factor
 useGPU = getOr(ops, 'useGPU', false);
 phaseCorrelation = getOr(ops, {'phaseCorrelation', 'PhaseCorrelation'}, true);
 % maximum shift allowed
-maxregshift = getOr(ops, 'maxregshift', round(.1*max(ops.Ly,ops.Lx))); 
+maxregshift = getOr(ops, 'maxregshift', round(.1*min(ly,lx))); 
 % slope on taper mask preapplied to image. was 2, then 1.2
 maskSlope   = getOr(ops, 'maskSlope', 2); 
 % SD pixels of gaussian smoothing applied to correlation map (MOM likes .6)
-smoothSigma = 1.15;
-
+smoothSigma = 2;
 
 % if subpixel is still inf, threshold it for new method
 if ops.kriging
     subpixel = min(10, subpixel);
 end
 
-[ly lx nFrames] = size(data);
 
 % Taper mask
 [ys, xs] = ndgrid(1:ly, 1:lx);
@@ -92,6 +91,7 @@ end
 % loop over batches
 dv = zeros(nFrames, 2);
 corr = zeros(nFrames, 1);
+ccl = zeros(ly*lx, nFrames,'single');
 
 nBatches = ceil(nFrames/batchSize);
 for bi = 1:nBatches
@@ -163,7 +163,9 @@ for bi = 1:nBatches
         end
         dv(fi,:) = gather_try(dv0);
         corr(fi)  = gather_try(cx);
-    % otherwise just take peak of matrix
+        ccl(:,fi) = gather_try(reshape(single(corrClip), [], size(corrClip,3)));
+        
+   % otherwise just take peak of matrix
     else
         cc0     = corrClipSmooth(floor(ly/2)+1+[-lcorr:lcorr],floor(lx/2)+1+[-lcorr:lcorr],:);
         [cmax,iy]  = max(cc0,[],1);
@@ -174,6 +176,7 @@ for bi = 1:nBatches
         dv0 = [iy(:)-lcorr ix(:)-lcorr]-1;
         dv(fi,:)  = gather_try(dv0);
         corr(fi) = gather_try(cx(:));
+        ccl(:,fi) = gather_try(reshape(single(corrClip), [], size(corrClip,3)));
     end
         
 end

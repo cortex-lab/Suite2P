@@ -34,7 +34,7 @@ for i = 1:ops.NiterPrealign
     end
     
     % register frames
-    dreg = nonrigidRegFrames(data, ops.xyMask, dsnew);
+    dreg = nonrigidRegFrames(data, ops, dsnew);
     
     % sort by correlation and take mean of most correlated frames
     [~, igood] = sort(mean(Corr,2), 'descend');

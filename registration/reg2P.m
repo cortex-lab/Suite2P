@@ -1,5 +1,6 @@
-function ops1 = reg2P(ops)
+function ops1 = reg2P(ops0)
 %%
+ops=ops0;
 ops.doRegistration  = getOr(ops, {'doRegistration'}, 1); % register tiffs?
 
 if ops.doRegistration
@@ -111,8 +112,10 @@ for i = 1:numPlanes
             ops1{i,j}.mimgRED       = zeros(ops1{i,j}.Ly, ops1{i,j}.Lx);
         end
         ops1{i,j}.DS          = [];
+        ops1{i,j}.DSrigid          = [];
         ops1{i,j}.CorrFrame   = [];
         ops1{i,j}.mimg1       = zeros(ops1{i,j}.Ly, ops1{i,j}.Lx);
+        ops1{i,j}.mimgReg     = ops1{i,j}.mimg;
         if ops.nonrigid
             ops1{i}.mimgB = cell(prod(ops.numBlocks),1);
             for ib = 1:ops.numBlocks(1)*ops.numBlocks(2)
@@ -122,7 +125,7 @@ for i = 1:numPlanes
     end
 end
 
-%% open files for registration
+% open files for registration
 
 [ops1, fid, fidRED, fidIntpol] = openBinFiles(ops, ops1, red_binary);
 
@@ -178,50 +181,21 @@ for k = 1:length(fs)
         
         % get the registration offsets for each frame
         if ops.doRegistration
+            [dsall, ops1] = rigidOffsets(data, j, iplane0, ops, ops1);
+            dreg = rigidMovie(data, ops1, dsall, yFOVs, xFOVs);
+            
+            
             if ops.nonrigid
-                [dsall, ops1] = nonrigidOffsets(data, j, iplane0, ops, ops1);
-            else
-                [dsall, ops1] = rigidOffsets(data, j, iplane0, ops, ops1);
-            end
-        end
-        
-        if ops.alignAcrossPlanes
-            if rem(j,5)==1
-                fprintf('Set %d, tiff %d done in time %2.2f \n', k, j, toc)
-            end
-            iplane0 = iplane0 - nFr/nchannels_expt;
-            continue;
-        end
-        
-        if ops.doRegistration
-            % if aligning by the red channel, data needs to be reloaded as the green channel
-            if red_align
-                data_red = data;
-                data = loadFramesBuff(tiff_file, ichannel, nFr, nchannels_expt, ops.temp_tiff);
-                if abs(BiDiPhase) > 0; data = ShiftBiDi(BiDiPhase, data, Ly, Lx);  end
-            end
-            % load red channel for red binary file if not already loaded for red alignment
-            if red_mean_expt && ~red_align
-                data_red = loadFramesBuff(tiff_file, rchannel, nFr, nchannels_expt, ops.temp_tiff);
-                if abs(BiDiPhase) > 0; data_red = ShiftBiDi(BiDiPhase, data_red, Ly, Lx); end
-            end
-            % align the frames according to the registration offsets
-            if ops.nonrigid
-                [dreg, xyValid] = nonrigidMovie(data, ops, dsall, xyValid);
-            else
-                dreg = rigidMovie(data, ops1, dsall, yFOVs, xFOVs);
+                [dsall, ops1] = nonrigidOffsets(dreg, j, iplane0, ops, ops1);
+                [dreg, xyValid] = nonrigidMovie(dreg, ops, dsall, xyValid);
             end
             
-            if red_mean_expt || red_align
-                if ops.nonrigid
-                    [dreg2, xyValid] = nonrigidMovie(data_red, ops, dsall, xyValid);
-                else
-                    dreg2 = rigidMovie(data_red, ops1, dsall, yFOVs, xFOVs);
-                end
-            end
+            
+            
         else
             dreg = data;
         end
+        
         
         % write dreg to bin file+
         for i = 1:numPlanes
@@ -232,6 +206,7 @@ for k = 1:length(fs)
                 fwrite(fid{i,l}, dwrite, class(data));
                 ops1{i,l}.Nframes(k) = ops1{i,l}.Nframes(k) + size(dwrite,3);
                 ops1{i,l}.mimg1 = ops1{i,l}.mimg1 + sum(dwrite,3);
+                %ops1{i,l}.mimgReg = ops1{i,l}.mimgReg*.75 + .25*sum(dwrite,3)/size(dwrite,3);
                 
                 if red_mean_expt || red_align
                     dwrite = dreg2(yFOVs(:,l),xFOVs(:,l),indframes);

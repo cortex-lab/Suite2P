@@ -8,7 +8,7 @@ Ly = ops.Ly;
 numBlocks = ops.numBlocks;
 
 % fraction of block of total image
-bfrac     = 1./max(2,(numBlocks-3));
+bfrac     = 1./max(2,(numBlocks-2));
 bfrac(numBlocks==1) = 1;
 ops.blockFrac = getOr(ops, {'blockFrac'}, bfrac);
 bpix      = round(ops.blockFrac .* [Ly Lx]);
@@ -22,7 +22,9 @@ yB        = linspace(0, Ly, numBlocks(1)+1);
 yB        = round((yB(1:end-1) + yB(2:end)) / 2);
 
 xB        = linspace(0, Lx, numBlocks(2)+1);
-xB        = round((xB(1:end-1) + xB(2:end)) / 2);
+if numBlocks(2) > 2
+    xB        = round((xB(1:end-1) + xB(2:end)) / 2);
+end
 
 % compute indices of blocks
 ib        = 0;
@@ -44,7 +46,7 @@ for iy = 1:numBlocks(1)
             ops.yBL{ib} = [max(1,yB(iy)-floor(bpix(1)/2)) : ...
                 min(Ly,yB(iy)+floor(bpix(1)/2))];
             ops.xBL{ib} = [max(1,xB(ix)-floor(bpix(2)/2)) : ...
-                min(Ly,xB(ix)+floor(bpix(2)/2))];
+                min(Lx,xB(ix)+floor(bpix(2)/2))];
         end
     else
         ib = ib+1;
@@ -66,6 +68,8 @@ sT           = ops.smoothBlocks;
 
 xyMask = zeros(Ly, Lx, nblocks, 'single');
 ib=0;
+
+%%
 for iy = 1:numBlocks(1)
     if numBlocks(2) > 1
         for ix = 1:numBlocks(2)
@@ -80,6 +84,7 @@ for iy = 1:numBlocks(1)
         xyMask(:, :, ib) = repmat(gausy, 1, Lx);
     end
 end
+%%
 
 xyMask = xyMask./repmat(sum(xyMask, 3), 1, 1, size(xyMask, 3));
 xyMask = reshape(xyMask, Ly*Lx, nblocks);

@@ -30,7 +30,7 @@ else
     processed = 0;
 end
 
-% run reg2P if the binaries do not exist
+%% run reg2P if the binaries do not exist
 %%%% if tiffs have already been registered, set ops.doRegistration = 0
 %%%% and reg2P will just create binary file
 % ops1 are the settings and values from registration
@@ -62,6 +62,7 @@ for i = [1:numel(ops1)]
         ops    = get_svdcomps(ops);
     end
             
+    %%
     if ops.getROIs
         % get sources in stat, and clustering images in res
         [ops, stat, model]           = sourcery(ops);

@@ -1,11 +1,11 @@
 % function to load and view the registered binaries output from Suite2P
 
 % db file
-make_db_MP024;
+%make_db_MP024;
 % which experiment to view
-iexp = 5;
+%iexp = 5;
 
-db = db(iexp);
+%db = db(iexp);
 ops.ResultsSavePath = 'D:/DATA/F/';
 CharSubDirs = '';
 for k = 1:length(db.expts)

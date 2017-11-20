@@ -82,7 +82,7 @@ for k = 1:niter
         
         B(isnan(B)) = 1;
         coefs       = min(B(2,:), ops.maxNeurop);
-        coefs       = max(0, coefs);
+        coefs       = max(0.5, coefs);
        
         disp([median(coefs) std(coefs(:))])
     end

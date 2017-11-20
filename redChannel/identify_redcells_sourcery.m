@@ -88,7 +88,7 @@ for i = 1:length(ops.planesToProcess)
     
     rrat = redSum(:,1)./(redSum(:,2)+redSum(:,1));
     redcell  = rrat > nanmean(rrat) + ops.redthres*nanstd(rrat);
-    notred   = rrat <= nanmean(rrat) + ops.notredthres*nanstd(rrat);
+    notred   = rrat <= nanmean(rrat) + ops.redmax*nanstd(rrat);
   
     
     fprintf('plane %d  reds %d\n',iplane,sum(redcell(:)));

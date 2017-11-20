@@ -3,6 +3,6 @@
 function [dreg, xyValid] = nonrigidMovie(data, ops, dsall, xyValid)
 
 [dreg,  xyVal] = ...
-    nonrigidRegFrames(data, ops.xyMask, dsall);
+    nonrigidRegFrames(data, ops, dsall);
     
    
