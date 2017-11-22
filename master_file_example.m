@@ -108,7 +108,7 @@ for iexp = 1 %[1:length(db0)]
         % creates mean red channel image aligned to green channel
         % use this if you didn't get red channel during registration
         % OR you have a separate experiment with red and green just for this
-        red_expts = ismember(ops.expts, getOr(ops, 'expred', []));
+        red_expts = ismember(db.expts, getOr(db, 'expred', []));
         if ~ops0.redMeanImg || sum(red_expts)==0
             run_REDaddon_sourcery(db, ops0);
         end
