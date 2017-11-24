@@ -1,3 +1,0 @@
-imageRate --- imaging rate per plane. Approximate, for initialization of deconvolution kernel.  
-sensorTau --- decay half-life (or timescale). Approximate, for initialization of deconvolution kernel.
-maxNeurop --- neuropil contamination coef has to be less than this (sometimes good, i.e. for interneurons)
