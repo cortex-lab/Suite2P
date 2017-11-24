@@ -197,7 +197,7 @@ if using surround neuropil (_signalExtraction_ = 'surround')
 ### Spike deconvolution 
 
 * _imageRate_ --- imaging rate per plane. 
-* _sensorTau_ --- decay timescale.
+* _sensorTau_ --- decay timescale (in seconds).
 * _maxNeurop_ --- neuropil contamination coef has to be less than this (sometimes good to impose a ceiling at 1, i.e. for interneurons)
 * _deconvType_ --- which type of deconvolution to use (either 'L0' or 'OASIS') 
 
