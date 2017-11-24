@@ -6,7 +6,10 @@ Algorithmic details in [http://biorxiv.org/content/early/2016/06/30/061507](http
 
 [![IMG](https://img.youtube.com/vi/xr-flH2Ow2Y/0.jpg)](https://www.youtube.com/watch?v=xr-flH2Ow2Y)
 
-This code was written by Marius Pachitariu and members of the cortexlab (Kenneth Harris and Matteo Carandini). It is provided here with no warranty. For support, please open an issue directly on github. An example dataset is provided [here](https://drive.google.com/open?id=0B649boZqpYG1amlyX015SG12VU0).
+This code was written by Marius Pachitariu and members of the cortexlab (Kenneth Harris and Matteo Carandini). It is provided here with no warranty. For support, please open an issue directly on github. 
+
+# Examples
+An example dataset (with master_file and make_db) is provided [here](https://drive.google.com/open?id=0B649boZqpYG1amlyX015SG12VU0).
 
 # I. Introduction
 
@@ -78,24 +81,22 @@ Note: some of the options are not specified in either the example `master_file` 
 
 The output is a struct called dat which is saved into a mat file in ResultsSavePath using the same subfolder structure, under a name formatted like `F_M150329_MP009_2015-04-29_plane1`. It contains all the information collected throughout the processing, and contains the ROI and neuropil traces in Fcell and FcellNeu, and whether each ROI j is a cell or not in stat(j).iscell. stat(j) contains information about each ROI j and can be used to recover the corresponding pixels for each ROI in stat.ipix. The centroid of the ROI is specified in stat as well. Here is a summary of where the important results are:
 
-cell traces are in dat.Fcell  
-neuropil traces are in dat.FcellNeu  
-manual, GUI overwritten "iscell" labels are in dat.cl.iscell  
+cell traces are in `Fcell`  
+neuropil traces are in `FcellNeu`
+
+deconvolved traces are in `sp`
+
+Each cell of the above structures is a different experiment from db.expts.
+manual, GUI overwritten "iscell" labels are in `stat.iscell`  
  
 stat(icell) contains all other information:  
 * iscell: automated label, based on anatomy  
-* neuropilCoefficient: neuropil subtraction coefficient, based on maximizing the skewness of the corrected trace (ICA)  
-* st: are the deconvolved spike times (in frames)  
-* c:  are the deconvolved amplitudes  
-* kernel: is the estimated kernel  
-
-Less important fields of stat(icell):
+* neuropilCoefficient: multiplicative coefficient on the neuropil signal
 * xpix, ypix: x and y indices of pixels belonging to this max. These index into the valid part of the image (defined by ops.yrange, ops.xrange).   
 * ipix: linearized indices ((ypix, xpix) --> ypix + (xpix-1) x Ly) of pixels belonging to this mask.   
 * isoverlap: whether the pixels overlap with other masks.     
 * lam, lambda: mask coefficients for the corresponding pixels. lambda is the same as lam, but normalized to 1.   
 * med: median of y and x pixels in the ROI (indices for the valid part of the image, defined by ops.yrange, ops.xrange).   
-* neuropilCoefficient: multiplicative coefficient on the neuropil signal, for correction based on maximal skewness of the corrected trace.  
 * blockstarts: the cumulative number of frames per block. Clould be useful for concatenating experiments correctly (some planes will have fewer frames/block). 
 * footprint, mrs, mrs0, cmpct, aspec_ratio, ellipse, mimgProj, skew, std, maxMinusMed, top5pcMinusMed: these are used by the automated classifier to label an ROI as cell or not. see section IX for details.
 
