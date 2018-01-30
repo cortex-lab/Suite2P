@@ -21,7 +21,7 @@ stat = [];
 xL = [];
 yL = [];
 clear mimg;
-for iplane = 2:ops.nplanes
+for iplane = 1:ops.nplanes
     fname  = sprintf('F_%s_%s_plane%d.mat', db.mouse_name, db.date, iplane);
     dat = load(fullfile(root, fname));
 
@@ -37,7 +37,7 @@ end
 clear img;
 ij = 1;
 clf;
-for iplane = 2:ops.nplanes
+for iplane = 1:ops.nplanes
     mimg{iplane} = mimg{iplane} - min(mimg{iplane}(:));
     mimg{iplane} = mimg{iplane} / max(mimg{iplane}(:));
     
