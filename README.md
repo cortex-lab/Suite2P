@@ -90,17 +90,22 @@ Each cell of the above structures is a different experiment from db.expts.
 manual, GUI overwritten "iscell" labels are in `stat.iscell`  
  
 stat(icell) contains all other information:  
-* iscell: automated label, based on anatomy  
-* neuropilCoefficient: multiplicative coefficient on the neuropil signal
-* xpix, ypix: x and y indices of pixels belonging to this max. These index into the valid part of the image (defined by ops.yrange, ops.xrange).   
-* ipix: linearized indices ((ypix, xpix) --> ypix + (xpix-1) x Ly) of pixels belonging to this mask.   
-* isoverlap: whether the pixels overlap with other masks.     
-* lam, lambda: mask coefficients for the corresponding pixels. lambda is the same as lam, but normalized to 1.   
-* med: median of y and x pixels in the ROI (indices for the valid part of the image, defined by ops.yrange, ops.xrange).   
-* blockstarts: the cumulative number of frames per block. Clould be useful for concatenating experiments correctly (some planes will have fewer frames/block). 
-* footprint, mrs, mrs0, cmpct, aspec_ratio, ellipse, mimgProj, skew, std, maxMinusMed, top5pcMinusMed: these are used by the automated classifier to label an ROI as cell or not. see section IX for details.
+* _iscell_: automated label, based on anatomy  
+* _neuropilCoefficient_: multiplicative coefficient on the neuropil signal
+* _xpix, ypix_: x and y indices of pixels belonging to this max. These index into the valid part of the image (defined by ops.yrange, ops.xrange).   
+* _ipix_: linearized indices ((ypix, xpix) --> ypix + (xpix-1) x Ly) of pixels belonging to this mask.   
+* _isoverlap_: whether the pixels overlap with other masks.     
+* _lam, lambda_: mask coefficients for the corresponding pixels. lambda is the same as lam, but normalized to 1.   
+* _med_: median of y and x pixels in the ROI (indices for the valid part of the image, defined by ops.yrange, ops.xrange).   
+* _blockstarts_: the cumulative number of frames per block. Clould be useful for concatenating experiments correctly (some planes will have fewer frames/block). 
+* _footprint, mrs, mrs0, cmpct, aspec_ratio, ellipse, mimgProj, skew, std, maxMinusMed, top5pcMinusMed_: these are used by the automated classifier to label an ROI as cell or not. see section IX for details.
 
 There are fields for red cell detection too (see the section on **Identifying red cells**)
+
+The settings for the registration and the mean image are also output in the `ops` structure:
+* _mimg_: target mean image computed at the beginning of registration to which all frames are aligned
+* _mimg1_: mean image computed from all the frames across all experiments
+* _DS_: offsets computed in XY
 
 # IV. Input-output file paths
 
