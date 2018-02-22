@@ -432,7 +432,8 @@ if x>=1 && y>=1 && x<=h.dat.cl.Lx && y<=h.dat.cl.Ly && h.dat.res.iclust(y,x)>0
     redraw_figure(h);
     guidata(hObject,h);
     
-    str = [];
+    str = sprintf('cell #%d\n',ichosen);
+    
     labels = [h.statLabels(2:end), {'iscell'}, {'redcell'},{'redprob'}];
     for j =1:length(labels)
        if isfield(h.dat.stat, labels{j})
