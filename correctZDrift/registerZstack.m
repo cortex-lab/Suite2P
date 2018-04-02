@@ -2,6 +2,8 @@
 % saves Z-stack to ops.ZstackSavePath
 function registerZstack(ops)
 %%
+ops.kriging = 1;
+
 zPath = fullfile(ops.RootDir, num2str(ops.Zexpt));
 fs = dir(fullfile(zPath, '*.tif'));
 for i = 1:length(fs)
@@ -34,7 +36,7 @@ for j = 1:ops.Zplanes
     end
     ops.Ly = size(I,1);
     ops.Lx = size(I,2);
-    ops = AlignIterativeKriging(single(I), ops);
+    ops = alignIterative(single(I), ops);
 
     Mimg(:,:,j) = ops.mimg;
     
