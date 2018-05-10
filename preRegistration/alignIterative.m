@@ -22,7 +22,7 @@ for i = 1:ops.NiterPrealign
     dreg  = rigidRegFrames(data, ops, dsnew);
     [~, igood] = sort(Corr, 'descend');
     if i<floor(ops.NiterPrealign/2)        
-        igood = igood(1:100);  
+        igood = igood(1:min(numel(igood),100));  
     else
         igood = igood(1:maxImgPreAlign);  
     end

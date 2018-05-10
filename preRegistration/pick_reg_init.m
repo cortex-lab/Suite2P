@@ -21,9 +21,9 @@ CC = CC./(diag(CC) * diag(CC)').^.5;
 % CC = corrcoef(dd);
 
 [CCsort, isort] = sort(CC, 2, 'descend');
-
-bestCC = mean(CCsort(:, 1:20), 2);
+nc = size(CCsort,2);
+bestCC = mean(CCsort(:, 1:min(nc,20)), 2);
 [~, imax] = max(bestCC);
 
-mimg = mean(data(:,:,isort(imax, 1:20)), 3);
+mimg = mean(data(:,:,isort(imax, 1:min(nc,20))), 3);
 end

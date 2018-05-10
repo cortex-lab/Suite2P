@@ -51,6 +51,9 @@ ops.Lx = Lx;
 if ops.doRegistration
     % get frames for initial registration
     IMG = GetRandFrames(fs, ops);
+    if isempty(IMG)
+        error('ERROR: There are too few frames per plane for processing!');
+    end
     % compute phase shifts from bidirectional scanning
     if ops.dobidi
         ops.BiDiPhase = BiDiPhaseOffsets(IMG);

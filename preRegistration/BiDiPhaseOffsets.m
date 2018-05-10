@@ -20,8 +20,9 @@ cc = ifft(d1 .* d2,[],2);
 cc = fftshift(cc, 2);
 cc = mean(mean(mean(cc,1),3),4);
 
-[cx, ix] = max(cc);
-ix       = ix - (floor(Lx/2) + 1);
+% max shift of +/-5 pixels
+[cx, ix] = max(cc(floor(Lx/2)+1 + [-5:5]));
+ix       = ix - (6);
 
 BiDiPhase = -1 * ix;
 
