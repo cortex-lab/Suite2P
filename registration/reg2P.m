@@ -139,13 +139,21 @@ nbytes = 0;
 xyValid = true(Ly,Lx);
 for k = 1:length(fs)
     % in case different experiments have different numbers of channels
-    if ismember(ops.expts(k), getOr(ops, 'expred', []))
-        nchannels_expt = ops.nchannels_red;
-        red_mean_expt  = red_mean;
+    if ~isempty(ops.expts)
+        if ismember(ops.expts(k), getOr(ops, 'expred', []))
+            nchannels_expt = ops.nchannels_red;
+        else
+            nchannels_expt = ops.nchannels;
+        end
     else
         nchannels_expt = ops.nchannels;
+    end
+    if nchannels_expt > 1
+        red_mean_expt  = red_mean;
+    else
         red_mean_expt  = 0;
     end
+    
     if red_align
         reg_channel = rchannel;
     else
@@ -267,7 +275,11 @@ end
 for i = 1:numel(ops1)
     ops1{i}.mimg1 = ops1{i}.mimg1/sum(ops1{i}.Nframes);
     if red_mean || red_align
-        red_expts = ismember(ops.expts, getOr(ops, 'expred', []));
+        if ~isempty(ops.expts)
+            red_expts = ismember(ops.expts, getOr(ops, 'expred', []));
+        else
+            red_expts = 1;
+        end
         ops1{i}.mimgRED = ops1{i}.mimgRED/sum(ops1{i}.Nframes(red_expts));
         if red_binary
             fclose(fidRED{i});
