@@ -1,8 +1,6 @@
 % non-rigid registration of frames with offsets ds
 function [dreg, Valid]= nonrigidRegFrames(data, xyMask, ds)
 
-orig_class = class(data);
-
 % if ops.useGPU
 %     data = gpuArray(single(data));
 % end
@@ -20,7 +18,7 @@ dy = reshape(dy, Ly, Lx, []);
 idy = repmat([1:Ly]', 1, Lx);
 idx = repmat([1:Lx],  Ly, 1);
 
-dreg = zeros(size(data), orig_class);
+dreg = zeros(size(data), 'single');
 Valid = true(Ly, Lx);
 for i = 1:NT
     Im = data(:,:,i);    
