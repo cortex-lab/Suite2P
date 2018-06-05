@@ -3,8 +3,10 @@ function ops = build_ops3(db, ops)
 ops.nplanes = getOr(ops, 'nplanes', 1);
 ops.nchannels = getOr(ops, 'nchannels', 1);
 ops.readTiffHeader = getOr(ops,'readTiffHeader',1);
-if ~isempty(db.expred)
-    ops.nchannels_red = getOr(ops, 'nchannels_red', 2);
+if isfield(db, 'expred')
+    if ~isempty(db.expred)
+        ops.nchannels_red = getOr(ops, 'nchannels_red', 2);
+    end
 end
 
 % ops = db;
