@@ -185,3 +185,7 @@ ops.CharSubDirs = CharSubDirs;
 
 ops.ResultsSavePath = sprintf('%s//%s//%s//%s//', ops.ResultsSavePath, ops.mouse_name, ops.date, ...
     CharSubDirs);
+    
+if isempty(db.expts)
+   ops.expts = [];
+end
