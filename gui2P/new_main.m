@@ -75,6 +75,8 @@ rng('default')
 % keyboard;
 if isfield(h.dat, 'dat')
     h.dat = h.dat.dat;
+    h                   = identify_classifier(h);    
+    h                   = classROI(h);
 else
     h.dat.filename = fullfile(filepath1, filename1);
     h.dat.cl.Ly       = numel(h.dat.ops.yrange);
