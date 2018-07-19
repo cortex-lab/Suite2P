@@ -116,7 +116,7 @@ The settings for the registration and the mean image are also output in the `ops
 * _RegFileTiffLocation_ --- where to save registered tiffs (if empty, does not save)
 **if you want to save red tiffs, then specify ops.RegFileTiffLocation and set ops.REDbinary = 1**
 
-All of these filepaths are completed with separate subfolders per animal and experiment, specified in the make_db file. Your data should be stored under a file tree of the form
+_ResultsSavePath_ is completed with separate subfolders per animal and experiment, specified in the make_db file. Your data should be stored under a file tree of the form
 
 \RootStorage\mouse_name\session\block\*.tif(f)
 
