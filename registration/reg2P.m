@@ -54,6 +54,16 @@ if ops.doRegistration
     if isempty(IMG)
         error('ERROR: There are too few frames per plane for processing!');
     end
+    
+    % from random frames get scaling factor (if uint16, scale by 2)
+    if ~isfield(ops, 'scaleTiff')
+        if max(IMG(:)) > 2^15
+            ops.scaleTiff = 2;
+        else
+            ops.scaleTiff = 1;
+        end
+    end
+    
     % compute phase shifts from bidirectional scanning
     if ops.dobidi
         ops.BiDiPhase = BiDiPhaseOffsets(IMG);
@@ -139,13 +149,21 @@ nbytes = 0;
 xyValid = true(Ly,Lx);
 for k = 1:length(fs)
     % in case different experiments have different numbers of channels
-    if ismember(ops.expts(k), getOr(ops, 'expred', []))
-        nchannels_expt = ops.nchannels_red;
-        red_mean_expt  = red_mean;
+    if ~isempty(ops.expts)
+        if ismember(ops.expts(k), getOr(ops, 'expred', []))
+            nchannels_expt = ops.nchannels_red;
+        else
+            nchannels_expt = ops.nchannels;
+        end
     else
         nchannels_expt = ops.nchannels;
+    end
+    if nchannels_expt > 1
+        red_mean_expt  = red_mean;
+    else
         red_mean_expt  = 0;
     end
+    
     if red_align
         reg_channel = rchannel;
     else
@@ -232,16 +250,19 @@ for k = 1:length(fs)
             indframes = ifr0:nplanes:size(data,3);
             for l = 1:size(xFOVs,2)
                 dwrite = dreg(yFOVs(:,l),xFOVs(:,l),indframes);
-                fwrite(fid{i,l}, dwrite, class(data));
-%                 ops1{i,l}.Nframes(k) = ops1{i,l}.Nframes(k) + size(dwrite,3);
+                dwrite = int16(dwrite / ops.scaleTiff);
+                fwrite(fid{i,l}, dwrite, 'int16');
                 ops1{i,l}.mimg1 = ops1{i,l}.mimg1 + sum(dwrite,3);
                 
                 if red_mean_expt || red_align
                     dwrite = dreg2(yFOVs(:,l),xFOVs(:,l),indframes);
+                    if ops.scaleTiff>1
+                        dwrite = int16(dwrite / ops.scaleTiff);
+                    end
                     ops1{i,l}.mimgRED = ops1{i,l}.mimgRED + sum(dwrite,3);
                 end
                 if red_binary
-                    fwrite(fidRED{i,l}, dwrite, class(data));
+                    fwrite(fidRED{i,l}, dwrite, 'int16');
                 end
             end
         end
@@ -267,7 +288,11 @@ end
 for i = 1:numel(ops1)
     ops1{i}.mimg1 = ops1{i}.mimg1/sum(ops1{i}.Nframes);
     if red_mean || red_align
-        red_expts = ismember(ops.expts, getOr(ops, 'expred', []));
+        if ~isempty(ops.expts)
+            red_expts = ismember(ops.expts, getOr(ops, 'expred', []));
+        else
+            red_expts = 1;
+        end
         ops1{i}.mimgRED = ops1{i}.mimgRED/sum(ops1{i}.Nframes(red_expts));
         if red_binary
             fclose(fidRED{i});

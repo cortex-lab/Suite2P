@@ -1,8 +1,6 @@
 % rigid registration of frames with offsets ds
 function dreg = rigidRegFrames(data, ops, ds)
 
-orig_class = class(data);
-
 % compute maximum batch size for GPU
 [h, w, nFrames] = size(data);
 if getOr(ops, 'useGPU', 0)
@@ -16,7 +14,7 @@ nFramesPerBatch = 8;
 nBatches = ceil(nFrames/nFramesPerBatch);
 startFrame = 1:nFramesPerBatch:nFrames;
 endFrame = min(startFrame+nFramesPerBatch-1, nFrames);
-dreg = zeros(size(data), orig_class);
+dreg = zeros(size(data), 'single');
 
 
 for iBatch = 1:nBatches
@@ -24,7 +22,7 @@ for iBatch = 1:nBatches
     if ops.useGPU
         dataBatch = gpuArray(single(data(:,:,idx)));
     else
-        dataBatch = data(:,:,idx);
+        dataBatch = single(data(:,:,idx));
     end
     [Ly, Lx, NT] = size(dataBatch);
     
@@ -48,7 +46,7 @@ for iBatch = 1:nBatches
         fdata       = fft2(dataBatch);
         dregBatch   = gather_try(real(ifft2(fdata .* exp(1i * dph))));
     else % do it frame-by-frame
-        dregBatch = zeros(size(dataBatch), orig_class);
+        dregBatch = zeros(size(dataBatch), 'single');
         for i = 1:NT
             dph         = 2*pi*(dsBatch(i,1)*Ny + dsBatch(i,2)*Nx);
             fdata       = fft2(single(dataBatch(:,:,i)));

@@ -60,7 +60,7 @@ while 1
     NT   = size(data,3);
     data = reshape(data, [], NT);
     data = double(data);
-        
+    
     % process the data
     %data = my_conv2(data, ops.sig, [1 2]);
     
@@ -71,7 +71,7 @@ while 1
     % compute neuropil fluorescence
     Fneu(:,ix + (1:NT)) = neuropMasks * data;
     
-     % compute neuropil fluorescence
+    % compute neuropil fluorescence
     cF(:,ix + (1:NT)) = centerMasks * data;
     sF(:,ix + (1:NT)) = surroundMasks * data;
     
@@ -83,23 +83,24 @@ end
 fclose(fid);
 
 %% get z drift
-cFt = my_conv2(cF,.5, 2); 
-sFt = my_conv2(sF,.5, 2); 
-
-cFt = ordfilt2(cFt,1, true(1,100),[], 'symmetric'); 
-sFt = ordfilt2(sFt,1, true(1,100),[], 'symmetric'); 
-
-ratCS = log(max(1e-4,cFt )) - log(max(1e-4,sFt));
-ratCS = zscore(ratCS, 1, 2);
-
-[u, s, v] = svdecon(ratCS);
-
-ops.zdrift = v(:,1);
-
-figure(10)
-plot(v(:,1))
-hold all
-
+if getOr(ops, 'getZdrift', 0)
+    cFt = my_conv2(cF,.5, 2);
+    sFt = my_conv2(sF,.5, 2);
+    
+    cFt = ordfilt2(cFt,1, true(1,100),[], 'symmetric');
+    sFt = ordfilt2(sFt,1, true(1,100),[], 'symmetric');
+    
+    ratCS = log(max(1e-4,cFt )) - log(max(1e-4,sFt));
+    ratCS = zscore(ratCS, 1, 2);
+    
+    [u, s, v] = svdecon(ratCS);
+    
+    ops.zdrift = v(:,1);
+    
+    figure(10)
+    plot(v(:,1))
+    hold all
+end
 %%
 % keyboard;
 

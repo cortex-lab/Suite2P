@@ -3,7 +3,11 @@ function ops = build_ops3(db, ops)
 ops.nplanes = getOr(ops, 'nplanes', 1);
 ops.nchannels = getOr(ops, 'nchannels', 1);
 ops.readTiffHeader = getOr(ops,'readTiffHeader',1);
-
+if isfield(db, 'expred')
+    if ~isempty(db.expred)
+        ops.nchannels_red = getOr(ops, 'nchannels_red', 2);
+    end
+end
 
 % ops = db;
 if ~iscell(db.mouse_name)
@@ -24,7 +28,11 @@ if ~iscell(db.mouse_name)
     % build file list
     ops.fsroot = [];
     for j = 1:length(ops.SubDirs)
-        ops.fsroot{j} = dir(fullfile(ops.RootDir, ops.SubDirs{j}, '*.tif'));
+        ffile = dir(fullfile(ops.RootDir, ops.SubDirs{j}, '*.tif'));
+        fname = struct2cell(ffile);
+        fname = fname(1,:)';
+        [~,index] = sort_nat(fname);
+        ops.fsroot{j} = ffile(index);
         ops.fsroot{j} = cat(1, ops.fsroot{j}, ...
             dir(fullfile(ops.RootDir, ops.SubDirs{j}, '*.tiff')));
         for k = 1:length(ops.fsroot{j})
@@ -34,7 +42,11 @@ if ~iscell(db.mouse_name)
     
     if isfield(db, 'expred') && ~isempty(db.expred) && ...
             (~isfield(db, 'nchannels_red') || isempty(db.nchannels_red))
-        ops.fsred = dir(fullfile(ops.RootDir, num2str(db.expred), '*.tif'));
+        ffile = dir(fullfile(ops.RootDir, num2str(db.expred), '*.tif'));
+        fname = struct2cell(ffile);
+        fname = fname(1,:)';
+        [~,index] = sort_nat(fname);
+        ops.fsred = ffile(index); 
         for k = 1:length(ops.fsroot{j})
             ops.fsred(k).name = fullfile(ops.RootDir, num2str(db.expred), ops.fsred(k).name);
         end
@@ -173,3 +185,7 @@ ops.CharSubDirs = CharSubDirs;
 
 ops.ResultsSavePath = sprintf('%s//%s//%s//%s//', ops.ResultsSavePath, ops.mouse_name, ops.date, ...
     CharSubDirs);
+    
+if isempty(db.expts)
+   ops.expts = [];
+end
