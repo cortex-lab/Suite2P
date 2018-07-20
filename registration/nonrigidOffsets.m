@@ -1,6 +1,6 @@
 % computes registration offsets for data split into blocks
 % loops over blocks and returns offsets dsall
-function [dsall,ops1] = nonrigidOffsets(data, j, iplane0, ops, ops1)
+function [dsall,ops1] = nonrigidOffsets(data, k, j, iplane0, ops, ops1)
 
 nplanes = getOr(ops, {'nplanes'}, 1);
 alignAcrossPlanes  = getOr(ops, {'alignAcrossPlanes'}, false);
@@ -36,5 +36,6 @@ for i = 1:numel(ops.planesToProcess)
     dsall(indframes,:,:)  = ds;
     ops1{i}.DS          = cat(1, ops1{i}.DS, ds);
     ops1{i}.CorrFrame   = cat(1, ops1{i}.CorrFrame, Corr);
+    ops1{i}.Nframes(k)  = ops1{i}.Nframes(k) + length(indframes);
 end
     

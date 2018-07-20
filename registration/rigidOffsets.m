@@ -4,7 +4,7 @@
 %%% j is which tiff
 %%% iplane0 is first position of each plane in tiff
 %%% ops and ops1 are options
-function [dsall, ops1] = rigidOffsets(data, j, iplane0, ops, ops1)
+function [dsall, ops1] = rigidOffsets(data, k, j, iplane0, ops, ops1)
 
 % split into subsets (for high scanning resolution recordings)
 [xFOVs, yFOVs] = get_xyFOVs(ops);
@@ -40,6 +40,7 @@ for i = 1:numel(ops.planesToProcess)
         end
         ops1{i,l}.DS          = cat(1, ops1{i,l}.DS, ds);
         ops1{i,l}.CorrFrame   = cat(1, ops1{i,l}.CorrFrame, Corr);
+        ops1{i,l}.Nframes(k)  = ops1{i,l}.Nframes(k) + length(indframes);
     end
     
     
