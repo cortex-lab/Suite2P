@@ -156,6 +156,10 @@ for i = setdiff(1:nplanes, planesToInterpolate)
         ds = ops1{i,j}.DS;
         indframes(length(ds)+1:end) = [];
         dsall(indframes,:,j) = ds;
+        nanInd = isnan(ops1{i,j}.DS(:,1));
+        ops1{i,j}.DS(nanInd,:)  = [];
+        ops1{i,j}.CorrFrame(nanInd,:)  = [];
+        ops1{i,j}.usedPlanes(nanInd,:)  = [];
         
         ops1{i,j}.planeInterpolated = 0;
         up = false(size(ds,1), nplanes);

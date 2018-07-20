@@ -111,8 +111,10 @@ for i =  1:length(ops.planesToProcess)
     % neuropil-corrected trace
     %     stat = run_deconvolution3(ops, dat);
     
-    dat.stat = stat;    
+    dat.stat = stat;
+    dat.ops = ops;
+    dat.Ff = Ff;
         
-    save(fpath, '-struct', 'dat')    
+    save(fpath, 'dat')    
 end
 %

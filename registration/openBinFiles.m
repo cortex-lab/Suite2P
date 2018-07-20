@@ -6,7 +6,7 @@ fid    = cell(numPlanes, size(ops1,2));
 fidRED = cell(numPlanes, size(ops1,2));
 fidIntpol = [];
 if ops.interpolateAcrossPlanes == 1 && ~isempty(ops.RegFileBinLocation)
-    fidIntpol = cell(numPlanes, size(xFOVs,2));
+    fidIntpol = cell(numPlanes, size(ops1,2));
 end
 
 for i = 1:numPlanes
