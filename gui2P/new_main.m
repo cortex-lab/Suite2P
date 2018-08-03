@@ -73,11 +73,19 @@ if flag
 rng('default')
 
 % keyboard;
+init = 0;
 if isfield(h.dat, 'dat')
     h.dat = h.dat.dat;
-    h                   = identify_classifier(h);    
-    h                   = classROI(h);
-else
+    if isfield(h.dat, 'cl')
+      h                   = identify_classifier(h);    
+      h                   = classROI(h);
+      init = 1;
+    else
+      init = 0;
+    end
+end
+
+if init==0
     h.dat.filename = fullfile(filepath1, filename1);
     h.dat.cl.Ly       = numel(h.dat.ops.yrange);
     h.dat.cl.Lx       = numel(h.dat.ops.xrange);
