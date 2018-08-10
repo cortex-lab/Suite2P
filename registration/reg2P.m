@@ -213,9 +213,9 @@ while sm.hasData()
     % get the registration offsets for each frame
     if ops.doRegistration
         if ops.nonrigid
-            [dsall, ops1] = nonrigidOffsets(data, fileCounter, iplane0, ops, ops1);
+            [dsall, ops1] = nonrigidOffsets(data, lastPartition, fileCounter, iplane0, ops, ops1);
         else
-            [dsall, ops1] = rigidOffsets(data, fileCounter, iplane0, ops, ops1);
+            [dsall, ops1] = rigidOffsets(data, lastPartition, fileCounter, iplane0, ops, ops1);
         end
     end
 
