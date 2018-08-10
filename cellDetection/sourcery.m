@@ -1,11 +1,11 @@
 % run cell detection on spatial masks U
-function [ops, stat, model] = sourcery(ops)
+function [ops, stat, model] = sourcery(ops, sm)
 
 tic
-[ops, U0, model, U2]    = get_svdForROI(ops);
-        
+[ops, U0, model, U2]    = get_svdForROI(ops, sm);
+
 %  U0 = my_conv2(U0, ops.sig, [1 2]);
- 
+
 ops.fig         = getOr(ops, 'fig', 1);
 ops.ThScaling   = getOr(ops, 'ThScaling', 1);
 
@@ -26,7 +26,7 @@ StS = S'*S; % covariance of neuropil basis functions
 
 % make cell mask with ops.diameter
 d0   = ceil(ops.diameter); % expected cell diameter in pixels
-sig = ceil(d0/4); 
+sig = ceil(d0/4);
 dx = repmat([-d0:d0], 2*d0+1, 1);
 dy = dx';
 rs = dx.^2 + dy.^2 - d0^2;
@@ -55,18 +55,18 @@ nBasis = size(S,2);
 
 %
 while 1
-    iter = iter + 1;    
-    
+    iter = iter + 1;
+
     % residual is smoothed at every iteration
     us = my_conv2_circ(Ucell, sig, [2 3]);
 
     % compute log variance at each location
     V = sq(mean(us.^2,1));
     V = double(V);
-    
+
     um = sq(mean(Ucell.^2,1));
     um = my_conv2_circ(um, sig, [1 2]);
-    
+
     V = V./um ;
     %     V = log(V./um);
     V = double(V);
@@ -76,130 +76,129 @@ while 1
     if iter==1
         lbound = -my_min2(-my_min2(V, d0), d0);
     end
-    
+
     V = V - lbound;
-    
-    if iter==1        
+
+    if iter==1
         % find indices of all maxima  in plus minus 1 range
         % use the median of these peaks to decide stopping criterion
         maxV    = -my_min(-V, 1, [1 2]);
         ix      = (V > maxV-1e-10);
-        
+
         % threshold is the mean peak, times a potential scaling factor
         pks = V(ix);
 
         Th  = ops.ThScaling * median(pks(pks>1e-4));
-        
+
         ops.Vcorr = V;
     end
-    
+
     % just in case this goes above original value
     V = min(V, ops.Vcorr);
-    
+
     % find local maxima in a +- d neighborhood
     maxV = -my_min(-V, d0, [1 2]);
-    
+
     % find indices of these maxima above a threshold
     ix  = (V > maxV-1e-10) & (V > Th);
     ind = find(ix);
-    
+
     if iter==1
-       Nfirst = numel(ind); 
+       Nfirst = numel(ind);
     end
-    
-    if numel(ind)==0 
+
+    if numel(ind)==0
         break;
     end
-    
+
     new_codes = normc(us(:, ind));
-    
+
     ncells = icell;
     LtU(ncells+size(new_codes,2), nSVD) = 0;
-    
+
     % each source needs to be iteratively subtracted off
     for i = 1:size(new_codes,2)
         icell = icell + 1;
         [ipix, ipos] = getIpix(ind(i), dx, dy, Lx, Ly);
-        
+
         Usub = Ucell(:, ipix);
-        
-        lam = max(0, new_codes(:, i)' * Usub);        
-        
+
+        lam = max(0, new_codes(:, i)' * Usub);
+
         % threshold pixels
         lam(lam<max(lam)/5) = 0;
-                 
+
         mPix(ipos,icell) = ipix;
         mLam(ipos,icell) = lam;
-        
+
         % extract biggest connected region of lam only
         mLam(:,icell)   = normc(getConnected(mLam(:,icell), rs)); % ADD normc HERE and BELOW!!!
         lam             = mLam(ipos,icell) ;
-        
+
         L(ipix,icell)   = lam;
-        
+
         LtU(icell, :)   = U0(:,ipix) * lam;
         LtS(icell, :)   = lam' * S(ipix,:);
-    end    
-    
-    % ADD NEUROPIL INTO REGRESSION HERE    
+    end
+
+    % ADD NEUROPIL INTO REGRESSION HERE
     LtL     = full(L'*L);
     codes   = ([LtL LtS; LtS' StS]+ 1e-3 * eye(icell+nBasis))\[LtU; StU];
-    neu     = codes(icell+1:end,:);    
+    neu     = codes(icell+1:end,:);
     codes   = codes(1:icell,:);
-%     codes = (LtL+ 1e-3 * eye(icell))\LtU;    
-    
+%     codes = (LtL+ 1e-3 * eye(icell))\LtU;
+
     % subtract off everything
-    Ucell = U0 - reshape(neu' * S', size(U0)) - reshape(double(codes') * L', size(U0));    
-    
+    Ucell = U0 - reshape(neu' * S', size(U0)) - reshape(double(codes') * L', size(U0));
+
     % re-estimate masks
     L   = sparse(Ly*Lx, icell);
-    for j = 1:icell        
+    for j = 1:icell
         ipos = find(mPix(:,j)>0);
-        ipix = mPix(ipos,j);        
-        
+        ipix = mPix(ipos,j);
+
         Usub = Ucell(:, ipix)+ codes(j, :)' * mLam(ipos,j)';
-        
+
         lam = max(0, codes(j, :) * Usub);
         % threshold pixels
         lam(lam<max(lam)/5) = 0;
-        
+
         mLam(ipos,j) = lam;
 
         % extract biggest connected region of lam only
         mLam(:,j) = normc(getConnected(mLam(:,j), rs));
         lam = mLam(ipos,j);
-        
-        
+
+
         L(ipix,j) = lam;
-        
+
         LtU(j, :) = U0(:,ipix) * lam;
         LtS(j, :) = lam' * S(ipix,:);
-        
+
         Ucell(:, ipix) = Usub - (Usub * lam)* lam';
     end
     %
     err(iter) = mean(Ucell(:).^2);
-    
+
     Vnew = sq(sum(Ucell.^2,1));
-    
+
     fprintf('%d total ROIs, err %4.4f, thresh %4.4f \n', icell, err(iter), Th)
-    if ops.fig   
-        
+    if ops.fig
         figure(1)
         subplot(1,2, 1);
         imagesc(ops.Vcorr, [0 2*Th])
         axis off
-        
+
         subplot(1,2, 2);
         imagesc(V, [0 2*Th])
         axis off
-        
+
         figure(2)
         [~, iclust, lam] = drawClusters(ops, r, mPix, mLam, Ly, Lx);
-        
-        drawnow
+
+        drawnow;
     end
-    
+
      if (numel(ind)<Nfirst * getOr(ops, 'stopSourcery', 1/10)) || (iter>= getOr(ops, 'maxIterRoiDetection', 100))
         break;
     end

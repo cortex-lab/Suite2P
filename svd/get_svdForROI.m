@@ -1,6 +1,6 @@
 % compute SVD and project onto normalized data
 % save if ops.writeSVDroi
-function [ops, U, model, U2] = get_svdForROI(ops, clustModel)
+function [ops, U, model, U2] = get_svdForROI(ops, clustModel, sm)
 
 % iplane = ops.iplane;
 U = []; Sv = []; V = []; Fs = []; sdmov = [];
@@ -23,7 +23,7 @@ mov = loadAndBin(ops, Ly, Lx, nimgbatch, nt0);
 %% SVD options
 if nargin==1 || ~strcmp(clustModel, 'CNMF')
     ops.nSVDforROI = min(ops.nSVDforROI, size(mov,3));
-    
+
     % smooth spatially to get high SNR SVD components
     if ops.sig>0.05
         for i = 1:size(mov,3)
@@ -32,7 +32,7 @@ if nargin==1 || ~strcmp(clustModel, 'CNMF')
             mov(:,:,i) = I;
         end
     end
-    
+
     mov             = reshape(mov, [], size(mov,3));
     % compute noise variance across frames (assumes slow signal)
     if 1
@@ -43,14 +43,11 @@ if nargin==1 || ~strcmp(clustModel, 'CNMF')
     sdmov           = reshape(sdmov, numel(ops.yrange), numel(ops.xrange));
     sdmov           = max(1e-10, sdmov);
     ops.sdmov       = sdmov;
-    
-    % smooth the variance over space
-    %     sdmov           = my_conv2(sdmov.^2, ops.diameter, [1 2]).^.5;
-    
+
     % normalize pixels by noise variance
     mov             = bsxfun(@rdivide, mov, sdmov(:));
     model.sdmov     = sdmov;
-    
+
     % compute covariance of frames
     if ops.useGPU
         COV             = gpuBlockXtX(mov)/size(mov,1);
@@ -58,7 +55,7 @@ if nargin==1 || ~strcmp(clustModel, 'CNMF')
         COV             = mov' * mov/size(mov,1);
     end
     ops.nSVDforROI = min(size(COV,1)-2, ops.nSVDforROI);
-    
+
     % compute SVD of covariance matrix
     if ops.useGPU && size(COV,1)<1.2e4
         [V, Sv, ~]      = svd(gpuArray(double(COV)));
@@ -72,36 +69,33 @@ if nargin==1 || ~strcmp(clustModel, 'CNMF')
         [V, Sv]          = eigs(double(COV), ops.nSVDforROI);
         Sv              = single(diag(Sv));
     end
-    
+
 
     if ops.useGPU
         U               = gpuBlockXY(mov, V);
     else
         U               = mov * V;
     end
-    U               = single(U);    
+    U               = single(U);
     % reshape U to frame size
     U = reshape(U, numel(ops.yrange), numel(ops.xrange), []);
-    
+
 
     % compute spatial masks (U = mov * V)
     mov = loadAndBin(ops, Ly, Lx, nimgbatch, nt0);
     mov             = reshape(mov, [], size(mov,3));
-    
+
     if ops.useGPU
         U2               = gpuBlockXY(mov, V);
     else
         U2               = mov * V;
     end
-    U2               = single(U2);    
+    U2               = single(U2);
     % reshape U to frame size
     U2 = reshape(U2, numel(ops.yrange), numel(ops.xrange), []);
 
-    
+
     % write SVDs to disk
-    if ~exist(ops.ResultsSavePath, 'dir')
-        mkdir(ops.ResultsSavePath);
-    end
     if getOr(ops, {'writeSVDroi'}, 0)
         % project spatial masks onto raw data
         fid = fopen(ops.RegFile, 'r');
@@ -114,7 +108,7 @@ if nargin==1 || ~strcmp(clustModel, 'CNMF')
             end
             data = single(data);
             data = reshape(data, Ly, Lx, []);
-            
+
             % subtract off the mean of this batch
             data = bsxfun(@minus, data, mean(data,3));
             %     data = bsxfun(@minus, data, ops.mimg1);
@@ -124,19 +118,18 @@ if nargin==1 || ~strcmp(clustModel, 'CNMF')
             else
                 Fs(:, ix + (1:size(data,3))) = U' * reshape(data, [], size(data,3));
             end
-            
+
             ix = ix + size(data,3);
         end
         fclose(fid);
-        
+
+        filePath = sm.getFileForPlane('svd_roi', ops.iplane);
         try
-            save(sprintf('%s/SVDroi_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
-                ops.mouse_name, ops.date, ops.iplane), 'U', 'Sv', 'Fs', 'ops', '-v6');
+            save(filePath, 'U', 'Sv', 'Fs', 'ops', '-v6');
         catch
-            save(sprintf('%s/SVDroi_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
-                ops.mouse_name, ops.date, ops.iplane), 'U', 'Sv', 'Fs', 'ops');
+            save(filePath, 'U', 'Sv', 'Fs', 'ops');
         end
     end
-    
+
 end
 
