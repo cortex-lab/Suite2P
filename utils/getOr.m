@@ -13,7 +13,7 @@ end
 
 fieldExists = isfield(s, field);
 if any(fieldExists)
-  if iscellstr(field)
+  if iscellstr(field) || isstring(field)
     v = s.(field{find(fieldExists, 1)});
   else
     v = s.(field);
