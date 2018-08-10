@@ -1,4 +1,4 @@
-function [ops, stat, Fcell, FcellNeu]      = extractSignals(ops, m, stat)
+function [ops, stat, Fcell, FcellNeu]      = extractSignals(ops, m, stat, sm)
 
 ops.saveNeuropil = getOr(ops, 'saveNeuropil', 0);
 
@@ -19,7 +19,7 @@ covL = [m.LtL m.LtS; m.LtS' m.StS];
 
 % covLinv = inv(covL + 1e-4 * Ireg);
 % covLinv = covLinv ./ repmat(diag(covLinv), 1, size(covLinv,2));
-%% get signals  
+%% get signals
 
 nimgbatch = 2000;
 
@@ -38,27 +38,27 @@ end
 [Ly Lx] = size(ops.mimg1);
 
 mimg1 = ops.mimg1(ops.yrange, ops.xrange);
-% find indices of good clusters 
+% find indices of good clusters
 while 1
     data = fread(fid,  Ly*Lx*nimgbatch, '*int16');
     if isempty(data)
-       break; 
+       break;
     end
     data = reshape(data, Ly, Lx, []);
     data = data(ops.yrange, ops.xrange, :);
     data = single(data);
     NT   = size(data,3);
-    
+
     % process the data
     data = bsxfun(@minus, data, mimg1);
     data = my_conv2(data, ops.sig, [1 2]);
-    data = bsxfun(@rdivide, data, m.sdmov);    
+    data = bsxfun(@rdivide, data, m.sdmov);
     data = single(reshape(data, [], NT));
-    
+
     %
     Ftemp = zeros(Nk, NT, 'single');
     for k = 1:Nk
-       ipix = stat(k).ipix(:)'; 
+       ipix = stat(k).ipix(:)';
        if ~isempty(ipix)
            Ftemp(k,:) = stat(k).lam(:)' * data(ipix,:);
        end
@@ -66,14 +66,14 @@ while 1
     %
     StU         = S' * data;
     Fdeconv     = covL\cat(1, Ftemp, StU);
-    
+
     Fneu(:,ix + (1:NT))     = m.LtS * Fdeconv(1+Nk:end, :); % estimated neuropil
     F(:,ix + (1:NT))        = Fneu(:,ix + (1:NT)) + Fdeconv(1:Nk, :); % estimated ROI signal
-    
+
     if ops.saveNeuropil
         Ntraces(:,ix + (1:NT)) = Fdeconv(1+Nk:end, :);
     end
-    
+
     ix = ix + NT;
     if rem(ix, 3*NT)==0
         fprintf('Frame %d done in time %2.2f \n', ix, toc)
@@ -120,6 +120,6 @@ end
 
 if getOr(ops, 'saveNeuropil', 0)
     S = reshape(S, numel(ops.yrange), numel(ops.xrange), Nbasis);
-    save(sprintf('%s/NEU_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
-        ops.mouse_name, ops.date, ops.iplane),  'ops', 'S', 'Ntraces', '-v7.3')
+    filePath = sm.getFileForPlane('neuropil', ops.iplane);
+    save(filePath, 'ops', 'S', 'Ntraces', '-v7.3');
 end

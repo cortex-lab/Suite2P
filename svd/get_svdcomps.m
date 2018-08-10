@@ -1,8 +1,5 @@
 % compute SVD of data and save to file
-function [ops, U, Sv] = get_svdcomps(ops)
-
-% load(sprintf('%s/%s/%s/regops_%s_%s_plane%d.mat', ops.ResultsSavePath, ops.mouse_name, ops.date, ...
-%     ops.mouse_name, ops.date, ops.iplane))
+function [ops, U, Sv] = get_svdcomps(ops, sm)
 
 iplane = ops.iplane;
 
@@ -23,7 +20,7 @@ end
 ops.NavgFramesSVD = floor(ntotframes/nt0);
 nimgbatch = nt0 * floor(2000/nt0);
 
-%% load the data 
+%% load the data
 
 ix = 0;
 fid = fopen(ops.RegFile, 'r');
@@ -35,22 +32,22 @@ while 1
         break;
     end
     data = reshape(data, Ly, Lx, []);
-    
+
     % subtract off the mean of this batch
 %     data = data - repmat(ops.mimg1, 1, 1, size(data,3));
-    
+
     nSlices = nt0*floor(size(data,3)/nt0);
     if nSlices ~= size(data,3)
         data = data(:,:, 1:nSlices);
     end
-    
+
     % bin data
     data = reshape(data, Ly, Lx, nt0, []);
     data = single(data);
     davg = squeeze(mean(data,3));
-    
+
     mov(:,:,ix + (1:size(davg,3))) = davg(ops.yrange, ops.xrange, :);
-    
+
     ix = ix + size(davg,3);
 end
 fclose(fid);
@@ -100,10 +97,6 @@ end
 U               = single(U);
 Sv              = single(diag(Sv));
 
-if ~exist(ops.ResultsSavePath, 'dir')
-    mkdir(ops.ResultsSavePath)
-end
-
 % project spatial masks onto raw data
 fid = fopen(ops.RegFile, 'r');
 ix = 0;
@@ -114,7 +107,7 @@ while 1
         break;
     end
     data = reshape(data, Ly, Lx, []);
-    
+
     % subtract off the mean of this batch
     %         data = data - repmat(mean(data,3), 1, 1, size(data,3));
 %     data = data - repmat(ops.mimg1, 1, 1, size(data,3));
@@ -125,14 +118,10 @@ while 1
     else
         Fs(:, ix + (1:size(data,3))) = U' * reshape(data, [], size(data,3));
     end
-    
+
     ix = ix + size(data,3);
 end
 fclose(fid);
-
-if ~exist(ops.ResultsSavePath, 'dir')
-    mkdir(ops.ResultsSavePath);
-end
 
 totF = [0 cumsum(ops.Nframes)];
 for iexp = 1:length(ops.expts)
@@ -141,12 +130,9 @@ end
 
 %%% save SVDs
 U = reshape(U, numel(ops.yrange), numel(ops.xrange), []);
+filePath = sm.getFileForPlane('svd', iplane);
 try % this is faster, but is limited to 2GB files
-    save(sprintf('%s/SVD_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
-        ops.mouse_name, ops.date, iplane), 'U', 'Sv', 'Vcell', 'ops', '-v6');
+    save(filePath, 'U', 'Sv', 'Vcell', 'ops', '-v6');
 catch % this takes a bit less space, but is significantly slower
-    save(sprintf('%s/SVD_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
-        ops.mouse_name, ops.date, iplane), 'U', 'Sv', 'Vcell', 'ops');
+    save(filePath, 'U', 'Sv', 'Vcell', 'ops');
 end
-
-% keyboard;
