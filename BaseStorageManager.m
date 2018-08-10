@@ -45,7 +45,7 @@ classdef (Abstract) BaseStorageManager < handle
     properties (Access=protected)
         % DB structure. It is used to store information
         % about files to be analyzed.
-        db = []
+        db = {}
         % Index of a db entry that is currently in use.
         currentEntry = 0
         % Index of current tiff file to read from current db entry
@@ -99,9 +99,9 @@ classdef (Abstract) BaseStorageManager < handle
             end
 
             if isempty(this.db)
-                this.db = newEntry;
+                this.db = {newEntry};
             else
-                this.db(end+1) = newEntry;
+                this.db(end+1) = {newEntry};
             end
             [inited, newOptions] = this.initEntry(this.options, length(this.db));
             this.options = newOptions;
@@ -114,6 +114,11 @@ classdef (Abstract) BaseStorageManager < handle
                     this.currentFile = 0;
                     this.currentExperiment = 0;
                 end
+            else
+                if ~inited
+                    warning('Suite2P:badDbEntry', 'DB entry was not initlizaed successfully (mouseName ''%s''). Check that paths are correct!', this.db{end}.mouseName{1});
+                    this.db(end) = [];
+                end
             end
         end
 
@@ -124,7 +129,7 @@ classdef (Abstract) BaseStorageManager < handle
 
         % Remove all entries from storage manager.
         function removeAllEntries(this)
-            this.db = [];
+            this.db = {};
             this.currentEntry = 0;
             this.currentFile = 0;
             this.currentExperiment = 0;
@@ -179,7 +184,7 @@ classdef (Abstract) BaseStorageManager < handle
                 partition = [];
             end
             if ~isempty(partition)
-                if partition < 0 || partition > size(this.db(this.currentEntry).allTiffFiles, 1)
+                if partition < 0 || partition > size(this.db{this.currentEntry}.allTiffFiles, 1)
                     % partition value is invalid
                     return
                 end
@@ -188,7 +193,7 @@ classdef (Abstract) BaseStorageManager < handle
                     this.currentFile = 1;
                 end
 
-                if isempty(this.db(this.currentEntry).allTiffFiles{partition, 2})
+                if isempty(this.db{this.currentEntry}.allTiffFiles{partition, 2})
                     return;
                 end
             end
@@ -219,13 +224,13 @@ classdef (Abstract) BaseStorageManager < handle
             if nargin < 2
                 partition = 1;
             end
-            if partition < 0 || partition > size(this.db(this.currentEntry).allTiffFiles, 1)
+            if partition < 0 || partition > size(this.db{this.currentEntry}.allTiffFiles, 1)
                 partition = 1;
             end
 
-            name = this.db(this.currentEntry).allTiffFiles{partition, 2}{1};
+            name = this.db{this.currentEntry}.allTiffFiles{partition, 2}{1};
             if nargout > 1
-                info.bytes = this.db(this.currentEntry).allTiffFiles{partition, 3}(1);
+                info.bytes = this.db{this.currentEntry}.allTiffFiles{partition, 3}(1);
                 info.partition = partition;
             end
         end
@@ -242,9 +247,9 @@ classdef (Abstract) BaseStorageManager < handle
                 return;
             end
 
-            name = this.db(this.currentEntry).allTiffFiles{this.currentExperiment, 2}{this.currentFile};
+            name = this.db{this.currentEntry}.allTiffFiles{this.currentExperiment, 2}{this.currentFile};
             if nargout > 1
-                info.bytes = this.db(this.currentEntry).allTiffFiles{this.currentExperiment, 3}(this.currentFile);
+                info.bytes = this.db{this.currentEntry}.allTiffFiles{this.currentExperiment, 3}(this.currentFile);
                 info.partition = this.currentExperiment;
             end
             this.increaseFileCounter();
@@ -261,15 +266,15 @@ classdef (Abstract) BaseStorageManager < handle
                 return;
             end
 
-            numFiles = length(this.db(this.currentEntry).allTiffFiles{this.currentExperiment, 2}); %#ok<PROP>
+            numFiles = length(this.db{this.currentEntry}.allTiffFiles{this.currentExperiment, 2}); %#ok<PROP>
             if this.currentFile >= numFiles %#ok<PROP>
                 return;
             end
 
             fileInd = this.currentFile + 1;
-            name = this.db(this.currentEntry).allTiffFiles{this.currentExperiment, 2}{fileInd};
+            name = this.db{this.currentEntry}.allTiffFiles{this.currentExperiment, 2}{fileInd};
             if nargout > 1
-                info.bytes = this.db(this.currentEntry).allTiffFiles{this.currentExperiment, 3}(fileInd);
+                info.bytes = this.db{this.currentEntry}.allTiffFiles{this.currentExperiment, 3}(fileInd);
                 info.partition = this.currentExperiment;
             end
         end
@@ -284,7 +289,7 @@ classdef (Abstract) BaseStorageManager < handle
                 return;
             end
             if nargin == 2
-                num = length(this.db(this.currentEntry).allTiffFiles{partition, 2});
+                num = length(this.db{this.currentEntry}.allTiffFiles{partition, 2});
             else
                 num = this.numFiles(this.currentEntry);
                 if isempty(num)
@@ -299,7 +304,7 @@ classdef (Abstract) BaseStorageManager < handle
             if this.currentEntry == 0 || isempty(this.db)
                 return;
             end
-            num = size(this.db(this.currentEntry).allTiffFiles, 1);
+            num = size(this.db{this.currentEntry}.allTiffFiles, 1);
         end
 
         % Prepare partition for reading.
@@ -309,7 +314,7 @@ classdef (Abstract) BaseStorageManager < handle
             if this.currentEntry == 0 || isempty(this.db)
                 return;
             end
-            if partition < 0 || partition > size(this.db(this.currentEntry).allTiffFiles, 1)
+            if partition < 0 || partition > size(this.db{this.currentEntry}.allTiffFiles, 1)
                 warning('No valid partition %u, will fall back to the first one.', partition);
                 partition = 1;
             end
@@ -335,7 +340,7 @@ classdef (Abstract) BaseStorageManager < handle
                 defaultValue = [];
             end
             if this.currentEntry > 0
-                s = this.db(this.currentEntry);
+                s = this.db{this.currentEntry};
                 [v, assigned] = this.getOrInternal(s, field, defaultValue);
                 if assigned
                     return;
@@ -447,8 +452,8 @@ classdef (Abstract) BaseStorageManager < handle
                 return;
             end
             this.currentFile = this.currentFile + 1;
-            if this.currentFile > length(this.db(this.currentEntry).allTiffFiles{this.currentExperiment, 2})
-                if this.currentExperiment == size(this.db(this.currentEntry).allTiffFiles, 1)
+            if this.currentFile > length(this.db{this.currentEntry}.allTiffFiles{this.currentExperiment, 2})
+                if this.currentExperiment == size(this.db{this.currentEntry}.allTiffFiles, 1)
                     this.currentExperiment = 0;
                     this.currentFile = 0;
                     return;
@@ -495,10 +500,10 @@ classdef (Abstract) BaseStorageManager < handle
                 fieldName = fieldNames{i};
                 if ~isfield(dbEntry, fieldName)
                     if length(this.db) > 1 && this.currentEntry > 1
-                        if isfield(this.db(this.currentEntry-1), fieldName)
+                        if isfield(this.db{this.currentEntry-1}, fieldName)
                             % inherit from previous record
-                            this.db(this.currentEntry).(fieldName) = this.db(this.currentEntry-1).(fieldName);
-                            dbEntry.(fieldName) = this.db(this.currentEntry).(fieldName);
+                            this.db{this.currentEntry}.(fieldName) = this.db{this.currentEntry-1}.(fieldName);
+                            dbEntry.(fieldName) = this.db{this.currentEntry}.(fieldName);
                         else
                             error('Value for field %s if not specified, animal %s', fieldName, dbEntry.mouseName{1});
                         end

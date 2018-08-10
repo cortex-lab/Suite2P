@@ -133,7 +133,7 @@ classdef CortexLabStorageManagerTest < matlab.unittest.TestCase
 
             dbEntry.mouseName = 'M0';
             dbEntry.date = '2017-10-13';
-            dbEntry.experiments = [4];
+            dbEntry.experiments = 4;
             dbEntry.diameter = 16;
             dbEntry.nplanes = 1;
             dbEntry.resultsSavePath = strcat(testCase.DataFolder, '-results');
@@ -297,6 +297,93 @@ classdef CortexLabStorageManagerTest < matlab.unittest.TestCase
                 'file') ~= 0);
 
             rmdir(dbEntry.resultsSavePath, 's');
+        end
+        
+        function testRegistrationStorage(testCase)
+            sm = CortexLabStorageManager(testCase.Options);
+
+            dbEntry.mouseName = 'M0';
+            dbEntry.date = '2017-10-13';
+            dbEntry.experiments = 4;
+            dbEntry.diameter = 16;
+            dbEntry.nplanes = 1;
+            dbEntry.resultsSavePath = strcat(testCase.DataFolder, '-results');
+            dbEntry.rootStorage = testCase.DataFolder;
+            dbEntry.regFilePath = dbEntry.resultsSavePath;
+            dbEntry.RegFileBinLocation = strcat(testCase.DataFolder, '-out-registration-slow');
+            dbEntry.RegFileTiffLocation = '';
+            dbEntry.temp_tiff = tempname;
+            
+            sm.addEntry(dbEntry);
+            
+            expectedFastStorage = fullfile(dbEntry.resultsSavePath, 'M0_2017-10-13_4_plane1.bin');
+            expectedFastStorage2 = fullfile(dbEntry.resultsSavePath, 'M0_2017-10-13_4_plane2.bin');
+            expectedRed = fullfile(dbEntry.resultsSavePath, 'M0_2017-10-13_4_plane1_RED.bin');
+            expectedInterp = fullfile(dbEntry.RegFileBinLocation, 'M0', '2017-10-13', '4', 'interpolated', 'M0_2017-10-13_4_plane1.bin');
+            expectedNegativePlane = fullfile(dbEntry.resultsSavePath, 'M0_2017-10-13_4_plane-1.bin');
+            
+            expectedSlow = fullfile(dbEntry.RegFileBinLocation, 'M0_2017-10-13_4_plane1.bin');
+            expectedSlowRed = fullfile(dbEntry.RegFileBinLocation, 'M0_2017-10-13_4_plane1_RED.bin');
+            
+            testCase.verifyEqual(sm.registrationFileOnFastStorage(-1), expectedNegativePlane);
+            testCase.verifyEqual(sm.registrationFileOnFastStorage(1), expectedFastStorage);
+            testCase.verifyEqual(sm.registrationFileOnFastStorage(2), expectedFastStorage2);
+            testCase.verifyEqual(sm.registrationFileOnFastStorage(1, 'red'), expectedRed);
+            testCase.verifyError(@()sm.registrationFileOnFastStorage(1, 'redd'), 'Suite2P:arg');
+            testCase.verifyEqual(sm.registrationFileOnFastStorage(1, 'interp'), expectedInterp);
+            
+            testCase.verifyEqual(sm.registrationFileOnSlowStorage(1), expectedSlow);
+            testCase.verifyEqual(sm.registrationFileOnSlowStorage(1, 'red'), expectedSlowRed);
+            testCase.verifyEqual(sm.registrationFileOnSlowStorage(1, 'interp'), expectedInterp);
+        end
+        
+        function secondInvalidEntry(testCase)
+            sm = CortexLabStorageManager(testCase.Options);
+
+            dbEntry.mouseName = 'M0';
+            dbEntry.date = '2017-10-13';
+            dbEntry.experiments = 4;
+            dbEntry.diameter = 16;
+            dbEntry.nplanes = 1;
+            dbEntry.resultsSavePath = strcat(testCase.DataFolder, '-results');
+            dbEntry.rootStorage = testCase.DataFolder;
+            dbEntry.regFilePath = dbEntry.resultsSavePath;
+            dbEntry.RegFileBinLocation = strcat(testCase.DataFolder, '-out-registration-slow');
+            dbEntry.RegFileTiffLocation = '';
+            dbEntry.temp_tiff = tempname;
+            
+            sm.addEntry(dbEntry);
+            dbEntry.mouseName = 'M1';
+            testCase.verifyWarning(@()sm.addEntry(dbEntry), 'Suite2P:badDbEntry');
+            
+            testCase.verifyEqual(sm.getNumEntries, 1);
+            sm.selectEntry(1);
+            testCase.verifyTrue(strcmp(sm.getOr('mouseName'), 'M0') == 1);
+        end
+        
+        function doubleEntry(testCase)
+            sm = CortexLabStorageManager(testCase.Options);
+
+            dbEntry.mouseName = 'M0';
+            dbEntry.date = '2017-10-13';
+            dbEntry.experiments = 4;
+            dbEntry.diameter = 16;
+            dbEntry.nplanes = 1;
+            dbEntry.resultsSavePath = strcat(testCase.DataFolder, '-results');
+            dbEntry.rootStorage = testCase.DataFolder;
+            dbEntry.regFilePath = dbEntry.resultsSavePath;
+            dbEntry.RegFileBinLocation = strcat(testCase.DataFolder, '-out-registration-slow');
+            dbEntry.RegFileTiffLocation = '';
+            dbEntry.temp_tiff = tempname;
+            
+            sm.addEntry(dbEntry);
+            testCase.verifyWarningFree(@()sm.addEntry(dbEntry));
+            
+            testCase.verifyEqual(sm.getNumEntries, 2);
+            sm.selectEntry(1);
+            testCase.verifyTrue(strcmp(sm.getOr('mouseName'), 'M0') == 1);
+            sm.selectEntry(2);
+            testCase.verifyTrue(strcmp(sm.getOr('mouseName'), 'M0') == 1);
         end
     end
 

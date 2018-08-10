@@ -88,7 +88,7 @@ classdef CortexLabStorageManager < BaseStorageManager
                 return;
             end
 
-            filePath = this.registrationBinaryPath(this.db(this.currentEntry));
+            filePath = this.registrationBinaryPath(this.db{this.currentEntry});
             fileFolder = fileparts(filePath);
             if ~exist(fileFolder, 'dir')
                 mkdir(fileFolder);
@@ -101,7 +101,7 @@ classdef CortexLabStorageManager < BaseStorageManager
                 error('Suite2P:notInited', 'Storage manager is not initialized, can not load registration file');
             end
             opt = [];
-            filePath = this.registrationBinaryPath(this.db(this.currentEntry));
+            filePath = this.registrationBinaryPath(this.db{this.currentEntry});
             if exist(filePath, 'file') == 0
                 return;
             end
@@ -124,7 +124,7 @@ classdef CortexLabStorageManager < BaseStorageManager
             if this.currentEntry == 0 || isempty(this.db)
                 return;
             end
-            dbEntry = this.db(this.currentEntry);
+            dbEntry = this.db{this.currentEntry};
 
             [~, experimentDir] = fileparts(dbEntry.allTiffFiles{this.currentExperiment, 1});
             folder = fullfile(this.getOr('RegFileTiffLocation'), dbEntry.mouseName{1}, ...
@@ -155,7 +155,7 @@ classdef CortexLabStorageManager < BaseStorageManager
                 elseif strcmpi(fileType, 'interp')
                     isInterpolation = true;
                 else
-                    error('Unknown value of parameter ''type'' (given value is %s). See description of function registrationFileOnFastStorage.', fileType);
+                    error('Suite2P:arg', 'Unknown value of parameter ''type'' (given value is ''%s''). See description of function registrationFileOnFastStorage.', fileType);
                 end
             end
             filePath = '';
@@ -165,7 +165,7 @@ classdef CortexLabStorageManager < BaseStorageManager
                 % used for interpolation.
                 return;
             end
-            dbEntry = this.db(this.currentEntry);
+            dbEntry = this.db{this.currentEntry};
             experiments_str = sprintf('%d_', dbEntry.experiments{:});
             experiments_str(end) = []; % remove last '_'
             % experiments_str at this point is CharSubDirs from original Suite2P
@@ -217,7 +217,7 @@ classdef CortexLabStorageManager < BaseStorageManager
             if isempty(folder)
                 return;
             end
-            dbEntry = this.db(this.currentEntry);
+            dbEntry = this.db{this.currentEntry};
             experiments_str = sprintf('%d_', dbEntry.experiments{:});
             experiments_str(end) = []; % remove last '_'
             % experiments_str at this point is CharSubDirs from original Suite2P
@@ -273,7 +273,7 @@ classdef CortexLabStorageManager < BaseStorageManager
             if isempty(this.db) || this.currentEntry == 0
                 return;
             end
-            dbEntry = this.db(this.currentEntry);
+            dbEntry = this.db{this.currentEntry};
 
             folder = this.savePathFromRoot();
             switch lower(fileType)
@@ -312,7 +312,7 @@ classdef CortexLabStorageManager < BaseStorageManager
             if entryInd < 1 || entryInd > length(this.db)
                 error('Suite2P:arg', 'Value for argument entryInd is out of range. Possible range is [1; %d], value given is %d\n', length(this.db), entryInd);
             end
-            dbEntry = this.db(entryInd);
+            dbEntry = this.db{entryInd};
             name = sprintf('%d_', dbEntry.experiments{:});
             name(end) = []; % remove last '_'
             % name at this point is CharSubDirs from original Suite2P
@@ -338,7 +338,7 @@ classdef CortexLabStorageManager < BaseStorageManager
             required = {'regFilePath', 'rootStorage', 'experiments'};
             for i = 1:length(required)
                 fieldName = required{i};
-                [v1, assigned] = this.getOrInternal(this.db(entryInd), fieldName, []);
+                [v1, assigned] = this.getOrInternal(this.db{entryInd}, fieldName, []);
                 [v2, assigned2] = this.getOrInternal(options, fieldName, []);
                 if assigned
                     v = v1;
@@ -347,7 +347,7 @@ classdef CortexLabStorageManager < BaseStorageManager
                 end
                 notAssigned = ~(assigned || assigned2);
                 if notAssigned || isempty(v)
-                    error('Suite2P:incompleteDb', 'Can not add db entry %d (%s) as required field ''%s'' is missing. Please add it in order to continue.', entryInd, this.db(entryInd).mouseName{1}, fieldName);
+                    error('Suite2P:incompleteDb', 'Can not add db entry %d (%s) as required field ''%s'' is missing. Please add it in order to continue.', entryInd, this.db{entryInd}.mouseName{1}, fieldName);
                 end
             end
         end
@@ -355,7 +355,7 @@ classdef CortexLabStorageManager < BaseStorageManager
         % Initialize current entry with given options. Options are not necessary db related.
         % For more details see initEntry in BaseStorageManager.
         function [inited, info] = initEntry(this, options, entryInd)
-            dbEntry = this.db(entryInd);
+            dbEntry = this.db{entryInd};
             %tifPaths = {};
             % cell array that contains list of cell files. Has
             % the same length as tifPaths. Each
@@ -485,8 +485,8 @@ classdef CortexLabStorageManager < BaseStorageManager
             info = options;
             this.options = options;
 
-            this.db(entryInd).allTiffFiles = allTiffFiles;
-            inited = ~isempty(allTiffFiles);
+            this.db{entryInd}.allTiffFiles = allTiffFiles;
+            inited = ~isempty(allTiffFiles) && ~isempty(allTiffFiles{1, 2});
         end
     end
 

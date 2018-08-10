@@ -377,7 +377,6 @@ if ops.interpolateAcrossPlanes && ~isempty(regFileBinLocation)
         delete(filename)
     end
 end
-end
 
 %%
 % compute outlier frames and xrange, yrange of registered frames
