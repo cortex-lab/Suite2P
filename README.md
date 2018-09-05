@@ -176,6 +176,7 @@ currently only works with rigid registration, where each section of FOV is regis
 * _getROIs_ --- whether to run the ROI detection algorithm after registration
 * _stopSourcery_ --- stop clustering if # of ROIs extracted < (ROIs extracted on iteration 1) x (stopSourcery) (default is 1/10)
 * _maxIterRoiDetection_ --- maximum number of clustering iterations (default is 100)
+* _refine_ --- whether or not to refine ROIs - suite2p smooths the PCs to find masks, refinement uses unsmoothed PCs to recompute masks from smoothed estimates
 
 ### SVD decomposition
 
