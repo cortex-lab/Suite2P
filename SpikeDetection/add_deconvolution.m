@@ -115,6 +115,6 @@ for i =  1:length(ops.planesToProcess)
     dat.ops = ops;
     dat.Ff = Ff;
         
-    save(fpath, 'dat')    
+    save(fpath,'-struct', 'dat')    
 end
 %
