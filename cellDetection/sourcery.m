@@ -207,7 +207,11 @@ end
 
 % this runs only the mask re-estimation step, on non-smoothed PCs
 % (because smoothing is done during clustering to help)
-sourceryAddon;
+if getOr(ops, 'refine', 1)
+	sourceryAddon;
+else
+	fprintf('no refinement of ROIs done\n')
+end
 
 mLam  =  mLam(:, 1:icell);
 mPix  =  mPix(:, 1:icell);
