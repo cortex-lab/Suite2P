@@ -12,7 +12,7 @@ if nargin>4 && ~isempty(temp_file)
         firstfail = 1;
         while ~iscopied
             try       
-                copyfile(tiff,temp_file);
+                copyfile(tiff,temp_file, 'f');
                 iscopied = 1;
                 if ~firstfail
                     fprintf('  succeeded!\n');

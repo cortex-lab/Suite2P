@@ -25,7 +25,7 @@ if isfield(h.dat.stat, 'baseline')
 end
 
 if isfield(h.dat, 'FcellNeu')
-    plot(baseline + coefNeu * my_conv_local(medfilt1(double(Fneu), 3), 3))
+    plot(my_conv_local(medfilt1(double(Fneu), 3), 3))
 end
 
 box off

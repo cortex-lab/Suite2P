@@ -1,4 +1,4 @@
-function varargout = new_main(varargin)
+function varargout = gui2p_old(varargin)
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
@@ -162,10 +162,10 @@ set(h.edit54,'Enable', 'on');
 set(h.edit52,'String','-Inf');
 set(h.edit54,'String','Inf');
 h.statstr = 'npix';
-h.statstrs = {'npix','cmpct','aspect_ratio','skew','std','footprint','mimgProj'};
+h.statstrs = {'npix','cmpct','aspect_ratio','skew','std','footprint'};
 h.statnum = 1;
-h.statmins = -Inf*ones(1,7);
-h.statmaxs = Inf*ones(1,7);
+h.statmins = -Inf*ones(1,6);
+h.statmaxs = Inf*ones(1,6);
 set_Bcolor(h, 1);
 set_maskCcolor(h, 1);
 % select unit normalized ROI brightness
@@ -527,7 +527,7 @@ guidata(hObject,h);
 %--------------------- MASK COLORS ----------------------%
 
 function set_maskCcolor(h, ih)
-pb = [98 95 96 102 99 100 104 112]; 
+pb = [98 95 96 102 99 100 104];  % 112
  
 set_Bcolor(h, 1)
 
@@ -633,10 +633,10 @@ I = redraw_figure(h);
 h.dat.cl.ellipseFig = I;
 set_maskCcolor(h, 8);
 
-% --- meanimg
-function pushbutton102_Callback(hObject, eventdata, h)
-h=meanimgFig(h);
-guidata(hObject,h);
+% % --- meanimg
+% function pushbutton102_Callback(hObject, eventdata, h)
+% h=meanimgFig(h);
+% guidata(hObject,h);
 
 function h=meanimgFig(h)
 hval0            = [h.dat.stat.mimgProjAbs];

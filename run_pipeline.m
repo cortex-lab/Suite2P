@@ -1,4 +1,4 @@
-function  run_pipeline(db, ops0)
+function  ops1 = run_pipeline(db, ops0)
 
 % ops0.TileFactor (or db(iexp).TileFactor) can be set to multiply the number of default tiles for the neuropil
 
@@ -8,10 +8,17 @@ ops0.getROIs                        = getOr(ops0, {'getROIs'}, 1);   % whether t
 ops0.getSVDcomps                    = getOr(ops0, {'getSVDcomps'}, 0);   % whether to save SVD components to disk for later processing
 
 ops0                                = build_ops3(db, ops0);
+
 if ~isfield(ops0, 'diameter') || isempty(ops0.diameter)
-    warning('you have not specified mean diameter of your ROIs')
-    warning('for best performance, please set db(iexp).diameter for each experiment')
+    error('you must specify approximate mean diameter of your ROIs in ops.diameter or db.diameter')    
 end
+if ~isfield(ops0, 'tau') || isempty(ops0.tau)
+    error('you must specify approximate timescale in seconds in ops.tau or db.tau')    
+end
+if ~isfield(ops0, 'fs') || isempty(ops0.fs)
+    error('you must specify sampling rate / plane in ops.fs or db.fs')    
+end
+
 ops0.diameter                        = getOr(ops0, 'diameter', 8*ops0.zoom);
 ops0.clustrules.diameter             = ops0.diameter;
 ops0.clustrules                      = get_clustrules(ops0.clustrules);
@@ -40,6 +47,7 @@ else
     disp('already registered binary found');
 end
 
+
 %%
 for i = [1:numel(ops1)]
     ops         = ops1{i};    
@@ -50,43 +58,27 @@ for i = [1:numel(ops1)]
     
     ops.iplane  = i;
     
-%     ops.ThScaling = 0.5;
-    
     if numel(ops.yrange)<10 || numel(ops.xrange)<10
         warning('valid range after registration very small, continuing to next plane')
         continue;
     end
-    
-    if getOr(ops, {'getSVDcomps'}, 0)
-        % extract and write to disk SVD comps (raw data)
-        ops    = get_svdcomps(ops);
-    end
             
     if ops.getROIs
         % get sources in stat, and clustering images in res
-        [ops, stat, model]           = sourcery(ops);
-
-        figure(10); clf;
-
-        % extract dF
-        switch getOr(ops, 'signalExtraction', 'surround')
-            case 'raw'
-                [ops, stat, Fcell, FcellNeu] = extractSignalsNoOverlaps(ops, model, stat);
-            case 'regression'
-                [ops, stat, Fcell, FcellNeu] = extractSignals(ops, model, stat);
-            case 'surround'
-                [ops, stat, Fcell, FcellNeu] = extractSignalsSurroundNeuropil2(ops, stat);
-        end
+        [ops, stat]           = sourcery_inc(ops);
+        
+        [ops, stat, Fcell, FcellNeu] = extractF(ops, stat);
         
         % apply user-specific clustrules to infer stat.iscell
         stat                         = classifyROI(stat, ops.clustrules);
-        
         
         save(sprintf('%s/F_%s_%s_plane%d.mat', ops.ResultsSavePath, ...
             ops.mouse_name, ops.date, ops.iplane),  'ops',  'stat',...
             'Fcell', 'FcellNeu', '-v7.3')
     end
 
+    ops1{i} = ops;
+    
     fclose('all');
     if ops.DeleteBin       
          delete(ops.RegFile);        % delete temporary bin file

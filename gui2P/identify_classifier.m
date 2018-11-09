@@ -44,12 +44,11 @@ if (flag==0)
         h.dat.cl.fpath  = fullfile(rootS2p, def_file);
         
         hload = load(h.dat.cl.fpath);
-        if ~isfield(hload, 'st') || ~isfield(hload, 'statLabels') || ~isfield(hload, 'prior')
+        if ~isfield(hload, 'st') || ~isfield(hload, 'statLabels') 
             error('found a non-classifier file in configFiles, called %s. \n Please remove and try again!', def_file)
         end
 
-        h.st        = hload.st;
-        h.prior     = hload.prior;
+        h.st        = hload.st;        
         h.statLabels = hload.statLabels;
         h.dat.ops.classifier = def_file;
     end

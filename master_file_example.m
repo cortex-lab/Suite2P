@@ -1,5 +1,17 @@
 %% SET ALL DEFAULT OPTIONS HERE
 
+% UPDATE fall 2018: Makes results equivalent to the newly released Python version. 
+% Main change is that cell detection can now extend ROIs along elongated
+% structures likes dendrites, and the neuropil correction also extends in this fashion. 
+% Added two new options ("connected=1", "max_overlap=0.75"), particularly useful
+% for non-somatic processing ("connected=0", "max_overlap=1.0"). 
+% Options "fs" and "tau" replace "imageRate"% and "sensorTau", 
+% with "fs" now being sampling rate PER PLANE. These are used not just in deconvolution, 
+% but also to determine temporal binning for cell detection, and are therefore mandatory.  
+% Revamped the classifier system to use new statistics and not use a prior anymore. 
+% Due to this, the GUI (gui2p) will not be compatible with older Suite2p results (use gui2p_old
+% instead). 
+
 % UPDATE fall 2017: non-rigid and rigid registration scripts merged; red
 % channel mean image can be computed while registering green channel; red
 % channel binary can be computed during green channel registration
@@ -31,11 +43,16 @@ else
 	error('toolbox_path does not exist, please change toolbox_path');
 end
 
-% mex -largeArrayDims SpikeDetection/deconvL0.c (or .cpp) % MAKE SURE YOU COMPILE THIS FIRST FOR DECONVOLUTION
+% mandatory user options
+ops0.diameter        = ?; % most important parameter. Set here, or individually per experiment in make_db file
+ops0.fs              = ?; % imaging rate PER PLANE. 
+ops0.tau             = ?; % decay half-life (or timescale) in seconds. Approximate, for deconvolution kernel and temporal binning in cell detection.
 
+
+% general options
 ops0.useGPU                 = 0; % if you can use an Nvidia GPU in matlab this accelerates registration approx 3 times. You only need the Nvidia drivers installed (not CUDA).
 ops0.fig                    = 1; % turn off figure generation with 0
-% ops0.diameter               = 12; % most important parameter. Set here, or individually per experiment in make_db file
+
 
 % ---- root paths for files and temporary storage (ideally an SSD drive. my SSD is C:/)
 ops0.RootStorage            = '//zserver4/Data/2P'; % Suite2P assumes a folder structure, check out README file
@@ -63,22 +80,14 @@ ops0.NavgFramesSVD          = 5000; % how many (binned) timepoints to do the SVD
 ops0.signalExtraction       = 'surround'; % how to extract ROI and neuropil signals: 
 %  'raw' (no cell overlaps), 'regression' (allows cell overlaps), 
 %  'surround' (no cell overlaps, surround neuropil model)
-ops0.refine                 = 1; % whether or not to refine ROIs (refinement uses unsmoothed PCs to compute masks)
+ops0.smooth_masks           = 1; % whether or not to smooth masks in ROI detection 
 
 % ----- neuropil options (if 'surround' option) ------------------- %
 % all are in measurements of pixels
-ops0.innerNeuropil  = 1; % padding around cell to exclude from neuropil
-ops0.outerNeuropil  = Inf; % radius of neuropil surround
-% if infinity, then neuropil surround radius is a function of cell size
-if isinf(ops0.outerNeuropil)
-    ops0.minNeuropilPixels = 400; % minimum number of pixels in neuropil surround
-    ops0.ratioNeuropil     = 5; % ratio btw neuropil radius and cell radius
-    % radius of surround neuropil = ops0.ratioNeuropil * (radius of cell)
-end
+ops0.innerNeuropil     = 1; % padding around cell to exclude from neuropil
+ops0.minNeuropilPixels = 400; % minimum number of pixels in neuropil surround
 
 % ----- spike deconvolution and neuropil subtraction options ----- %
-ops0.imageRate              = 30;   % imaging rate (cumulative over planes!). Approximate, for initialization of deconvolution kernel.
-ops0.sensorTau              = 2; % decay half-life (or timescale). Approximate, for initialization of deconvolution kernel.
 ops0.maxNeurop              = 1; % for the neuropil contamination to be less than this (sometimes good, i.e. for interneurons)
 
 % ----- if you have a RED channel ---------------------- ------------%
@@ -95,6 +104,7 @@ ops0.redthres               = 1.5; % the higher the thres the less red cells
 ops0.redmax                 = 1; % the higher the max the more NON-red cells
 
 db0 = db;
+
 %% RUN THE PIPELINE HERE
 
 for iexp = 1 %[1:length(db0)]
