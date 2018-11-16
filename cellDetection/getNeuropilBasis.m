@@ -41,10 +41,10 @@ switch type
             end
         end
     case 'Fourier'
-        disp('here')
-        
         nTilesY = 1 + 2*ceil(nTilesY/2);
         nTilesX = 1 + 2*ceil(nTilesX/2);
+        S = zeros(Ly, Lx, nTilesY, nTilesX, 'single');
+        
         Ay = ones(Ly, nTilesY);
         Ax = ones(Lx, nTilesX);
         for k = 1:(nTilesY-1)/2
