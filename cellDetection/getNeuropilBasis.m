@@ -58,7 +58,7 @@ switch type
         
         for j = 1:nTilesX
             for i = 1:nTilesY
-                S(:,:,i,j) = Ay(:,j) * Ax(:,i)';
+                S(:,:,i,j) = Ay(:,i) * Ax(:,j)';
             end
         end
 end
