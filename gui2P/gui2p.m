@@ -77,8 +77,8 @@ init = 0;
 if isfield(h.dat, 'dat')
     h.dat = h.dat.dat;
     if isfield(h.dat, 'cl')
-      h                   = identify_classifier(h);    
-      h                   = new_classifier(h);
+%       h                   = identify_classifier(h);    
+%       h                   = new_classifier(h);
       init = 1;
     else
       init = 0;
