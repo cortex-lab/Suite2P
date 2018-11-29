@@ -8,7 +8,13 @@ dat = load('Fall.mat');
 Fcell = {dat.F};
 FcellNeu = {dat.Fneu};
 ops = dat.ops;
+ops.Ly = single(ops.Ly);
+ops.Lx = single(ops.Lx);
+
 ops.mimg1 = ops.meanImg;
+if isfield(ops, 'meanImg_chan2')
+	ops.mimgRED = ops.meanImg_chan2;
+end
 sp = {dat.spks};
 
 flds = fieldnames(dat.stat{1});
@@ -16,7 +22,7 @@ for n = 1:length(dat.stat)
 	for j = 1:length(flds)
 		stat(n).(flds{j}) = dat.stat{n}.(flds{j});
 	end
-	stat(n).ipix = int64(ops.Ly)*(stat(n).ypix+1) + stat(n).xpix + 1;
+	stat(n).ipix = int64(ops.Lx)*(stat(n).xpix) + stat(n).ypix + 1;
 	stat(n).ipix = stat(n).ipix(:);
 	stat(n).mimgProjAbs = 0;
 	stat(n).cmpct = stat(n).compact;
