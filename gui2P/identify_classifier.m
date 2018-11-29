@@ -10,7 +10,7 @@ end
 rootS2p = fileparts(rootS2p);
 rootS2p = fullfile(rootS2p, 'configFiles');
 
-flag=0
+flag=0;
 if isfield(h.dat.ops, 'classifier') && ~isempty(h.dat.ops.classifier)
     if ~exist(fullfile(rootS2p, h.dat.ops.classifier), 'file')
          warndlg('specified classifier database not found, reverting  to last used');
@@ -20,12 +20,12 @@ if isfield(h.dat.ops, 'classifier') && ~isempty(h.dat.ops.classifier)
         h.dat.cl.fpath  = fullfile(rootS2p, def_file);
         
         hload = load(h.dat.cl.fpath);
-        if ~isfield(hload, 'st') || ~isfield(hload, 'statLabels') || ~isfield(hload, 'prior')
+        if ~isfield(hload, 'st') || ~isfield(hload, 'statLabels') || ~isfield(hload, 'icell')
             error('found a non-classifier file in configFiles, called %s. \n Please remove and try again!', def_file)
         end
 
         h.st        = hload.st;
-        h.prior     = hload.prior;
+        h.icell     = hload.icell;
         h.statLabels = hload.statLabels;
     end
 else
@@ -33,7 +33,7 @@ else
 end
 if (flag==0)
     fs = dir(fullfile(rootS2p, '*.mat'));
-    if isempty(fs)
+	if isempty(fs)
         warndlg('no classifier found, please make a new one!')
         h           = make_classifier(h);
     else
@@ -44,10 +44,11 @@ if (flag==0)
         h.dat.cl.fpath  = fullfile(rootS2p, def_file);
         
         hload = load(h.dat.cl.fpath);
-        if ~isfield(hload, 'st') || ~isfield(hload, 'statLabels') 
+        if ~isfield(hload, 'st') || ~isfield(hload, 'statLabels') || ~isfield(hload, 'icell') 
             error('found a non-classifier file in configFiles, called %s. \n Please remove and try again!', def_file)
-        end
+		end
 
+		h.icell = hload.icell;
         h.st        = hload.st;        
         h.statLabels = hload.statLabels;
         h.dat.ops.classifier = def_file;

@@ -73,29 +73,28 @@ if flag
 rng('default')
 
 % keyboard;
-init = 0;
+% keyboard;
+h.init = 0;
 if isfield(h.dat, 'dat')
     h.dat = h.dat.dat;
     if isfield(h.dat, 'cl')
-%       h                   = identify_classifier(h);    
-%       h                   = new_classifier(h);
-      init = 1;
+      h.init = 1;
+	  h                   = identify_classifier(h);
+      h                   = new_classifier(h);
+      
     else
-      init = 0;
+      h.init = 0;
     end
 end
 
-if init==0
+if h.init==0
     h.dat.filename = fullfile(filepath1, filename1);
     h.dat.cl.Ly       = h.dat.ops.Ly;
     h.dat.cl.Lx       = h.dat.ops.Lx;
     
     % make up iclut here
-    try
-        [h.dat.res.iclust, h.dat.res.lambda, h.dat.res.lambda0] =...
+    [h.dat.res.iclust, h.dat.res.lambda, h.dat.res.lambda0] =...
             getIclust(h.dat.stat, h.dat.cl);
-    catch
-    end
     h.dat.res.iclust = reshape(h.dat.res.iclust, h.dat.cl.Ly, h.dat.cl.Lx);
 %     h.dat.res.lambda = reshape(h.dat.res.lambda, h.dat.cl.Ly, h.dat.cl.Lx);
     
@@ -780,7 +779,7 @@ msg{8} = ['(scale bar for colors shown below buttons):'];
 msg{10} = ['CLASSIFIER: probability assigned by classifier'];
 msg{11} = ['SKEW: skewness of activity, after neuropil correction and some smoothing'];
 msg{12} = ['MEANIMG: weighting of activity mask onto mean image'];
-msg{13} = ['CMPCT: compactness of ROI pixels. Smallest is 1, for disks.'];
+msg{13} = ['COMPACT: compactness of ROI pixels. Smallest is 1, for disks.'];
 msg{14} = ['FOOT: "footprint" of ROI; ~ number of correlated neighboring pixels'];
 msg{15} = ['RED: probability of being a red-tagged cell, assigned by algorithm'];
 msg{17} = ['hint: the letters in paranthesis are keyboard shortcuts.'];
@@ -835,7 +834,7 @@ function popupmenu12_Callback(hObject, eventdata, h)
 % handles    structure with handles and user data (see GUIDATA)
 contents = cellstr(get(hObject,'String'));
 popstr = contents{get(hObject,'Value')};
-
+stn = 0;
 switch popstr
     case 'number of pixels'
         stn = 1;
@@ -852,6 +851,7 @@ switch popstr
     case 'meanimg proj'
         stn = 7;
 end
+
 set(h.edit52,'String',num2str(h.statmins(stn)));
 set(h.edit54,'String',num2str(h.statmaxs(stn)));
 
@@ -948,7 +948,3 @@ end
     
     
     
-
-
-
-
