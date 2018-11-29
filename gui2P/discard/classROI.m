@@ -29,7 +29,9 @@ model       = buildHist(prior, st, statLabels);
 [Ypred, ps] = evaluateHist(model, st0);
 
 for j = 1:length(stat)
-   stat(j).iscell = Ypred(j) > h.dat.cl.threshold; 
+	if h.init==0
+		stat(j).iscell = Ypred(j) > h.dat.cl.threshold;
+	end
    stat(j).cellProb  = Ypred(j); 
 end
 

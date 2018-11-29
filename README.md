@@ -8,6 +8,8 @@ Algorithmic details in [http://biorxiv.org/content/early/2016/06/30/061507](http
 
 This code was written by Marius Pachitariu, Carsen Stringer and members of the cortexlab (Kenneth Harris and Matteo Carandini). It is provided here with no warranty. For support, please open an issue directly on github. 
 
+For the python version of the code, go [here](https://github.com/MouseLand/suite2p). We recommend using the python code - the documentation is better (see [wiki](https://github.com/MouseLand/suite2p/wiki)), and the graphical interface has more functionality.
+
 # Examples
 An example dataset (with master_file and make_db) is provided [here](https://drive.google.com/open?id=0B649boZqpYG1amlyX015SG12VU0).
 

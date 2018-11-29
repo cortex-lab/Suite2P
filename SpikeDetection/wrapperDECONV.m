@@ -62,7 +62,7 @@ for k = 1:niter
                warning('Refer to instructions at top of example master file for more help.')
                error('OASIS not found.')
             end
-            [sp, ca, sd2, Fbase] = OASISpreprocess(ops,  Fsub);
+            [sp, ca, sd2, ~, Fbase] = OASISpreprocess(ops,  Fsub);
         case 'L0'
             [sp, ca, sd2] = deconvolution_standalone(ops, Fsub);
         otherwise
