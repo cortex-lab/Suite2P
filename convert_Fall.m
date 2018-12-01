@@ -5,10 +5,8 @@
 dat = load('Fall.mat');
 
 %%
-NN = 1000;
-ineu = randperm(size(dat.F,1),NN);
-Fcell = {dat.F(ineu,:)};
-FcellNeu = {dat.Fneu(ineu,:)};
+Fcell = {dat.F};
+FcellNeu = {dat.Fneu};
 ops = dat.ops;
 ops.Ly = single(dat.ops.Ly);
 ops.Lx = single(dat.ops.Lx);
@@ -20,11 +18,9 @@ end
 sp = {dat.spks};
 clear stat
 flds = fieldnames(dat.stat{1});
-n=0;
-for l = ineu%length(dat.stat)
-	n=n+1;
+for n = 1:length(dat.stat)
 	for j = 1:length(flds)
-		stat(n).(flds{j}) = dat.stat{l}.(flds{j});
+		stat(n).(flds{j}) = dat.stat{n}.(flds{j});
 	end
 	stat(n).ipix = int64(ops.Ly)*(stat(n).xpix) + stat(n).ypix + 1;
 	stat(n).ipix = stat(n).ipix(:);
