@@ -38,7 +38,14 @@ ops.Vcorr = zeros(dat.ops.Ly, dat.ops.Lx);
 ops.Vcorr(ops.yrange_crop, ops.xrange_crop) = dat.ops.Vcorr;
 
 
-%%
-
-
 save('F.mat','-v7.3','Fcell','FcellNeu','ops','sp','stat');
+
+%%
+%% convert back to a python format
+
+load('F_proc.mat');
+icell = [dat.stat.iscell];
+cellProb = [dat.stat.cellProb];
+iscell=[icell(:) cellProb(:)];
+writeNPY(iscell, 'iscell.npy')
+
