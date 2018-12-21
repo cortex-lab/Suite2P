@@ -162,6 +162,8 @@ for i = setdiff(1:nplanes, planesToInterpolate)
     up = false(size(ds,1), nplanes);
     up(:,i) = true;
     ops1{i}.usedPlanes = up;
+    ds(all(all(isnan(ds),2),3),:,:) = [];
+    ops1{i}.DS = ds;
 end
 % (2) collect dsall for all planes that will be interpolated
 for i = 1:length(planesToInterpolate)
