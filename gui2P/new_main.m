@@ -73,21 +73,27 @@ if flag
 rng('default')
 
 % keyboard;
+h.init = 0;
 if isfield(h.dat, 'dat')
     h.dat = h.dat.dat;
-    h                   = identify_classifier(h);    
-    h                   = classROI(h);
-else
+    if isfield(h.dat, 'cl')
+      h.init = 1;
+		h                   = identify_classifier(h);
+      h                   = classROI(h);
+      
+    else
+      h.init = 0;
+    end
+end
+
+if h.init==0
     h.dat.filename = fullfile(filepath1, filename1);
     h.dat.cl.Ly       = numel(h.dat.ops.yrange);
     h.dat.cl.Lx       = numel(h.dat.ops.xrange);
     
     % make up iclut here
-    try
-        [h.dat.res.iclust, h.dat.res.lambda, h.dat.res.lambda0] =...
+    [h.dat.res.iclust, h.dat.res.lambda, h.dat.res.lambda0] =...
             getIclust(h.dat.stat, h.dat.cl);
-    catch
-    end
     h.dat.res.iclust = reshape(h.dat.res.iclust, h.dat.cl.Ly, h.dat.cl.Lx);
 %     h.dat.res.lambda = reshape(h.dat.res.lambda, h.dat.cl.Ly, h.dat.cl.Lx);
     

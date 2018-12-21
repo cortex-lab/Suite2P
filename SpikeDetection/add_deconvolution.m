@@ -45,7 +45,6 @@ for i =  1:length(ops.planesToProcess)
     ops.imageRate    = getOr(ops0, {'imageRate'}, 30); % total image rate (over all planes)
     ops.sensorTau    = getOr(ops0, {'sensorTau'}, 2); % approximate timescale in seconds
     ops.sameKernel   = getOr(ops0, {'sameKernel'}, 1); % 1 for same kernel per plane, 0 for individual kernels (not recommended)
-    ops.sameKernel   = getOr(ops0, {'sameKernel'}, 1);
     ops.maxNeurop    = getOr(ops0, {'maxNeurop'}, Inf); % maximum neuropil coefficient (default no max)
     ops.recomputeKernel    = getOr(ops0, {'recomputeKernel'}, 0);    
     ops.deconvNeuropil = getOr(ops0, {'deconvNeuropil'}, 0);   % whether to deconvolve the neuropil as well
@@ -115,6 +114,6 @@ for i =  1:length(ops.planesToProcess)
     dat.ops = ops;
     dat.Ff = Ff;
         
-    save(fpath, 'dat')    
+    save(fpath,'-struct', 'dat')    
 end
 %

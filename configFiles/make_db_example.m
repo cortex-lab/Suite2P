@@ -1,6 +1,6 @@
 % UPDATE Christmas 2016: number of clusters determined automatically, but
 % do specify the "diameter" of an average cell for best results. You can do this with either
-% db(iexp).diameter, or ops0.diameter. 
+% db(iexp).diameter, or ops0.diameter.
 
 i = 0;
 
@@ -32,6 +32,7 @@ db(i).expts         = {[2010 2107], [1 2 3]};
 db(i).diameter      = 12;
 
 % example for datasets without folder structure
+i = i+1;
 db(i).mouse_name    = 'notImportant';
 db(i).date          = '2016';
 db(i).expts         = []; % leave empty, or specify subolders as numbers
@@ -43,5 +44,5 @@ db(i).RootDir       = 'F:\DATA\neurofinder\neurofinder.01.00\images'; % specify 
 % db(i).BiDiPhase        = 0; % adjust the relative phase of consecutive lines
 % db(i).nSVD             = 1000; % will overwrite the default, only for this dataset
 % db(i).comments      = 'this was an adaptation experiment';
-% db(i).expred        = [4]; % say one block which had a red channel 
+% db(i).expred        = [4]; % say one block which had a red channel
 % db(i).nchannels_red = 2; % how many channels did the red block have in total (assumes red is last)

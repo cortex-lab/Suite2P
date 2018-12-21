@@ -6,7 +6,9 @@ Algorithmic details in [http://biorxiv.org/content/early/2016/06/30/061507](http
 
 [![IMG](https://img.youtube.com/vi/xr-flH2Ow2Y/0.jpg)](https://www.youtube.com/watch?v=xr-flH2Ow2Y)
 
-This code was written by Marius Pachitariu and members of the cortexlab (Kenneth Harris and Matteo Carandini). It is provided here with no warranty. For support, please open an issue directly on github. 
+This code was written by Marius Pachitariu, Carsen Stringer and members of the cortexlab (Kenneth Harris and Matteo Carandini). It is provided here with no warranty. For support, please open an issue directly on github. 
+
+For the python version of the code, go [here](https://github.com/MouseLand/suite2p). We recommend using the python code - the documentation is better (see [wiki](https://github.com/MouseLand/suite2p/wiki)), and the graphical interface has more functionality.
 
 # Examples
 An example dataset (with master_file and make_db) is provided [here](https://drive.google.com/open?id=0B649boZqpYG1amlyX015SG12VU0).
@@ -176,6 +178,7 @@ currently only works with rigid registration, where each section of FOV is regis
 * _getROIs_ --- whether to run the ROI detection algorithm after registration
 * _stopSourcery_ --- stop clustering if # of ROIs extracted < (ROIs extracted on iteration 1) x (stopSourcery) (default is 1/10)
 * _maxIterRoiDetection_ --- maximum number of clustering iterations (default is 100)
+* _refine_ --- whether or not to refine ROIs - suite2p smooths the PCs to find masks, refinement uses unsmoothed PCs to recompute masks from smoothed estimates
 
 ### SVD decomposition
 

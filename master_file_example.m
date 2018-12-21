@@ -63,6 +63,7 @@ ops0.NavgFramesSVD          = 5000; % how many (binned) timepoints to do the SVD
 ops0.signalExtraction       = 'surround'; % how to extract ROI and neuropil signals: 
 %  'raw' (no cell overlaps), 'regression' (allows cell overlaps), 
 %  'surround' (no cell overlaps, surround neuropil model)
+ops0.refine                 = 1; % whether or not to refine ROIs (refinement uses unsmoothed PCs to compute masks)
 
 % ----- neuropil options (if 'surround' option) ------------------- %
 % all are in measurements of pixels

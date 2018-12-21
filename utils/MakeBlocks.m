@@ -44,7 +44,7 @@ for iy = 1:numBlocks(1)
             ops.yBL{ib} = [max(1,yB(iy)-floor(bpix(1)/2)) : ...
                 min(Ly,yB(iy)+floor(bpix(1)/2))];
             ops.xBL{ib} = [max(1,xB(ix)-floor(bpix(2)/2)) : ...
-                min(Ly,xB(ix)+floor(bpix(2)/2))];
+                min(Lx,xB(ix)+floor(bpix(2)/2))];
         end
     else
         ib = ib+1;
