@@ -226,14 +226,15 @@ for i = 1:length(planesToInterpolate)
 end
 
 % align frames and write movie
-t2 = 0;
+t2 = 0; % number of all frames of already aligned experiments (divisible by nplanes)
 % if two consecutive files have as many bytes, they have as many frames
 nbytes = 0;
 xyValid = true(ops.Ly, ops.Lx);
 for k = 1:length(fs)
-    dataPrev = zeros(ops.Ly, ops.Lx, nplanes, 'int16');
+    dataPrev = zeros(ops.Ly, ops.Lx, nplanes, 'int16'); % for last nplanes frames of previous tiff file
     iplane0 = 1:1:ops.nplanes;
-    t1 = 0;
+    t1 = 0; % number of all frames of already aligned tiffs in current experiment
+    tPlanes = zeros(1,indInterpolate(end)) + t2/nplanes; % index of imaging cycle of last aligned frame for each plane
     for j = 1:length(fs{k})
         if abs(nbytes - fs{k}(j).bytes)>1e3
             nbytes = fs{k}(j).bytes;
@@ -257,6 +258,7 @@ for k = 1:length(fs)
         end
         
         % align frames according to determined registration offsets
+        % (without interpolating across planes)
         [dreg, xyValid] = BlockRegMovie(data, ops, ...
             dsall(t1+t2+(1:size(data,3)),:,:), xyValid);
         
@@ -273,40 +275,47 @@ for k = 1:length(fs)
         if interpolateAcrossPlanes && ~isempty(RegFileBinLocation)
             % use frames of plane that match best to target image of
             % current plane and average across similar planes
-            dataNext = [];
-            for i = indInterpolate
-                ind1 = iplane0(planesToInterpolate(i)) : nplanes : size(data,3);
-                sh = shifts(ceil((t1+t2)/nplanes + (1:length(ind1))));
-                uniqueShifts = unique(sh);
+            dataNext = []; % first nplanes frames of following tiff if needed for interpolation
+            for i = indInterpolate % go through all planes (target images) that occur throughout all experiments
+                ind1 = find(iplane0 == planesToInterpolate(i)); % find indices of all frames belonging to current target frame
+                ind1 = ind1 : nplanes : size(dreg,3);
+                sh = shifts(tPlanes(i) + (1:length(ind1))); % find shifts in z for this target image in current tiff
+                tPlanes(i) = tPlanes(i) + length(ind1);
+%                 sh = shifts(ceil((t1+t2)/nplanes + (1:length(ind1))));
+                uniqueShifts = unique(sh); % find planes covering all shifts
                 dwrite = zeros(size(dreg,1),size(dreg,2),length(ind1));
                 for s = uniqueShifts
-                    planesInv = find(~isnan(profiles(:,i-s)))';
+                    planesInv = find(~isnan(profiles(:,i-s)))'; % find planes used for interpolation
                     diffs = planesInv - i;
                     for pl = 1:length(planesInv)
-                        ind2 = ind1 + diffs(pl); % smallest possible value: -nplanes+1,
+                        ind2 = ind1 + diffs(pl); % find frames of current interpolation plane in tiff
+                        % smallest possible value: -nplanes+1,
                         % largest possible values: size(dreg,3)+nplanes
-                        ind2(sh~=s) = [];
+                        ind3 = sh==s; % of those frames only use those where shift matches current shift level
+                        ind2(~ind3) = [];
+                        ind3 = find(ind3);
                         weight = profiles(planesInv(pl),i-s);
                         if ind2(1)<1 % frame is part of previously loaded tiff file (can happen if frames per tiff are not mupltiple of planes)
                             dwrite(:,:,1) = dwrite(:,:,1) + ...
-                                weight .* double(dataPrev(:,:,end-ind2(1)));
+                                weight .* double(dataPrev(:,:,end+ind2(1)));
                             ind2(1) = [];
+                            ind3(1) = [];
                         end
                         if ind2(end)>size(dreg,3) % frame is part of upcoming tiff file
                             if j<length(fs{k})
                                 if isempty(dataNext) % load first few frames of next tiff and register them
                                     ichanset = [ichannel; nplanes; ops.nchannels];
-                                    data = loadFramesBuff(fs{k}(j+1).name, ...
+                                    dataN = loadFramesBuff(fs{k}(j+1).name, ...
                                         ichanset(1), ichanset(2), ichanset(3));
                                     if BiDiPhase
                                         yrange = 2:2:Ly;
                                         if BiDiPhase>0
-                                            data(yrange, (1+BiDiPhase):Lx,:) = data(yrange, 1:(Lx-BiDiPhase),:);
+                                            dataN(yrange, (1+BiDiPhase):Lx,:) = dataN(yrange, 1:(Lx-BiDiPhase),:);
                                         else
-                                            data(yrange, 1:Lx+BiDiPhase,:) = data(yrange, 1-BiDiPhase:Lx,:);
+                                            dataN(yrange, 1:Lx+BiDiPhase,:) = dataN(yrange, 1-BiDiPhase:Lx,:);
                                         end
                                     end
-                                    dataNext = register_movie(data, ops, ...
+                                    dataNext = register_movie(dataN, ops, ...
                                         dsall((t1+t2) + size(dreg,3) ...
                                         + (1:nplanes),:));
                                 end
@@ -314,15 +323,18 @@ for k = 1:length(fs)
                                     double(dataNext(:,:,ind2(end)-size(dreg,3)));
                             end
                             ind2(end) = [];
+                            ind3(end) = [];
                         end
-                        dwrite(:,:,ceil(ind2/nplanes)) = dwrite(:,:,ceil(ind2/nplanes)) + ...
+                        dwrite(:,:,ind3) = dwrite(:,:,ind3) + ...
                             weight .* double(dreg(:,:,ind2));
+%                         dwrite(:,:,ceil(ind2/nplanes)) = dwrite(:,:,ceil(ind2/nplanes)) + ...
+%                             weight .* double(dreg(:,:,ind2));
                     end
                 end
                 fwrite(fidIntpol{ops.planesToProcess(planesToInterpolate(i))}, dwrite, class(data));
             end
         end
-        dataPrev = dreg(:,:,end-nplanes+1:end);
+        dataPrev = dreg(:,:,max(1,end-nplanes+1):end);
         t1 = t1 + size(dreg,3);
         iplane0 = iplane0 - nFr/ops.nchannels;
     end
