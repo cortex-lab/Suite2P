@@ -29,12 +29,15 @@ if ~isempty(targetImage) % grab frames around half time during target experiment
     expInds = targetImage(1);
     startTiff = floor(length(fs{expInds})/2 - ...
         nplanes*nchannels*ops.NimgFirstRegistration/2/nFr);
-    tiffInds = startTiff:length(fs{expInds});
+    tiffInds{expInds} = startTiff:length(fs{expInds});
     iplaneK = 1 - (startTiff-1)*nFr; % to calculate index of first frame belonging to plane 1 in startTiff
     nfmax = floor(nFr/nplanes/nchannels)-1;
 else
     expInds = 1:length(ops.SubDirs);
-    tiffInds = 1:length(fs{expInds});
+    tiffInds = cell(1, length(ops.SubDirs));
+    for k = 1:length(ops.SubDirs)
+        tiffInds{k} = 1:length(fs{k});
+    end
     iplaneK = 1;
     nfmax = max(1, round(ops.NimgFirstRegistration/ntifs)); % number of tiffs to take per file
     if nfmax>=2000
@@ -51,7 +54,7 @@ for k = expInds
         end
     end
     
-    for j = tiffInds
+    for j = tiffInds{k}
         % compute number of frames in tiff if size different from previous
         if abs(nbytes - fs{k}(j).bytes)>1e3
             nbytes = fs{k}(j).bytes;
