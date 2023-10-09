@@ -124,16 +124,30 @@ planesToInterp = planesToInterpolate(indInterpolate); % target images
 % (similar neihgbouring planes); those will be averaged
 corrsPadded = [NaN(size(corrsNorm)), corrsNorm, NaN(size(corrsNorm))];
 for t = 1:size(corrsNorm,1)
+    % for each time point, shift matrix of correlations so that each
+    % aligned frame is matched to best target frame (best for all frames of
+    % each cycle)
     corrsPadded(t,:,:) = circshift(corrsPadded(t,:,:),shifts(t),2);
 end
+% determine average correlation of each aligned frame to all target frames
+% (correlation with best matching target should be in profiles(j,j))
 profiles = squeeze(nanmean(corrsPadded(:,size(corrsNorm,2)+ ...
     (1:size(corrsNorm,2)),:), 1));
+% only interpolate neighbouring planes where average correlation is >= 0.8
+% (the best matching target plane and any other target planes that also had
+% a good match)
 ind = profiles>=0.8;
+% find aligned planes that reach high average correlation with only 1
+% target plane
 sngls = find(sum(ind,1) < 2);
+% for these single matched, find the 2nd best match (even though
+% correlation is < 0.8)
 for k = sngls
     [~,j] = sort(profiles(:,k),'descend');
     ind(j(2),k) = true;
 end
+% for each aligned plane, normalize high average correlations with target
+% planes to sum = 1
 profiles(~ind) = NaN;
 profiles = bsxfun(@rdivide, profiles, nansum(profiles,1)); % [planesToInterpolate x planesToInterpolate]
 if getOr(ops, 'fig', 1) == 1
